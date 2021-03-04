@@ -1,6 +1,6 @@
 import React, { createContext, useState } from "react";
 import { firebase } from "../firebase/firebase";
-
+import * as Facebook from "expo-facebook";
 const UserContext = createContext([{}, () => {}]);
 const db = firebase.firestore();
 
@@ -16,7 +16,7 @@ const UserProvider = ({ children }) => {
         await firebase
           .auth()
           .signInWithEmailAndPassword(email, password)
-          
+
           .catch((error) => {
             alert("Login failed. " + error.message);
           });
@@ -87,6 +87,45 @@ const UserProvider = ({ children }) => {
     },
     toggleTheme: () => {
       setIsDarkTheme((isDarkTheme) => !isDarkTheme);
+    },
+    loginWithFacebook: async () => {
+      const appId = "462397001840220";
+
+      try {
+        await Facebook.initializeAsync({
+          appId: appId,
+        });
+        const {
+          type,
+          token,
+          expirationDate,
+          permissions,
+          declinedPermissions,
+        } = await Facebook.logInWithReadPermissionsAsync({
+          permissions: ["public_profile"],
+        });
+        switch (type) {
+          case "success": {
+            await firebase
+              .auth()
+              .setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
+            const credential = firebase.auth.FacebookAuthProvider.credential(
+              token
+            );
+            firebase
+              .auth()
+              .signInWithCredential(credential)
+              .catch((error) => {
+                alert(error);
+              });
+          }
+          case "cancel": {
+            alert("Cancelled!");
+          }
+        }
+      } catch (e) {
+        alert(`Facebook Login Error: ${e}`);
+      }
     },
   };
   return (

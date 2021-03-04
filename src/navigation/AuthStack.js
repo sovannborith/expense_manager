@@ -3,13 +3,12 @@ import { View } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import SignupScreen from "../screens/authentication/SignUpScreen";
-import LoginScreen from "../screens/authentication/LoginScreen";
-import OnboardingScreen from "../screens/authentication/ForgetPasswordScreen";
-import LoginScreen from "../screens/authentication/OnboardingScreen";
+import SignInScreen from "../screens/authentication/SignInScreen";
+import ForgetPasswordScreen from "../screens/authentication/ForgetPasswordScreen";
+import OnboardingScreen from "../screens/authentication/OnboardingScreen";
 
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
-import AsyncStorage from "@react-native-community/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createStackNavigator();
 
@@ -27,13 +26,12 @@ const AuthStack = () => {
       }
     }); // Add some error handling, also you can simply do setIsFirstLaunch(null)
   }, []);
-
   if (isFirstLaunch === null) {
     return null; // This is the 'tricky' part: The query to AsyncStorage is not finished, but we have to present something to the user. Null will just render nothing, so you can also put a placeholder of some sort, but effectively the interval between the first mount and AsyncStorage retrieving your data won't be noticeable to the user. But if you want to display anything then you can use a LOADER here
   } else if (isFirstLaunch == true) {
     routeName = "Onboarding";
   } else {
-    routeName = "Login";
+    routeName = "SignIn";
   }
 
   return (
@@ -44,12 +42,17 @@ const AuthStack = () => {
         options={{ header: () => null }}
       />
       <Stack.Screen
-        name="Login"
-        component={LoginScreen}
+        name="SignIn"
+        component={SignInScreen}
         options={{ header: () => null }}
       />
       <Stack.Screen
-        name="Signup"
+        name="ForgetPassword"
+        component={ForgetPasswordScreen}
+        options={{ header: () => null }}
+      />
+      <Stack.Screen
+        name="SignUp"
         component={SignupScreen}
         options={({ navigation }) => ({
           title: "",

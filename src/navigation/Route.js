@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-
+import { NavigationContainer } from "@react-navigation/native";
 import AppStack from "./AppStack";
 import { firebase } from "../server/firebase/firebase";
 import { UserContext } from "../server/context/UserContext";
-
+import AuthStack from "./AuthStack";
 const Route = () => {
   const { user, setUser } = useContext(UserContext);
   const [initializing, setInitializing] = useState(true);
@@ -19,6 +19,10 @@ const Route = () => {
   }, []);
 
   if (initializing) return null;
-  return <AppStack />;
+  return (
+    <NavigationContainer>
+      {user ? <AppStack /> : <AuthStack />}
+    </NavigationContainer>
+  );
 };
 export default Route;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,45 @@ import {
   StyleSheet,
   StatusBar,
   ScrollView,
+  Alert,
   SafeAreaView,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
+import { UserContext } from "../server/context/UserContext";
+
+import FormButton from "../components/form/FormButton";
+
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useTheme();
+  const [loading, setLoading] = useState(false);
 
+  const { signOut } = useContext(UserContext);
+
+  const handleSubmit = (navigation) => {
+    Alert.alert(
+      //title
+      "Sign Out Confirmation",
+      //body
+      "Are you sure want to sign out?",
+      [
+        {
+          text: "Yes",
+          onPress: () => {
+            signOut();
+            navigation.navigate("Home", { screen: "Home" });
+          },
+        },
+        {
+          text: "Cancel",
+          onPress: () => true,
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+      //clicking out side of alert will not cancel
+    );
+  };
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 20 }}>
       <StatusBar
@@ -21,6 +53,14 @@ const HomeScreen = ({ navigation }) => {
       />
       <View>
         <Text>Hello Expense Manager</Text>
+      </View>
+
+      <View>
+        <FormButton
+          buttonTitle="Sign In"
+          loading={loading}
+          onPress={handleSubmit}
+        />
       </View>
     </SafeAreaView>
   );

@@ -11,7 +11,6 @@ import {
   SafeAreaView,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 
 import { FirebaseContext } from "../../server/context/FirebaseContext";

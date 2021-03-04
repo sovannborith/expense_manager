@@ -1,108 +1,146 @@
 import React, { useContext, useState } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform  } from "react-native";
-import {  useFormik} from 'formik';
-import * as Yup from 'yup';
-import * as Animatable from 'react-native-animatable';
-import FormInput from "../../components/form/FormInput";
-import FormButton from "../../components/form//FormButton";
-import { UserContext } from "../../server/context/UserContext";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  KeyboardAvoidingView,
+  SafeAreaView,
+  Platform,
+} from "react-native";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import * as Animatable from "react-native-animatable";
+//import * as Facebook from 'expo-facebook';
 
-  
+import FormInput from "../../components/form/FormInput";
+import FormButton from "../../components/form/FormButton";
+import SocialButton from "../../components/form/SocialButton";
+import { UserContext } from "../../server/context/UserContext";
 
 const SignInScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { login, user } = useContext(UserContext);
-  
-  const signIn =() =>
-  {    
-      try {
-        setLoading(true);       
-        if (isValid) {
-          login(values.email, values.password);
-        }
-        if(user) {
-          navigation.navigate("Home");
-        }
-      } catch (e) {        
-        alert("Login failed! Please try again!");
-      } finally {
-        setLoading(false);
+  const { login, user, loginWithFacebook } = useContext(UserContext);
+
+  const signIn = () => {
+    try {
+      setLoading(true);
+      if (isValid) {
+        login(values.email, values.password);
       }
+      if (user) {
+        navigation.navigate("Home");
+      }
+    } catch (e) {
+      alert("Login failed! Please try again!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const SignInSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required(),
+    email: Yup.string().email("Invalid email").required(),
     password: Yup.string().required(),
-  }); 
+  });
 
-  const {handleChange, handleBlur, handleSubmit, values, touched, errors, isValid} = useFormik({
+  const {
+    handleChange,
+    handleBlur,
+    handleSubmit,
+    values,
+    touched,
+    errors,
+    isValid,
+  } = useFormik({
     validationSchema: SignInSchema,
-    initialValues:{ email: '', password: '' },
-    onSubmit: () => {signIn(values.email,values.password)}
+    initialValues: { email: "", password: "" },
+    onSubmit: () => {
+      signIn(values.email, values.password);
+    },
   });
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS=="ios" ? "padding" : null} style={styles.container}>
-      <View style={{flex: 1}}>      
-        <View style={{alignItems:"center"}}>
-          <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        </View>
-        <Animatable.View 
-            animation="fadeInUpBig"
-            style={styles.footer}
-        >
-        <View style={styles.signInWrapper}>
-          <View style={styles.loginHeader}>
-            <Text style={styles.text}>Sign In</Text>  
-          </View>        
-          <View style={styles.formElement}>          
-            <FormInput
-              labelValue={values.email}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
-              placeholderText="Email"
-              iconType="user"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              error ={errors.email}
-              touched={touched.email}
-              autoFocus={true}
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "height" : null}
+        style={styles.container}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={{ alignItems: "center" }}>
+            <Image
+              source={require("../../assets/logo_01.png")}
+              style={styles.logo}
             />
-
-            <FormInput
-              labelValue={values.password}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              placeholderText="Password"
-              iconType="lock"
-              secureTextEntry={true}
-              error ={errors.password}
-              touched={touched.password}
-            />
-
-            <FormButton
-              buttonTitle="Sign In"            
-              loading={loading}
-              onPress={handleSubmit}
-              
-            />
-
-            <TouchableOpacity
-            style={styles.forgotButton}
-            
-            onPress={() => navigation.navigate("ForgetPassword")}
-          >
-            <Text style={styles.navButtonText}>Forgot Password?</Text>
-          </TouchableOpacity>
           </View>
-          <View style={styles.formFooter}>
+          <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+            <View style={styles.signInWrapper}>
+              <View style={styles.loginHeader}>
+                <Text style={styles.text}>Sign In</Text>
+              </View>
+              <View style={styles.formElement}>
+                <FormInput
+                  labelValue={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  placeholderText="Email"
+                  iconType="user"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  error={errors.email}
+                  touched={touched.email}
+                  autoFocus={true}
+                />
 
-          </View>
+                <FormInput
+                  labelValue={values.password}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  placeholderText="Password"
+                  iconType="lock"
+                  secureTextEntry={true}
+                  error={errors.password}
+                  touched={touched.password}
+                />
+
+                <FormButton
+                  buttonTitle="Sign In"
+                  loading={loading}
+                  onPress={handleSubmit}
+                />
+
+                <View>
+                  <SocialButton
+                    buttonTitle="Sign In with Facebook"
+                    btnType="facebook"
+                    color="#4867aa"
+                    backgroundColor="#e6eaf4"
+                    onPress={() => loginWithFacebook()}
+                  />
+
+                  <SocialButton
+                    buttonTitle="Sign In with Google"
+                    btnType="google"
+                    color="#de4d41"
+                    backgroundColor="#f5e7ea"
+                    onPress={() => loginWithFacebook()}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  style={styles.forgotButton}
+                  onPress={() => navigation.navigate("ForgetPassword")}
+                >
+                  <Text style={styles.navButtonText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.formFooter}></View>
+            </View>
+          </Animatable.View>
         </View>
-        </Animatable.View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -111,7 +149,7 @@ export default SignInScreen;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f9fafd",
-    flex: 1,    
+    flex: 1,
     padding: 10,
   },
   logo: {
@@ -119,16 +157,15 @@ const styles = StyleSheet.create({
     width: 150,
     resizeMode: "cover",
   },
-  signInWrapper:{
+  signInWrapper: {
     borderColor: "#246b6b",
     borderWidth: 1,
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "flex-start",
-    height: "100%"
-    
+    height: "100%",
   },
-  loginHeader:{
+  loginHeader: {
     position: "relative",
     top: -1,
     height: 50,
@@ -139,31 +176,29 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     width: "100%",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   text: {
     fontSize: 28,
     marginBottom: 10,
     color: "#fff",
     fontWeight: "bold",
-    top: 3
+    top: 3,
   },
-  formElement:{
+  formElement: {
     padding: 10,
     flex: 1,
     alignItems: "center",
-    width: "100%"
+    width: "100%",
   },
-  signIn:{
-
-  },
+  signIn: {},
   navButton: {
     marginTop: 15,
   },
   forgotButton: {
     marginTop: 10,
     width: "100%",
-    height: 50,    
+    height: 50,
     padding: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -175,7 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#246b6b",
   },
-  formFooter:{
+  formFooter: {
     height: 50,
     backgroundColor: "#246b6b",
     borderBottomLeftRadius: 25,
@@ -186,7 +221,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   footer: {
-    flex: Platform.OS === 'ios' ? 3 : 5,
-    
-},
+    flex: Platform.OS === "ios" ? 3 : 5,
+  },
 });
