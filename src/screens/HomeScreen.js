@@ -21,7 +21,12 @@ const HomeScreen = ({ navigation }) => {
 
   const { signOut } = useContext(UserContext);
 
-  const handleSubmit = (navigation) => {
+  const logOff = () => {
+    signOut();
+    navigation.navigate("Home", { screen: "Home" });
+  };
+
+  const handleSubmit = () => {
     Alert.alert(
       //title
       "Sign Out Confirmation",
@@ -31,8 +36,7 @@ const HomeScreen = ({ navigation }) => {
         {
           text: "Yes",
           onPress: () => {
-            signOut();
-            navigation.navigate("Home", { screen: "Home" });
+            logOff();
           },
         },
         {

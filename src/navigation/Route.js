@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+
 import AppStack from "./AppStack";
 import { firebase } from "../server/firebase/firebase";
 import { UserContext } from "../server/context/UserContext";

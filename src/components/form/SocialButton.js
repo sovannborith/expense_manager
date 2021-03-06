@@ -38,10 +38,10 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 10,
     width: "100%",
-    height: windowHeight / 15,
+    height: 40, //windowHeight / 16,
     padding: 10,
     flexDirection: "row",
-    borderRadius: 3,
+    borderRadius: 20,
   },
   iconWrapper: {
     width: 30,

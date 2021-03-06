@@ -1,6 +1,10 @@
 import React, { createContext, useState } from "react";
 import { firebase } from "../firebase/firebase";
 import * as Facebook from "expo-facebook";
+import * as Google from "expo-google-app-auth";
+
+import Loader from "../../components/LoadingComponent";
+
 const UserContext = createContext([{}, () => {}]);
 const db = firebase.firestore();
 
@@ -8,9 +12,52 @@ const UserProvider = ({ children }) => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [user, setUser] = useState(null);
 
+  const androidClientId =
+    "170056723597-jbp72nsfklf9calfdr8s7qjq383f6tf9.apps.googleusercontent.com";
+  const iosClientId =
+    "170056723597-v6go477npl5upfraifas991at6r4bcoc.apps.googleusercontent.com";
+
+  const googleSignIn = (googleUser) => {
+    if (!isUserEqual(googleUser, user)) {
+      const credential = firebase.auth.GoogleAuthProvider.credential(
+        googleUser.idToken,
+        googleUser.accessToken
+      );
+
+      firebase
+        .auth()
+        .signInWithCredential(credential)
+        /* .then(() => {
+          //alert("Will put loading here");
+        }) */
+        .catch((error) => {
+          alert(error);
+        });
+    } else {
+      alert("User already signed-in");
+    }
+  };
+  const isUserEqual = (googleUser, user) => {
+    if (user) {
+      var providerData = user.providerData;
+      for (var i = 0; i < providerData.length; i++) {
+        if (
+          providerData[i].providerId ===
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+          providerData[i].uid === googleUser.getBasicProfile().getId()
+        ) {
+          // We don't need to reauth the Firebase connection.
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const userFirebase = {
     user,
     setUser,
+    Loader,
     login: async (email, password) => {
       try {
         await firebase
@@ -27,6 +74,7 @@ const UserProvider = ({ children }) => {
     register: async (email, password) => {
       try {
         await firebase.auth().createUserWithEmailAndPassword(email, password);
+        alert("test");
       } catch (e) {
         alert(e);
       }
@@ -104,27 +152,41 @@ const UserProvider = ({ children }) => {
         } = await Facebook.logInWithReadPermissionsAsync({
           permissions: ["public_profile"],
         });
-        switch (type) {
-          case "success": {
-            await firebase
-              .auth()
-              .setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
-            const credential = firebase.auth.FacebookAuthProvider.credential(
-              token
-            );
-            firebase
-              .auth()
-              .signInWithCredential(credential)
-              .catch((error) => {
-                alert(error);
-              });
-          }
-          case "cancel": {
-            alert("Cancelled!");
-          }
+        if (type === "success") {
+          await firebase
+            .auth()
+            .setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
+          const credential = firebase.auth.FacebookAuthProvider.credential(
+            token
+          );
+          firebase
+            .auth()
+            .signInWithCredential(credential)
+            .catch((error) => {
+              alert(error);
+            });
+        } else {
+          //alert("Cancelled!");
         }
       } catch (e) {
         alert(`Facebook Login Error: ${e}`);
+      }
+    },
+    loginWithGoogle: async () => {
+      try {
+        const result = await Google.logInAsync({
+          androidClientId: androidClientId,
+          iosClientId: iosClientId,
+          scopes: ["profile", "email"],
+        });
+
+        if (result.type === "success") {
+          googleSignIn(result);
+        } else {
+          return { cancelled: true };
+        }
+      } catch (e) {
+        return { error: true };
       }
     },
   };

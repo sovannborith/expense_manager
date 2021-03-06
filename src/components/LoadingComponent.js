@@ -1,12 +1,19 @@
 import React from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 
-const Loading = ({ size }) => {
+import LottieView from "lottie-react-native";
+
+const Loader = () => {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator size={size} />
+      <LottieView
+        source={require("../assets/splash-turismo.json")}
+        autoPlay
+        loop
+      />
+      ;
     </View>
   );
 };
 
-export default Loading;
+export default Loader;

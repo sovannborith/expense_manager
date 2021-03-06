@@ -21,7 +21,7 @@ const FormInput = ({
         marginTop: 5,
         marginBottom: 10,
         width: "100%",
-        height: 50,
+        height: 40,
         borderColor: !touched ? "#878787" : !error ? "#246b6b" : "#d10000",
         borderRadius: 3,
         borderWidth: 1,

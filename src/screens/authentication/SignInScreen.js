@@ -21,7 +21,27 @@ import { UserContext } from "../../server/context/UserContext";
 
 const SignInScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { login, user, loginWithFacebook } = useContext(UserContext);
+  const { login, user, loginWithFacebook, loginWithGoogle } = useContext(
+    UserContext
+  );
+
+  const signInWithGoogle = () => {
+    try {
+      loginWithGoogle();
+      navigation.navigate("Home");
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const signInWithFacebook = () => {
+    try {
+      loginWithFacebook();
+      navigation.navigate("Home");
+    } catch (e) {
+      alert(e);
+    }
+  };
 
   const signIn = () => {
     try {
@@ -116,7 +136,7 @@ const SignInScreen = ({ navigation }) => {
                     btnType="facebook"
                     color="#4867aa"
                     backgroundColor="#e6eaf4"
-                    onPress={() => loginWithFacebook()}
+                    onPress={() => signInWithFacebook()}
                   />
 
                   <SocialButton
@@ -124,7 +144,7 @@ const SignInScreen = ({ navigation }) => {
                     btnType="google"
                     color="#de4d41"
                     backgroundColor="#f5e7ea"
-                    onPress={() => loginWithFacebook()}
+                    onPress={() => signInWithGoogle()}
                   />
                 </View>
 
@@ -133,6 +153,12 @@ const SignInScreen = ({ navigation }) => {
                   onPress={() => navigation.navigate("ForgetPassword")}
                 >
                   <Text style={styles.navButtonText}>Forgot Password?</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.forgotButton}
+                  onPress={() => navigation.navigate("SignUp")}
+                >
+                  <Text style={styles.navButtonText}>Sign Up Here!</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.formFooter}></View>

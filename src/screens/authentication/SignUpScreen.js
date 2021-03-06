@@ -1,40 +1,45 @@
-import React, { useState, useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
-  Platform,
+  Image,
   StyleSheet,
-  ScrollView,
-  StatusBar,
+  KeyboardAvoidingView,
   SafeAreaView,
+  Platform,
 } from "react-native";
-import * as Animatable from "react-native-animatable";
-import { FontAwesome, Feather } from "@expo/vector-icons";
-
-import { FirebaseContext } from "../../server/context/FirebaseContext";
-import { UserContext } from "../../server/context/UserContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-//import Banner from "../../components/Banner";
+import * as Animatable from "react-native-animatable";
+//import * as Facebook from 'expo-facebook';
+
+import FormInput from "../../components/form/FormInput";
+import FormButton from "../../components/form/FormButton";
+import SocialButton from "../../components/form/SocialButton";
+import { UserContext } from "../../server/context/UserContext";
 
 const SignUpScreen = ({ navigation }) => {
-  const firebase = useContext(FirebaseContext);
-  const [_, setUser] = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
+  const { register, user } = useContext(UserContext);
 
-  const signUp = async () => {
-    setLoading(true);
-    const user = { userName, email, password, profilePhoto };
+  const signUp = () => {
     try {
-      const createdUser = await firebase.createUser(user);
-
-      setUser({ ...createdUser, isLoggedIn: true });
-    } catch (error) {
-      console.log("Error @signUp: ", error);
+      setLoading(true);
+      if (isValid) {
+        register(values.email, values.password);
+      }
+      if (user) {
+        navigation.navigate("Home");
+      }
+    } catch (e) {
+      alert(e); //alert("Sign Up failed! Please try again!");
+    } finally {
+      setLoading(false);
     }
   };
-  const SignInSchema = Yup.object().shape({
+
+  const SignUpSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required(),
     password: Yup.string().required(),
   });
@@ -48,158 +53,75 @@ const SignUpScreen = ({ navigation }) => {
     errors,
     isValid,
   } = useFormik({
-    validationSchema: SignInSchema,
+    validationSchema: SignUpSchema,
     initialValues: { email: "", password: "" },
     onSubmit: () => {
-      signIn(values.email, values.password);
+      signUp(values.email, values.password);
     },
   });
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <StatusBar backgroundColor="red" barStyle="light-content" />
-        <Banner horizontal={true} />
-        <View style={styles.header}>
-          <Text style={styles.text_header}>Sign Up Here!</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "height" : null}
+        style={styles.container}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={{ alignItems: "center" }}>
+            <Image
+              source={require("../../assets/logo_01.png")}
+              style={styles.logo}
+            />
+          </View>
+          <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+            <View style={styles.signInWrapper}>
+              <View style={styles.loginHeader}>
+                <Text style={styles.text}>Sign In</Text>
+              </View>
+              <View style={styles.formElement}>
+                <FormInput
+                  labelValue={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  placeholderText="Email"
+                  iconType="user"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  error={errors.email}
+                  touched={touched.email}
+                  autoFocus={true}
+                />
+
+                <FormInput
+                  labelValue={values.password}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  placeholderText="Password"
+                  iconType="lock"
+                  secureTextEntry={true}
+                  error={errors.password}
+                  touched={touched.password}
+                />
+
+                <FormButton
+                  buttonTitle="Register"
+                  loading={loading}
+                  onPress={handleSubmit}
+                />
+
+                <TouchableOpacity
+                  style={styles.forgotButton}
+                  onPress={() => navigation.navigate("SignIn")}
+                >
+                  <Text style={styles.navButtonText}>Sign In Here!</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.formFooter}></View>
+            </View>
+          </Animatable.View>
         </View>
-        <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-          <ScrollView>
-            <Text style={styles.text_footer}>Username</Text>
-            <View style={styles.action}>
-              <FontAwesome name="user-o" color="#05375a" size={20} />
-              <TextInput
-                placeholder="Your Username"
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => textInputChange(val)}
-              />
-              {data.check_textInputChange ? (
-                <Animatable.View animation="bounceIn">
-                  <Feather name="check-circle" color="green" size={20} />
-                </Animatable.View>
-              ) : null}
-            </View>
-
-            <Text
-              style={[
-                styles.text_footer,
-                {
-                  marginTop: 35,
-                },
-              ]}
-            >
-              Password
-            </Text>
-            <View style={styles.action}>
-              <Feather name="lock" color="#05375a" size={20} />
-              <TextInput
-                placeholder="Your Password"
-                secureTextEntry={data.secureTextEntry ? true : false}
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => handlePasswordChange(val)}
-              />
-              <TouchableOpacity onPress={updateSecureTextEntry}>
-                {data.secureTextEntry ? (
-                  <Feather name="eye-off" color="grey" size={20} />
-                ) : (
-                  <Feather name="eye" color="grey" size={20} />
-                )}
-              </TouchableOpacity>
-            </View>
-
-            <Text
-              style={[
-                styles.text_footer,
-                {
-                  marginTop: 35,
-                },
-              ]}
-            >
-              Confirm Password
-            </Text>
-            <View style={styles.action}>
-              <Feather name="lock" color="#05375a" size={20} />
-              <TextInput
-                placeholder="Confirm Your Password"
-                secureTextEntry={data.confirm_secureTextEntry ? true : false}
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => handleConfirmPasswordChange(val)}
-              />
-              <TouchableOpacity onPress={updateConfirmSecureTextEntry}>
-                {data.secureTextEntry ? (
-                  <Feather name="eye-off" color="grey" size={20} />
-                ) : (
-                  <Feather name="eye" color="grey" size={20} />
-                )}
-              </TouchableOpacity>
-            </View>
-            <View style={styles.textPrivate}>
-              <Text style={styles.color_textPrivate}>
-                By signing up you agree to our
-              </Text>
-              <Text style={[styles.color_textPrivate, { fontWeight: "bold" }]}>
-                {" "}
-                Terms of service
-              </Text>
-              <Text style={styles.color_textPrivate}> and</Text>
-              <Text style={[styles.color_textPrivate, { fontWeight: "bold" }]}>
-                {" "}
-                Privacy policy
-              </Text>
-            </View>
-            <View style={styles.button}>
-              <TouchableOpacity
-                style={styles.signIn}
-                onPress={() => {
-                  navigation.navigate("SignUp");
-                }}
-              >
-                <LinearGradient
-                  colors={["#FFA07A", "#FF6347"]}
-                  style={styles.signIn}
-                >
-                  <Text
-                    style={[
-                      styles.textSign,
-                      {
-                        color: "#fff",
-                      },
-                    ]}
-                  >
-                    Sign Up
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => navigation.navigate("SignIn")}
-                style={[
-                  styles.signIn,
-                  {
-                    borderColor: "#FF6347",
-                    borderWidth: 1,
-                    marginTop: 15,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.textSign,
-                    {
-                      color: "#FF6347",
-                    },
-                  ]}
-                >
-                  Sign In
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </Animatable.View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -208,66 +130,79 @@ export default SignUpScreen;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#f9fafd",
     flex: 1,
-    backgroundColor: "#FF6347",
+    padding: 10,
   },
-  header: {
+  logo: {
+    height: 150,
+    width: 150,
+    resizeMode: "cover",
+  },
+  signInWrapper: {
+    borderColor: "#246b6b",
+    borderWidth: 1,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    height: "100%",
+  },
+  loginHeader: {
+    position: "relative",
+    top: -1,
+    height: 50,
+    backgroundColor: "#246b6b",
+    borderColor: "#246b6b",
+    borderWidth: 1,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    fontSize: 28,
+    marginBottom: 10,
+    color: "#fff",
+    fontWeight: "bold",
+    top: 3,
+  },
+  formElement: {
+    padding: 10,
     flex: 1,
-    justifyContent: "flex-end",
-    paddingHorizontal: 20,
-    paddingBottom: 50,
+    alignItems: "center",
+    width: "100%",
+  },
+  signIn: {},
+  navButton: {
+    marginTop: 15,
+  },
+  forgotButton: {
+    marginTop: 10,
+    width: "100%",
+    height: 50,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#246b6b",
+  },
+  navButtonText: {
+    fontSize: 16,
+    color: "#246b6b",
+  },
+  formFooter: {
+    height: 50,
+    backgroundColor: "#246b6b",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    width: "100%",
+    top: 1,
+    borderColor: "#246b6b",
+    borderWidth: 1,
   },
   footer: {
     flex: Platform.OS === "ios" ? 3 : 5,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-  },
-  text_header: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 30,
-  },
-  text_footer: {
-    color: "#05375a",
-    fontSize: 18,
-  },
-  action: {
-    flexDirection: "row",
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f2f2f2",
-    paddingBottom: 5,
-  },
-  textInput: {
-    flex: 1,
-    marginTop: Platform.OS === "ios" ? 0 : -12,
-    paddingLeft: 10,
-    color: "#05375a",
-  },
-  button: {
-    alignItems: "center",
-    marginTop: 50,
-  },
-  signIn: {
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 10,
-  },
-  textSign: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  textPrivate: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 20,
-  },
-  color_textPrivate: {
-    color: "grey",
   },
 });
