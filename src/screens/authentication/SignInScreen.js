@@ -17,6 +17,7 @@ import * as Animatable from "react-native-animatable";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import SocialButton from "../../components/form/SocialButton";
+import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
 
 const SignInScreen = ({ navigation }) => {
@@ -43,11 +44,11 @@ const SignInScreen = ({ navigation }) => {
     }
   };
 
-  const signIn = () => {
+  const signIn = (email, password) => {
     try {
       setLoading(true);
       if (isValid) {
-        login(values.email, values.password);
+        login(email, password);
       }
       if (user) {
         navigation.navigate("Home");
@@ -95,7 +96,8 @@ const SignInScreen = ({ navigation }) => {
           </View>
           <Animatable.View animation="fadeInUpBig" style={styles.footer}>
             <View style={styles.signInWrapper}>
-              <View style={styles.loginHeader}>
+              {/* <View style={styles.loginHeader}> */}
+              <View>
                 <Text style={styles.text}>Sign In</Text>
               </View>
               <View style={styles.formElement}>
@@ -147,21 +149,15 @@ const SignInScreen = ({ navigation }) => {
                     onPress={() => signInWithGoogle()}
                   />
                 </View>
-
-                <TouchableOpacity
-                  style={styles.forgotButton}
+                <FormLineButton
+                  buttonTitle="Forgot Password"
                   onPress={() => navigation.navigate("ForgetPassword")}
-                >
-                  <Text style={styles.navButtonText}>Forgot Password?</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.forgotButton}
+                />
+                <FormLineButton
+                  buttonTitle="Sign Up"
                   onPress={() => navigation.navigate("SignUp")}
-                >
-                  <Text style={styles.navButtonText}>Sign Up Here!</Text>
-                </TouchableOpacity>
+                />
               </View>
-              <View style={styles.formFooter}></View>
             </View>
           </Animatable.View>
         </View>
@@ -207,7 +203,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 28,
     marginBottom: 10,
-    color: "#fff",
+    color: "#000",
     fontWeight: "bold",
     top: 3,
   },
@@ -228,9 +224,13 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 25,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#246b6b",
+    borderColor: "#BEC1D2",
+    borderLeftWidth: 3,
+    borderLeftColor: "#ee3431",
+    borderRightColor: "#ee3431",
+    borderRightWidth: 3,
   },
   navButtonText: {
     fontSize: 16,

@@ -1,9 +1,9 @@
 import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import Loading from "../LoadingComponent";
-const FormButton = ({ buttonTitle, loading, ...rest }) => {
+const FormLineButton = ({ buttonTitle, loading, ...rest }) => {
   return (
-    <TouchableOpacity style={styles.buttonContainer} {...rest}>
+    <TouchableOpacity style={styles.forgotButton} {...rest}>
       {loading ? (
         <Loading size="small" />
       ) : (
@@ -13,21 +13,26 @@ const FormButton = ({ buttonTitle, loading, ...rest }) => {
   );
 };
 
-export default FormButton;
+export default FormLineButton;
 
 const styles = StyleSheet.create({
-  buttonContainer: {
+  forgotButton: {
     marginTop: 10,
     width: "100%",
     height: 50,
-    backgroundColor: "#ee3431",
     padding: 10,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#BEC1D2",
+    borderLeftWidth: 3,
+    borderLeftColor: "#ee3431",
+    borderRightColor: "#ee3431",
+    borderRightWidth: 3,
   },
   buttonText: {
     fontSize: 16,
-    color: "#ffffff",
+    color: "#246b6b",
   },
 });

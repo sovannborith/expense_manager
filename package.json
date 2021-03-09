@@ -29,6 +29,7 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.3",
     "react-native-reanimated": "~1.13.0",
     "react-native-screens": "~2.15.2",
+    "react-native-svg": "^12.1.0",
     "react-native-web": "~0.13.12",
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "yup": "^0.32.9"

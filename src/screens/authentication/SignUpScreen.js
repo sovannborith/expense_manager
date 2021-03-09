@@ -12,22 +12,20 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
-//import * as Facebook from 'expo-facebook';
-
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
-import SocialButton from "../../components/form/SocialButton";
+import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { register, user } = useContext(UserContext);
 
-  const signUp = () => {
+  const signUp = (email, password) => {
     try {
       setLoading(true);
       if (isValid) {
-        register(values.email, values.password);
+        register(email, password);
       }
       if (user) {
         navigation.navigate("Home");
@@ -75,7 +73,7 @@ const SignUpScreen = ({ navigation }) => {
           </View>
           <Animatable.View animation="fadeInUpBig" style={styles.footer}>
             <View style={styles.signInWrapper}>
-              <View style={styles.loginHeader}>
+              <View>
                 <Text style={styles.text}>Sign In</Text>
               </View>
               <View style={styles.formElement}>
@@ -109,15 +107,12 @@ const SignUpScreen = ({ navigation }) => {
                   loading={loading}
                   onPress={handleSubmit}
                 />
-
-                <TouchableOpacity
-                  style={styles.forgotButton}
+                <FormLineButton
+                  buttonTitle="Sign In"
                   onPress={() => navigation.navigate("SignIn")}
-                >
-                  <Text style={styles.navButtonText}>Sign In Here!</Text>
-                </TouchableOpacity>
+                />
               </View>
-              <View style={styles.formFooter}></View>
+              {/* <View style={styles.formFooter}></View> */}
             </View>
           </Animatable.View>
         </View>

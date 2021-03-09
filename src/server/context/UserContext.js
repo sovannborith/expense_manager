@@ -74,7 +74,6 @@ const UserProvider = ({ children }) => {
     register: async (email, password) => {
       try {
         await firebase.auth().createUserWithEmailAndPassword(email, password);
-        alert("test");
       } catch (e) {
         alert(e);
       }

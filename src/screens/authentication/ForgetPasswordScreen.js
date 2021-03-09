@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
+import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -86,13 +87,10 @@ const ForgetPasswordScreen = ({ navigation }) => {
                 loading={loading}
                 onPress={handleSubmit}
               />
-
-              <TouchableOpacity
-                style={styles.forgotButton}
+              <FormLineButton
+                buttonTitle="Sign In"
                 onPress={() => navigation.navigate("SignIn")}
-              >
-                <Text style={styles.navButtonText}>Sign In</Text>
-              </TouchableOpacity>
+              />
             </View>
             <View style={styles.formFooter}></View>
           </View>
