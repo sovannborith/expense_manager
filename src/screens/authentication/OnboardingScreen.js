@@ -15,7 +15,7 @@ const Onboarding = ({ navigation }) => {
     setCurrentIndex(viewableItems[0].index);
   });
 
-  const viewConfig = useRef({ viewAreaCoveragePercentThresold: 50 }).current;
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const scrollTo = () => {
     if (currentIndex < slides.length - 1) {
@@ -36,7 +36,7 @@ const Onboarding = ({ navigation }) => {
           bounces={false}
           renderItem={({ item }) => <OnboardingItem item={item} />}
           onScroll={Animated.event(
-            [{ nativeEvent: { contentOfset: { x: scrollX } } }],
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: false }
           )}
           pagingEnabled
