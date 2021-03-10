@@ -16,6 +16,7 @@ import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
+import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ const SignUpScreen = ({ navigation }) => {
   const signUp = (email, password) => {
     try {
       setLoading(true);
+
       if (isValid) {
         register(email, password);
       }
