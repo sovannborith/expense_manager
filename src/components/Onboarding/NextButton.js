@@ -49,14 +49,14 @@ const NextButton = ({ percentage, scrollTo }) => {
       <Svg width={size} height={size}>
         <G rotation="-90" origin={center}>
           <Circle
-            stroke="#E6E7E8"
+            stroke="#ee3431"
             cx={center}
             cy={center}
             r={radius}
             strokeWidth={strokeWidth}
           />
           <Circle
-            stroke="#F4338F"
+            stroke="#ee3431"
             cx={center}
             cy={center}
             r={radius}
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   button: {
     position: "absolute",
-    backgroundColor: "#F4338F",
+    backgroundColor: "#ee3431",
     borderRadius: 100,
     padding: 20,
   },

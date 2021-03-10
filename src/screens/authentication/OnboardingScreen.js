@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
-import { View, FlatList, StyleSheet, Animated } from "react-native";
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  Animated,
+  SafeAreaView,
+} from "react-native";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import slides from "../../services/slides";
 import OnboardingItem from "../../components/Onboarding/OnboardingItem";
@@ -11,27 +19,29 @@ const Onboarding = ({ navigation }) => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef(null);
 
-  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+  const viewableItemsChanged = useRef(({ viewableItems }) => {
     setCurrentIndex(viewableItems[0].index);
-  });
+  }).current;
 
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
-  const scrollTo = () => {
+  const scrollTo = async () => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      navigation.navigate("SignIn");
+      await AsyncStorage.setItem("@alreadyLaunched", "false").then(
+        navigation.navigate("SignIn")
+      );
     }
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={{ flex: 3 }}>
         <FlatList
           data={slides}
           horizontal
-          showsHorizontalScrollIndicator
+          showsHorizontalScrollIndicator={false}
           pagingEnabled
           bounces={false}
           renderItem={({ item }) => <OnboardingItem item={item} />}
@@ -39,9 +49,9 @@ const Onboarding = ({ navigation }) => {
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
             { useNativeDriver: false }
           )}
-          pagingEnabled
+          pagingEnabled={true}
           scrollEventThrottle={32}
-          onViewableItemsChanged={onViewableItemsChanged}
+          onViewableItemsChanged={viewableItemsChanged}
           viewabilityConfig={viewConfig}
           ref={slidesRef}
         />
@@ -51,7 +61,7 @@ const Onboarding = ({ navigation }) => {
         percentage={(currentIndex + 1) * (100 / slides.length)}
         scrollTo={scrollTo}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

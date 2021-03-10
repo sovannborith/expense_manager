@@ -3,6 +3,8 @@ import { firebase } from "../firebase/firebase";
 import * as Facebook from "expo-facebook";
 import * as Google from "expo-google-app-auth";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import Loader from "../../components/LoadingComponent";
 
 const UserContext = createContext([{}, () => {}]);
@@ -88,6 +90,7 @@ const UserProvider = ({ children }) => {
     signOut: async () => {
       try {
         await firebase.auth().signOut();
+        await AsyncStorage.removeItem("@alreadyLaunched");
         setUser(null);
       } catch (e) {
         alert(e);

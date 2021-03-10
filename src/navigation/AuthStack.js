@@ -6,36 +6,43 @@ import SignupScreen from "../screens/authentication/SignUpScreen";
 import SignInScreen from "../screens/authentication/SignInScreen";
 import ForgetPasswordScreen from "../screens/authentication/ForgetPasswordScreen";
 import OnboardingScreen from "../screens/authentication/OnboardingScreen";
+import Loader from "../components/LoadingComponent";
 
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthStack = () => {
   const Stack = createStackNavigator();
-  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
+  const [isFirstLaunch, setIsFirstLaunch] = useState(true);
+  const [loading, setLoading] = useState(false);
   let routeName;
 
   useEffect(() => {
-    AsyncStorage.getItem("alreadyLaunched").then((value) => {
-      if (value == null) {
-        AsyncStorage.setItem("alreadyLaunched", "true"); // No need to wait for `setItem` to finish, although you might want to handle errors
-        setIsFirstLaunch(true);
-      } else {
-        setIsFirstLaunch(false);
-      }
-    }); // Add some error handling, also you can simply do setIsFirstLaunch(null)
+    try {
+      AsyncStorage.getItem("@alreadyLaunched").then((value) => {
+        alert(value);
+        if (value === null) {
+          //AsyncStorage.setItem("alreadyLaunched", "true"); // No need to wait for `setItem` to finish, although you might want to handle errors
+          setIsFirstLaunch(true);
+        } else {
+          setIsFirstLaunch(false);
+        }
+      }); // Add some error handling, also you can simply do setIsFirstLaunch(null)
+    } catch (e) {
+      alert(e);
+    }
   }, []);
 
-  /* setIsFirstLaunch(true);
-
   if (isFirstLaunch === null) {
-    return null; // This is the 'tricky' part: The query to AsyncStorage is not finished, but we have to present something to the user. Null will just render nothing, so you can also put a placeholder of some sort, but effectively the interval between the first mount and AsyncStorage retrieving your data won't be noticeable to the user. But if you want to display anything then you can use a LOADER here
+    setLoading(true);
+    return <Loader isLoading={loading} />;
   } else if (isFirstLaunch == true) {
     routeName = "Onboarding";
   } else {
     routeName = "SignIn";
-  } */
-  routeName = "Onboarding";
+  }
+  alert(routeName);
+  //routeName = "Onboarding";
   return (
     <Stack.Navigator initialRouteName={routeName}>
       <Stack.Screen

@@ -12,7 +12,7 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
-//import * as Facebook from 'expo-facebook';
+import * as Facebook from "expo-facebook";
 
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";

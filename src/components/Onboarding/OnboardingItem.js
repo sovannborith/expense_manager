@@ -1,14 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
 
-import windowWidth from "../../utils/Dimensions";
+const windowWidth = Dimensions.get("window").width;
 
 const OnboardingItem = ({ item }) => {
   return (
-    <View style={(styles.container, { windowWidth })}>
+    <View style={(styles.container, { width: windowWidth })}>
       <Image
         source={item.imageUrl}
-        style={[styles.image, { width: windowWidth, resizeMode: "contain" }]}
+        style={[
+          styles.image,
+          { width: windowWidth - 20, resizeMode: "contain" },
+        ]}
       />
       <View style={{ flex: 0.3 }}>
         <Text style={styles.title}>{item.title}</Text>
@@ -29,6 +32,7 @@ const styles = StyleSheet.create({
   image: {
     flex: 0.7,
     justifyContent: "center",
+    alignSelf: "center",
   },
   title: {
     fontWeight: "800",
