@@ -1,8 +1,7 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, Component } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   Image,
   StyleSheet,
   KeyboardAvoidingView,
@@ -13,23 +12,39 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
 import * as Facebook from "expo-facebook";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import SocialButton from "../../components/form/SocialButton";
 import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
+import Loader from "../../components/LoadingComponent";
+
+import HomeScreen from "../HomeScreen";
 
 const SignInScreen = ({ navigation }) => {
-  const [loading, setLoading] = useState(false);
   const { login, user, loginWithFacebook, loginWithGoogle } = useContext(
     UserContext
   );
 
+  const [loginUser, setLoginUser] = useState(null);
+  const [isLoading, setLoading] = useState(true);
+
+  const checkUser = async () => {
+    try {
+      await AsyncStorage.getItem("@loginUser").then((value) => {
+        setLoginUser(value);
+      });
+    } catch (e) {
+      alert(e);
+    } finally {
+      setLoading(false);
+    }
+  };
   const signInWithGoogle = () => {
     try {
-      loginWithGoogle();
-      navigation.navigate("Home");
+      loginWithGoogle().then(navigation.navigate("App", { Screen: "Home" }));
     } catch (e) {
       alert(e);
     }
@@ -38,7 +53,8 @@ const SignInScreen = ({ navigation }) => {
   const signInWithFacebook = () => {
     try {
       loginWithFacebook();
-      navigation.navigate("Home");
+      //setUser(user);
+      navigation.navigate("App", { Screen: "Home" });
     } catch (e) {
       alert(e);
     }
@@ -51,7 +67,8 @@ const SignInScreen = ({ navigation }) => {
         login(email, password);
       }
       if (user) {
-        navigation.navigate("Home");
+        //setUser(user);
+        navigation.navigate("App", { Screen: "Home" });
       }
     } catch (e) {
       alert("Login failed! Please try again!");
@@ -81,86 +98,101 @@ const SignInScreen = ({ navigation }) => {
     },
   });
 
+  useEffect(() => {
+    try {
+      checkUser();
+      if (loginUser) {
+        navigation.navigate("App", { Screen: "Home" });
+      }
+    } catch (e) {
+      alert(e);
+    }
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS == "ios" ? "height" : null}
         style={styles.container}
       >
-        <View style={{ flex: 1 }}>
-          <View style={{ alignItems: "center" }}>
-            <Image
-              source={require("../../assets/logo_01.png")}
-              style={styles.logo}
-            />
-          </View>
-          <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-            <View style={styles.signInWrapper}>
-              {/* <View style={styles.loginHeader}> */}
-              <View>
-                <Text style={styles.text}>Sign In</Text>
-              </View>
-              <View style={styles.formElement}>
-                <FormInput
-                  labelValue={values.email}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  placeholderText="Email"
-                  iconType="user"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  error={errors.email}
-                  touched={touched.email}
-                  autoFocus={true}
-                />
-
-                <FormInput
-                  labelValue={values.password}
-                  onChangeText={handleChange("password")}
-                  onBlur={handleBlur("password")}
-                  placeholderText="Password"
-                  iconType="lock"
-                  secureTextEntry={true}
-                  error={errors.password}
-                  touched={touched.password}
-                />
-
-                <FormButton
-                  buttonTitle="Sign In"
-                  loading={loading}
-                  onPress={handleSubmit}
-                />
-
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <View style={{ flex: 1 }}>
+            <View style={{ alignItems: "center" }}>
+              <Image
+                source={require("../../assets/logo_01.png")}
+                style={styles.logo}
+              />
+            </View>
+            <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+              <View style={styles.signInWrapper}>
+                {/* <View style={styles.loginHeader}> */}
                 <View>
-                  <SocialButton
-                    buttonTitle="Sign In with Facebook"
-                    btnType="facebook"
-                    color="#4867aa"
-                    backgroundColor="#e6eaf4"
-                    onPress={() => signInWithFacebook()}
+                  <Text style={styles.text}>Sign In</Text>
+                </View>
+                <View style={styles.formElement}>
+                  <FormInput
+                    labelValue={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    placeholderText="Email"
+                    iconType="user"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    error={errors.email}
+                    touched={touched.email}
+                    autoFocus={true}
                   />
 
-                  <SocialButton
-                    buttonTitle="Sign In with Google"
-                    btnType="google"
-                    color="#de4d41"
-                    backgroundColor="#f5e7ea"
-                    onPress={() => signInWithGoogle()}
+                  <FormInput
+                    labelValue={values.password}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    placeholderText="Password"
+                    iconType="lock"
+                    secureTextEntry={true}
+                    error={errors.password}
+                    touched={touched.password}
+                  />
+
+                  <FormButton
+                    buttonTitle="Sign In"
+                    loading={isLoading}
+                    onPress={handleSubmit}
+                  />
+
+                  <View>
+                    <SocialButton
+                      buttonTitle="Sign In with Facebook"
+                      btnType="facebook"
+                      color="#4867aa"
+                      backgroundColor="#e6eaf4"
+                      onPress={() => signInWithFacebook()}
+                    />
+
+                    <SocialButton
+                      buttonTitle="Sign In with Google"
+                      btnType="google"
+                      color="#de4d41"
+                      backgroundColor="#f5e7ea"
+                      onPress={() => signInWithGoogle()}
+                    />
+                  </View>
+                  <FormLineButton
+                    buttonTitle="Forgot Password"
+                    onPress={() => navigation.navigate("ForgetPassword")}
+                  />
+                  <FormLineButton
+                    buttonTitle="Sign Up"
+                    onPress={() => navigation.navigate("SignUp")}
                   />
                 </View>
-                <FormLineButton
-                  buttonTitle="Forgot Password"
-                  onPress={() => navigation.navigate("ForgetPassword")}
-                />
-                <FormLineButton
-                  buttonTitle="Sign Up"
-                  onPress={() => navigation.navigate("SignUp")}
-                />
               </View>
-            </View>
-          </Animatable.View>
-        </View>
+            </Animatable.View>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,19 +11,59 @@ import {
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { UserContext } from "../server/context/UserContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import FormButton from "../components/form/FormButton";
+import Loader from "../components/LoadingComponent";
 
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useTheme();
   const [loading, setLoading] = useState(false);
-
+  const [isFirstLaunch, setFirstLaunch] = useState(true);
   const { signOut } = useContext(UserContext);
+
+  const checkFirstLaunch = async () => {
+    try {
+      setLoading(true);
+      const value = await AsyncStorage.getItem("@isFirstLaunch");
+      //alert("First Launch " & value);
+      if (value !== null) {
+        setFirstLaunch(false);
+      }
+      if (isFirstLaunch) {
+        navigation.navigate("Onboarding");
+      }
+    } catch (e) {
+      alert(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkLoginUser = async () => {
+    try {
+      const loginUser = await AsyncStorage.getItem("@loginUser");
+
+      if (!loginUser) {
+        navigation.navigate("Auth", { screen: "Login" });
+      }
+    } catch (e) {
+      alert(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkFirstLaunch();
+    checkLoginUser();
+  }, []);
 
   const logOff = () => {
     signOut();
-    navigation.navigate("Home", { screen: "Home" });
+    AsyncStorage.removeItem("@isFirstLaunch");
+    navigation.navigate("Home");
   };
 
   const handleSubmit = () => {

@@ -9,10 +9,10 @@ import {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import slides from "../../services/slides";
-import OnboardingItem from "../../components/Onboarding/OnboardingItem";
-import Paginator from "../../components/Onboarding/Paginator";
-import NextButton from "../../components/Onboarding/NextButton";
+import slides from "../services/slides";
+import OnboardingItem from "../components/Onboarding/OnboardingItem";
+import Paginator from "../components/Onboarding/Paginator";
+import NextButton from "../components/Onboarding/NextButton";
 
 const Onboarding = ({ navigation }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -29,8 +29,8 @@ const Onboarding = ({ navigation }) => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      await AsyncStorage.setItem("@alreadyLaunched", "false").then(
-        navigation.navigate("SignIn")
+      await AsyncStorage.setItem("@isFirstLaunch", "false").then(
+        navigation.navigate("Home")
       );
     }
   };
@@ -54,6 +54,7 @@ const Onboarding = ({ navigation }) => {
           onViewableItemsChanged={viewableItemsChanged}
           viewabilityConfig={viewConfig}
           ref={slidesRef}
+          keyExtractor={(item) => `key-${item.id}`}
         />
       </View>
       <Paginator data={slides} scrollX={scrollX} />

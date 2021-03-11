@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { Component, useContext, useState } from "react";
 import {
   View,
   Text,
@@ -12,15 +12,33 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
+
+import HomeScreen from "../HomeScreen";
 import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { register, user } = useContext(UserContext);
+
+  const setUser = async (user) => {
+    alert(user);
+    try {
+      await AsyncStorage.setItem("@loginUser", user.userName).then(() => {
+        setLoginUser(user);
+      });
+    } catch (e) {
+      alert(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const signUp = (email, password) => {
     try {
@@ -29,7 +47,9 @@ const SignUpScreen = ({ navigation }) => {
       if (isValid) {
         register(email, password);
       }
+
       if (user) {
+        //setUser(user);
         navigation.navigate("Home");
       }
     } catch (e) {
