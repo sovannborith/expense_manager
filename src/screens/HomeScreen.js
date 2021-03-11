@@ -19,45 +19,34 @@ import Loader from "../components/LoadingComponent";
 const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const [isFirstLaunch, setFirstLaunch] = useState(true);
-  const { signOut } = useContext(UserContext);
+  const { signOut, getLoginUser } = useContext(UserContext);
 
-  const checkFirstLaunch = async () => {
+  const validate = async () => {
     try {
-      setLoading(true);
       const value = await AsyncStorage.getItem("@isFirstLaunch");
-      //alert("First Launch " & value);
       if (value !== null) {
         setFirstLaunch(false);
       }
       if (isFirstLaunch) {
-        navigation.navigate("Onboarding");
+        navigation.replace("Onboarding");
       }
-    } catch (e) {
-      alert(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkLoginUser = async () => {
-    try {
+      alert(getLoginUser().userName);
       const loginUser = await AsyncStorage.getItem("@loginUser");
-
-      if (!loginUser) {
-        navigation.navigate("Auth", { screen: "Login" });
+      alert("Asyn User: " & loginUser);
+      if (loginUser == null) {
+        navigation.replace("Auth", { screen: "SignIn" });
       }
     } catch (e) {
       alert(e);
     } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    checkFirstLaunch();
-    checkLoginUser();
+    validate();
+    if (isLoading) setLoading(false);
   }, []);
 
   const logOff = () => {
@@ -95,17 +84,19 @@ const HomeScreen = ({ navigation }) => {
         barStyle={theme.dark ? "light-content" : "dark-content"}
         style={{ backgroundColor: "#019131" }}
       />
-      <View>
-        <Text>Hello Expense Manager</Text>
-      </View>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <View>
+          <View>
+            <Text>Hello Expense Manager</Text>
+          </View>
 
-      <View>
-        <FormButton
-          buttonTitle="Sign In"
-          loading={loading}
-          onPress={handleSubmit}
-        />
-      </View>
+          <View>
+            <FormButton buttonTitle="Sign In" onPress={handleSubmit} />
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

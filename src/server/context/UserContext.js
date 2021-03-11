@@ -29,9 +29,7 @@ const UserProvider = ({ children }) => {
       firebase
         .auth()
         .signInWithCredential(credential)
-        /* .then(() => {
-          //alert("Will put loading here");
-        }) */
+
         .catch((error) => {
           alert(error);
         });
@@ -57,15 +55,11 @@ const UserProvider = ({ children }) => {
   };
 
   const userFirebase = {
-    user,
-    setUser,
-    Loader,
     login: async (email, password) => {
       try {
         await firebase
           .auth()
           .signInWithEmailAndPassword(email, password)
-
           .catch((error) => {
             alert("Login failed. " + error.message);
           });
@@ -90,13 +84,12 @@ const UserProvider = ({ children }) => {
     signOut: async () => {
       try {
         await firebase.auth().signOut();
-        await AsyncStorage.removeItem("@alreadyLaunched");
         setUser(null);
       } catch (e) {
         alert(e);
       }
     },
-    getCurrentUser: async () => {
+    getLoginUser: async () => {
       return firebase.auth().currentUser;
     },
 

@@ -30,7 +30,7 @@ const Onboarding = ({ navigation }) => {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
       await AsyncStorage.setItem("@isFirstLaunch", "false").then(
-        navigation.navigate("Home")
+        navigation.replace("Home")
       );
     }
   };

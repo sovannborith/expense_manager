@@ -7,6 +7,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
 } from "react-native";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
@@ -15,6 +16,7 @@ import { UserContext } from "../../server/context/UserContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
+
 const ForgetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useContext(UserContext);
@@ -51,52 +53,50 @@ const ForgetPasswordScreen = ({ navigation }) => {
   });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS == "ios" ? "padding" : null}
-      style={styles.container}
-    >
-      <View style={{ flex: 1 }}>
-        <View style={{ alignItems: "center" }}>
-          <Image
-            source={require("../../assets/logo_01.png")}
-            style={styles.logo}
-          />
-        </View>
-        <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-          <View style={styles.signInWrapper}>
-            <View style={styles.loginHeader}>
-              <Text style={styles.text}>Reset Password</Text>
-            </View>
-            <View style={styles.formElement}>
-              <FormInput
-                labelValue={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                placeholderText="Email"
-                iconType="user"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                error={errors.email}
-                touched={touched.email}
-                autoFocus={true}
-              />
-
-              <FormButton
-                buttonTitle="Reset Password"
-                loading={loading}
-                onPress={handleSubmit}
-              />
-              <FormLineButton
-                buttonTitle="Sign In"
-                onPress={() => navigation.navigate("SignIn")}
-              />
-            </View>
-            <View style={styles.formFooter}></View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : null}
+        style={styles.container}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={{ alignItems: "center" }}>
+            <Image
+              source={require("../../assets/logo_01.png")}
+              style={styles.logo}
+            />
           </View>
-        </Animatable.View>
-      </View>
-    </KeyboardAvoidingView>
+          <Animatable.View animation="fadeInUpBig">
+            <View style={styles.signInWrapper}>
+              <View style={styles.formElement}>
+                <FormInput
+                  labelValue={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  placeholderText="Email"
+                  iconType="user"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  error={errors.email}
+                  touched={touched.email}
+                  autoFocus={true}
+                />
+
+                <FormButton
+                  buttonTitle="Reset Password"
+                  loading={loading}
+                  onPress={handleSubmit}
+                />
+                <FormLineButton
+                  buttonTitle="Sign In"
+                  onPress={() => navigation.navigate("SignIn")}
+                />
+              </View>
+            </View>
+          </Animatable.View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -114,16 +114,10 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   signInWrapper: {
-    borderColor: "#246b6b",
-    //backgroundColor: "#246b6b",
-    borderWidth: 1,
-    /* borderTopLeftRadius: 25,
-    borderTopRightRadius: 25, */
-    borderRadius: 25,
     alignItems: "center",
     justifyContent: "flex-start",
-    //padding: 10,
     height: "100%",
+    marginTop: 20,
   },
   loginHeader: {
     position: "relative",
@@ -141,7 +135,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 28,
     marginBottom: 10,
-    color: "#fff",
+    color: "#246b6b",
     fontWeight: "bold",
     top: 3,
   },

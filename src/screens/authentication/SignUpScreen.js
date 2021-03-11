@@ -25,32 +25,28 @@ import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { register, user } = useContext(UserContext);
+  const { register, getLoginUser } = useContext(UserContext);
 
-  const setUser = async (user) => {
-    alert(user);
+  const setLoginUser = async ({ user }) => {
     try {
-      await AsyncStorage.setItem("@loginUser", user.userName).then(() => {
-        setLoginUser(user);
-      });
+      if (user) {
+        AsyncStorage.setItem("@loginUser", user.accessToken);
+      }
     } catch (e) {
       alert(e);
-    } finally {
-      setLoading(false);
     }
   };
 
   const signUp = (email, password) => {
     try {
       setLoading(true);
-
       if (isValid) {
         register(email, password);
       }
-
-      if (user) {
-        //setUser(user);
-        navigation.navigate("Home");
+      const loginUser = getLoginUser();
+      if (loginUser) {
+        setLoginUser(loginUser);
+        navigation.navigate("App", { screen: "Home" });
       }
     } catch (e) {
       alert(e); //alert("Sign Up failed! Please try again!");
@@ -81,7 +77,7 @@ const SignUpScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS == "ios" ? "height" : null}
         style={styles.container}
@@ -93,7 +89,7 @@ const SignUpScreen = ({ navigation }) => {
               style={styles.logo}
             />
           </View>
-          <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+          <Animatable.View animation="fadeInUpBig">
             <View style={styles.signInWrapper}>
               <View>
                 <Text style={styles.text}>Sign In</Text>
@@ -134,7 +130,6 @@ const SignUpScreen = ({ navigation }) => {
                   onPress={() => navigation.navigate("SignIn")}
                 />
               </View>
-              {/* <View style={styles.formFooter}></View> */}
             </View>
           </Animatable.View>
         </View>
@@ -157,12 +152,13 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   signInWrapper: {
-    borderColor: "#246b6b",
+    /* borderColor: "#246b6b",
     borderWidth: 1,
-    borderRadius: 25,
+    borderRadius: 25, */
     alignItems: "center",
     justifyContent: "flex-start",
     height: "100%",
+    marginTop: 20,
   },
   loginHeader: {
     position: "relative",
@@ -180,7 +176,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 28,
     marginBottom: 10,
-    color: "#fff",
+    color: "#246b6b",
     fontWeight: "bold",
     top: 3,
   },

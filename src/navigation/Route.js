@@ -1,31 +1,29 @@
 import React, { useState, useEffect, useContext } from "react";
+
+import { StatusBar } from "react-native";
+
 import { NavigationContainer } from "@react-navigation/native";
 
-import AppStack from "./AppStack";
 import { firebase } from "../server/firebase/firebase";
 import { UserContext } from "../server/context/UserContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Loader from "../components/LoadingComponent";
 import MainStack from "./MainStack";
 const Route = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { getLoginUser } = useContext(UserContext);
   const [isLoading, setLoading] = useState(true);
-  //const [initializing, setInitializing] = useState(true);
 
-  const onAuthStateChanged = (user) => {
-    setUser(user);
-    //if (initializing) setInitializing(false);
-  };
+  const onAuthStateChanged = (user) => {};
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
+    if (isLoading) setLoading(false);
     return subscriber;
   }, []);
 
-  //if (initializing) return null;
   return (
     <NavigationContainer>
+      <StatusBar backgroundColor="#246b6b" barStyle="light-content" />
       {isLoading ? <Loader /> : <MainStack />}
     </NavigationContainer>
   );

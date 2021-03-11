@@ -24,37 +24,45 @@ import Loader from "../../components/LoadingComponent";
 import HomeScreen from "../HomeScreen";
 
 const SignInScreen = ({ navigation }) => {
-  const { login, user, loginWithFacebook, loginWithGoogle } = useContext(
-    UserContext
-  );
+  const {
+    login,
+    getLoginUser,
+    loginWithFacebook,
+    loginWithGoogle,
+  } = useContext(UserContext);
 
-  const [loginUser, setLoginUser] = useState(null);
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
 
-  const checkUser = async () => {
+  const setLoginUser = async ({ user }) => {
+    if (user) {
+      await AsyncStorage.setItem("@loginUser", user.accessToken);
+    }
+  };
+  const signInWithGoogle = () => {
     try {
-      await AsyncStorage.getItem("@loginUser").then((value) => {
-        setLoginUser(value);
-      });
+      setLoading(true);
+      loginWithGoogle();
+
+      const loginUser = getLoginUser();
+      if (loginUser) {
+        setLoginUser(loginUser);
+        navigation.replace("App", { Screen: "Home" });
+      }
     } catch (e) {
       alert(e);
     } finally {
       setLoading(false);
     }
   };
-  const signInWithGoogle = () => {
-    try {
-      loginWithGoogle().then(navigation.navigate("App", { Screen: "Home" }));
-    } catch (e) {
-      alert(e);
-    }
-  };
 
   const signInWithFacebook = () => {
     try {
       loginWithFacebook();
-      //setUser(user);
-      navigation.navigate("App", { Screen: "Home" });
+      const loginUser = getLoginUser();
+      if (loginUser) {
+        setLoginUser(loginUser);
+        navigation.navigate("App", { Screen: "Home" });
+      }
     } catch (e) {
       alert(e);
     }
@@ -66,8 +74,10 @@ const SignInScreen = ({ navigation }) => {
       if (isValid) {
         login(email, password);
       }
-      if (user) {
-        //setUser(user);
+      const loginUser = getLoginUser();
+
+      if (loginUser) {
+        setLoginUser(loginUser);
         navigation.navigate("App", { Screen: "Home" });
       }
     } catch (e) {
@@ -98,101 +108,82 @@ const SignInScreen = ({ navigation }) => {
     },
   });
 
-  useEffect(() => {
-    try {
-      checkUser();
-      if (loginUser) {
-        navigation.navigate("App", { Screen: "Home" });
-      }
-    } catch (e) {
-      alert(e);
-    }
-  }, []);
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
       <KeyboardAvoidingView
         behavior={Platform.OS == "ios" ? "height" : null}
         style={styles.container}
       >
-        {isLoading ? (
-          <Loader />
-        ) : (
-          <View style={{ flex: 1 }}>
-            <View style={{ alignItems: "center" }}>
-              <Image
-                source={require("../../assets/logo_01.png")}
-                style={styles.logo}
-              />
-            </View>
-            <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-              <View style={styles.signInWrapper}>
-                {/* <View style={styles.loginHeader}> */}
-                <View>
-                  <Text style={styles.text}>Sign In</Text>
-                </View>
-                <View style={styles.formElement}>
-                  <FormInput
-                    labelValue={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    placeholderText="Email"
-                    iconType="user"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    error={errors.email}
-                    touched={touched.email}
-                    autoFocus={true}
-                  />
-
-                  <FormInput
-                    labelValue={values.password}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    placeholderText="Password"
-                    iconType="lock"
-                    secureTextEntry={true}
-                    error={errors.password}
-                    touched={touched.password}
-                  />
-
-                  <FormButton
-                    buttonTitle="Sign In"
-                    loading={isLoading}
-                    onPress={handleSubmit}
-                  />
-
-                  <View>
-                    <SocialButton
-                      buttonTitle="Sign In with Facebook"
-                      btnType="facebook"
-                      color="#4867aa"
-                      backgroundColor="#e6eaf4"
-                      onPress={() => signInWithFacebook()}
-                    />
-
-                    <SocialButton
-                      buttonTitle="Sign In with Google"
-                      btnType="google"
-                      color="#de4d41"
-                      backgroundColor="#f5e7ea"
-                      onPress={() => signInWithGoogle()}
-                    />
-                  </View>
-                  <FormLineButton
-                    buttonTitle="Forgot Password"
-                    onPress={() => navigation.navigate("ForgetPassword")}
-                  />
-                  <FormLineButton
-                    buttonTitle="Sign Up"
-                    onPress={() => navigation.navigate("SignUp")}
-                  />
-                </View>
-              </View>
-            </Animatable.View>
+        <View style={{ flex: 1 }}>
+          <View style={{ alignItems: "center" }}>
+            <Image
+              source={require("../../assets/logo_01.png")}
+              style={styles.logo}
+            />
           </View>
-        )}
+          <Animatable.View animation="fadeInUpBig">
+            <View style={styles.signInWrapper}>
+              <View style={styles.formElement}>
+                <FormInput
+                  labelValue={values.email}
+                  onChangeText={handleChange("email")}
+                  onBlur={handleBlur("email")}
+                  placeholderText="Email"
+                  iconType="user"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  error={errors.email}
+                  touched={touched.email}
+                  autoFocus={true}
+                />
+
+                <FormInput
+                  labelValue={values.password}
+                  onChangeText={handleChange("password")}
+                  onBlur={handleBlur("password")}
+                  placeholderText="Password"
+                  iconType="lock"
+                  secureTextEntry={true}
+                  error={errors.password}
+                  touched={touched.password}
+                />
+
+                <FormButton
+                  buttonTitle="Sign In"
+                  loading={isLoading}
+                  onPress={handleSubmit}
+                />
+
+                <View>
+                  <SocialButton
+                    buttonTitle="Sign In with Facebook"
+                    btnType="facebook"
+                    color="#4867aa"
+                    backgroundColor="#e6eaf4"
+                    onPress={() => signInWithFacebook()}
+                  />
+
+                  <SocialButton
+                    buttonTitle="Sign In with Google"
+                    btnType="google"
+                    color="#de4d41"
+                    backgroundColor="#f5e7ea"
+                    onPress={() => signInWithGoogle()}
+                  />
+                </View>
+                <FormLineButton
+                  buttonTitle="Forgot Password"
+                  onPress={() => navigation.navigate("ForgetPassword")}
+                />
+                <FormLineButton
+                  buttonTitle="Sign Up"
+                  onPress={() => navigation.navigate("SignUp")}
+                />
+              </View>
+            </View>
+          </Animatable.View>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -212,12 +203,13 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   signInWrapper: {
-    borderColor: "#246b6b",
+    /* borderColor: "#246b6b",
     borderWidth: 1,
-    borderRadius: 25,
+    borderRadius: 25, */
     alignItems: "center",
     justifyContent: "flex-start",
     height: "100%",
+    marginTop: 20,
   },
   loginHeader: {
     position: "relative",
@@ -235,7 +227,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 28,
     marginBottom: 10,
-    color: "#000",
+    color: "#246b6b",
     fontWeight: "bold",
     top: 3,
   },
