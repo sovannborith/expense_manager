@@ -3,6 +3,7 @@ import { firebase } from "../firebase/firebase";
 import * as Facebook from "expo-facebook";
 import * as Google from "expo-google-app-auth";
 
+import api from "../../services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Loader from "../../components/LoadingComponent";
@@ -13,7 +14,7 @@ const db = firebase.firestore();
 const UserProvider = ({ children }) => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [user, setUser] = useState(null);
-
+  const tokenKey = "@loginUser";
   const androidClientId =
     "170056723597-jbp72nsfklf9calfdr8s7qjq383f6tf9.apps.googleusercontent.com";
   const iosClientId =
@@ -29,7 +30,9 @@ const UserProvider = ({ children }) => {
       firebase
         .auth()
         .signInWithCredential(credential)
-
+        .then((res) => {
+          api.setToken("@loginUser", res.user.uid);
+        })
         .catch((error) => {
           alert(error);
         });
@@ -55,21 +58,32 @@ const UserProvider = ({ children }) => {
   };
 
   const userFirebase = {
+    user,
+    setUser,
     login: async (email, password) => {
       try {
         await firebase
           .auth()
           .signInWithEmailAndPassword(email, password)
+          .then((res) => {
+            console.log(res.user);
+            api.setToken("@loginUser", res.user.uid);
+          })
           .catch((error) => {
             alert("Login failed. " + error.message);
           });
       } catch (e) {
-        console.log(e);
+        alert(e);
       }
     },
     register: async (email, password) => {
       try {
-        await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then((res) => {
+            api.setToken("@loginUser", res.user.uid);
+          });
       } catch (e) {
         alert(e);
       }
@@ -83,7 +97,12 @@ const UserProvider = ({ children }) => {
     },
     signOut: async () => {
       try {
-        await firebase.auth().signOut();
+        await firebase
+          .auth()
+          .signOut()
+          .then((res) => {
+            api.removeToken("@loginUser");
+          });
         setUser(null);
       } catch (e) {
         alert(e);
@@ -157,6 +176,9 @@ const UserProvider = ({ children }) => {
           firebase
             .auth()
             .signInWithCredential(credential)
+            .then((res) => {
+              api.setToken("@loginUser", res.user.uid);
+            })
             .catch((error) => {
               alert(error);
             });

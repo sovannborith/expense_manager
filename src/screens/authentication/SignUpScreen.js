@@ -9,47 +9,42 @@ import {
   SafeAreaView,
   Platform,
 } from "react-native";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+
+import { firebase } from "../../server/firebase/firebase";
 import * as Animatable from "react-native-animatable";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
 
-import HomeScreen from "../HomeScreen";
 import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { register, getLoginUser } = useContext(UserContext);
+  const { register } = useContext(UserContext);
 
   const setLoginUser = async ({ user }) => {
+    if (user !== null) {
+      await AsyncStorage.setItem("@loginUser", user);
+    }
+  };
+  const signUp = async (email, password) => {
     try {
-      if (user) {
-        AsyncStorage.setItem("@loginUser", user.accessToken);
+      if (isValid) {
+        await firebase
+          .auth()
+          .createUserWithEmailAndPassword(email, password)
+          .then((res) => {
+            //api.setToken(res.user.uid);
+            navigation.navigate("App", { screen: "Home" });
+          });
       }
     } catch (e) {
       alert(e);
-    }
-  };
-
-  const signUp = (email, password) => {
-    try {
-      setLoading(true);
-      if (isValid) {
-        register(email, password);
-      }
-      const loginUser = getLoginUser();
-      if (loginUser) {
-        setLoginUser(loginUser);
-        navigation.navigate("App", { screen: "Home" });
-      }
-    } catch (e) {
-      alert(e); //alert("Sign Up failed! Please try again!");
     } finally {
       setLoading(false);
     }
@@ -118,6 +113,7 @@ const SignUpScreen = ({ navigation }) => {
                   secureTextEntry={true}
                   error={errors.password}
                   touched={touched.password}
+                  onSubmitEditing={handleSubmit}
                 />
 
                 <FormButton

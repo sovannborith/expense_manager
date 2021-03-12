@@ -6,14 +6,32 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import { firebase } from "../server/firebase/firebase";
 import { UserContext } from "../server/context/UserContext";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loader from "../components/LoadingComponent";
 import MainStack from "./MainStack";
+import { set } from "react-native-reanimated";
 const Route = () => {
-  const { getLoginUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [isLoading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
 
-  const onAuthStateChanged = (user) => {};
+  const setLoginUser = async ({ loginUser }) => {
+    try {
+      if (loginUser !== null) {
+        await AsyncStorage.setItem("@loginUser", loginUser);
+      }
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const onAuthStateChanged = (user) => {
+    if (user) {
+      setUser(user);
+      AsyncStorage.setItem("@loginUser", user.uid);
+    }
+    if (initializing) setInitializing(false);
+  };
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
@@ -21,10 +39,13 @@ const Route = () => {
     return subscriber;
   }, []);
 
+  if (initializing) {
+    return <Loader />;
+  }
+
   return (
     <NavigationContainer>
-      <StatusBar backgroundColor="#246b6b" barStyle="light-content" />
-      {isLoading ? <Loader /> : <MainStack />}
+      <MainStack />
     </NavigationContainer>
   );
 };

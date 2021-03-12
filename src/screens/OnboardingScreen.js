@@ -29,7 +29,7 @@ const Onboarding = ({ navigation }) => {
     if (currentIndex < slides.length - 1) {
       slidesRef.current.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      await AsyncStorage.setItem("@isFirstLaunch", "false").then(
+      await AsyncStorage.setItem("@isFirstLaunch", "0").then(
         navigation.replace("Home")
       );
     }

@@ -20,8 +20,7 @@ import SocialButton from "../../components/form/SocialButton";
 import FormLineButton from "../../components/form/FormLineButton";
 import { UserContext } from "../../server/context/UserContext";
 import Loader from "../../components/LoadingComponent";
-
-import HomeScreen from "../HomeScreen";
+import api from "../../services/api";
 
 const SignInScreen = ({ navigation }) => {
   const {
@@ -33,21 +32,12 @@ const SignInScreen = ({ navigation }) => {
 
   const [isLoading, setLoading] = useState(false);
 
-  const setLoginUser = async ({ user }) => {
-    if (user) {
-      await AsyncStorage.setItem("@loginUser", user.accessToken);
-    }
-  };
   const signInWithGoogle = () => {
     try {
       setLoading(true);
       loginWithGoogle();
 
-      const loginUser = getLoginUser();
-      if (loginUser) {
-        setLoginUser(loginUser);
-        navigation.replace("App", { Screen: "Home" });
-      }
+      navigation.replace("App", { Screen: "Home" });
     } catch (e) {
       alert(e);
     } finally {
@@ -58,11 +48,7 @@ const SignInScreen = ({ navigation }) => {
   const signInWithFacebook = () => {
     try {
       loginWithFacebook();
-      const loginUser = getLoginUser();
-      if (loginUser) {
-        setLoginUser(loginUser);
-        navigation.navigate("App", { Screen: "Home" });
-      }
+      navigation.navigate("App", { Screen: "Home" });
     } catch (e) {
       alert(e);
     }
@@ -74,12 +60,14 @@ const SignInScreen = ({ navigation }) => {
       if (isValid) {
         login(email, password);
       }
+      navigation.navigate("App", { Screen: "Home" });
+      /* 
       const loginUser = getLoginUser();
-
+      console.log(loginUser);
       if (loginUser) {
         setLoginUser(loginUser);
         navigation.navigate("App", { Screen: "Home" });
-      }
+      } */
     } catch (e) {
       alert("Login failed! Please try again!");
     } finally {
@@ -147,6 +135,9 @@ const SignInScreen = ({ navigation }) => {
                   secureTextEntry={true}
                   error={errors.password}
                   touched={touched.password}
+                  onSubmitEditing={handleSubmit}
+                  gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+                  bff
                 />
 
                 <FormButton
