@@ -8,34 +8,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Loader from "../../components/LoadingComponent";
 
-const UserContext = createContext([{}, () => {}]);
-const db = firebase.firestore();
+export const AuthContext = createContext();
 
-const UserProvider = ({ children }) => {
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const [user, setUser] = useState(null);
+const db = firebase.firestore();
+export const AuthProvider = ({ children }) => {
+  const [loginUser, setLoginUser] = useState(null);
   const tokenKey = "@loginUser";
   const androidClientId =
     "170056723597-jbp72nsfklf9calfdr8s7qjq383f6tf9.apps.googleusercontent.com";
   const iosClientId =
     "170056723597-v6go477npl5upfraifas991at6r4bcoc.apps.googleusercontent.com";
 
-  const googleSignIn = (googleUser) => {
-    if (!isUserEqual(googleUser, user)) {
+  const googleSignIn = async (googleUser) => {
+    if (!isUserEqual(googleUser, loginUser)) {
       const credential = firebase.auth.GoogleAuthProvider.credential(
         googleUser.idToken,
         googleUser.accessToken
       );
-
-      firebase
+      const user = await firebase
         .auth()
         .signInWithCredential(credential)
-        .then((res) => {
-          api.setToken("@loginUser", res.user.uid);
-        })
         .catch((error) => {
-          alert(error);
+          alert("Error @AuthProvider - googleSignIn: " + e);
         });
+      if (!user) {
+        api.setToken(JSON.stringify(user.email));
+      }
     } else {
       alert("User already signed-in");
     }
@@ -57,9 +55,9 @@ const UserProvider = ({ children }) => {
     return false;
   };
 
-  const userFirebase = {
-    user,
-    setUser,
+  const userAuth = {
+    loginUser,
+    setLoginUser,
     login: async (email, password) => {
       try {
         await firebase
@@ -67,7 +65,7 @@ const UserProvider = ({ children }) => {
           .signInWithEmailAndPassword(email, password)
           .then((res) => {
             console.log(res.user);
-            api.setToken("@loginUser", res.user.uid);
+            api.setToken(JSON.stringify(res.user.uid));
           })
           .catch((error) => {
             alert("Login failed. " + error.message);
@@ -82,7 +80,7 @@ const UserProvider = ({ children }) => {
           .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
-            api.setToken("@loginUser", res.user.uid);
+            api.setToken(JSON.stringify(res.user.uid));
           });
       } catch (e) {
         alert(e);
@@ -101,15 +99,12 @@ const UserProvider = ({ children }) => {
           .auth()
           .signOut()
           .then((res) => {
-            api.removeToken("@loginUser");
+            api.removeToken();
           });
-        setUser(null);
+        setLoginUser(null);
       } catch (e) {
         alert(e);
       }
-    },
-    getLoginUser: async () => {
-      return firebase.auth().currentUser;
     },
 
     uploadProfilePhoto: async (uri) => {
@@ -177,7 +172,7 @@ const UserProvider = ({ children }) => {
             .auth()
             .signInWithCredential(credential)
             .then((res) => {
-              api.setToken("@loginUser", res.user.uid);
+              api.setToken(JSON.stringify(res.user.uid));
             })
             .catch((error) => {
               alert(error);
@@ -203,13 +198,13 @@ const UserProvider = ({ children }) => {
           return { cancelled: true };
         }
       } catch (e) {
-        return { error: true };
+        alert("Error @Login with Google: " + e);
       }
     },
   };
   return (
-    <UserContext.Provider value={userFirebase}>{children}</UserContext.Provider>
+    <AuthContext.Provider value={userAuth}>{children}</AuthContext.Provider>
   );
 };
 
-export { UserContext, UserProvider };
+//export { UserContext, UserProvider };

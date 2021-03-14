@@ -45,7 +45,6 @@ const AppStack = ({ navigation }) => {
         component={HomeScreen}
         options={{
           title: "Expense Tracker",
-          /* headerLeft: () => <BackButton onPress={() => navigation.goBack()} />, */
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),
@@ -68,10 +67,6 @@ const AppStack = ({ navigation }) => {
         options={{
           title: "Sign In",
           headerShown: false,
-          /*  headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          headerRight: () => (
-            <HeaderRight onPress={() => navigation.navigate("Profile")} />
-          ), */
         }}
       />
     </Stack.Navigator>

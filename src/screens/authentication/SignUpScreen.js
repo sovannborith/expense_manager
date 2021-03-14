@@ -2,7 +2,6 @@ import React, { Component, useContext, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   Image,
   StyleSheet,
   KeyboardAvoidingView,
@@ -19,19 +18,14 @@ import * as Yup from "yup";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import FormOutLineButton from "../../components/form/FormOutLineButton";
-import { UserContext } from "../../server/context/UserContext";
+import { AuthContext } from "../../server/context/AuthProvider";
 import { COLORS } from "../../constants";
 import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { register } = useContext(UserContext);
+  const { register } = useContext(AuthContext);
 
-  const setLoginUser = async ({ user }) => {
-    if (user !== null) {
-      await AsyncStorage.setItem("@loginUser", user);
-    }
-  };
   const signUp = async (email, password) => {
     try {
       if (isValid) {
@@ -39,7 +33,7 @@ const SignUpScreen = ({ navigation }) => {
           .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
-            //api.setToken(res.user.uid);
+            api.setToken(res.user.uid);
             navigation.navigate("App", { screen: "Home" });
           });
       }

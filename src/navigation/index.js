@@ -1,11 +1,11 @@
 import React from "react";
 import Route from "./Route";
-import { UserProvider } from "../server/context/UserContext";
+import { AuthProvider } from "../server/context/AuthProvider";
 const Providers = () => {
   return (
-    <UserProvider>
+    <AuthProvider>
       <Route />
-    </UserProvider>
+    </AuthProvider>
   );
 };
 

@@ -12,7 +12,7 @@ import {
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import FormOutLineButton from "../../components/form/FormOutLineButton";
-import { UserContext } from "../../server/context/UserContext";
+import { AuthContext } from "../../server/context/AuthProvider";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
@@ -20,7 +20,7 @@ import { COLORS } from "../../constants";
 
 const ForgetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
-  const { resetPassword } = useContext(UserContext);
+  const { resetPassword } = useContext(AuthContext);
 
   const SignInSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required(),

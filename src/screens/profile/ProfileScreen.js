@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from "react-native";
 
+import FormInput from "../../components/form/FormInput";
 import { COLORS } from "../../constants";
 
 const ProfileScreen = () => {
@@ -19,6 +20,13 @@ const ProfileScreen = () => {
             source={require("../../assets/logo_01.png")}
             style={styles.logo}
           />
+        </View>
+        <View style={styles.signInWrapper}>
+          <FormInput labelValue="User ID" iconType="user" />
+          <FormInput labelValue="Display Name" iconType="user" />
+          <FormInput labelValue="Email" iconType="user" />
+          <FormInput labelValue="Phone Number" iconType="contacts" />
+          <FormInput labelValue="Photo Url" iconType="picture" />
         </View>
       </View>
     </SafeAreaView>
@@ -32,14 +40,21 @@ const styles = StyleSheet.create({
   },
   logoCover: {
     alignItems: "center",
-    height: 160,
+    height: 125,
     backgroundColor: COLORS.primary,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
   logo: {
-    height: 150,
-    width: 150,
+    height: 120,
+    width: 120,
     resizeMode: "cover",
+  },
+  signInWrapper: {
+    flex: 1,
+
+    alignItems: "center",
+    height: "100%",
+    padding: 10,
   },
 });

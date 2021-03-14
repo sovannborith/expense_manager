@@ -13,7 +13,7 @@ import {
   LogBox,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
-import { UserContext } from "../server/context/UserContext";
+import { AuthContext } from "../server/context/AuthProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { VictoryPie } from "victory-native";
 
@@ -33,8 +33,7 @@ const HomeScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const theme = useTheme();
   const [isLoading, setLoading] = useState(false);
-  const [isFirstLaunch, setFirstLaunch] = useState(true);
-  const { signOut } = useContext(UserContext);
+  const { signOut } = useContext(AuthContext);
   //const isFocused = useIsFocused();
 
   const validate = async () => {
@@ -43,13 +42,13 @@ const HomeScreen = ({ navigation }) => {
       if (value !== "0") {
         navigation.navigate("Onboarding");
       } else {
-        let userData = await api.getToken("@loginUser");
+        let userData = await api.getToken();
         if (userData === null || userData == "undefined") {
           navigation.replace("Auth", { screen: "SignIn" });
         }
       }
     } catch (e) {
-      alert(e);
+      alert("Error @HomeScreen - validate: " + e);
     } finally {
     }
   };
@@ -61,6 +60,7 @@ const HomeScreen = ({ navigation }) => {
 
   const logOff = () => {
     signOut();
+
     navigation.replace("Auth", { screen: "SignIn" });
   };
 

@@ -18,7 +18,7 @@ import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import SocialButton from "../../components/form/SocialButton";
 import FormOutLineButton from "../../components/form/FormOutLineButton";
-import { UserContext } from "../../server/context/UserContext";
+import { AuthContext } from "../../server/context/AuthProvider";
 import Loader from "../../components/LoadingComponent";
 import api from "../../services/api";
 import { COLORS } from "../../constants";
@@ -29,7 +29,7 @@ const SignInScreen = ({ navigation }) => {
     getLoginUser,
     loginWithFacebook,
     loginWithGoogle,
-  } = useContext(UserContext);
+  } = useContext(AuthContext);
 
   const [isLoading, setLoading] = useState(false);
 
@@ -37,8 +37,6 @@ const SignInScreen = ({ navigation }) => {
     try {
       setLoading(true);
       loginWithGoogle();
-
-      navigation.replace("App", { Screen: "Home" });
     } catch (e) {
       alert(e);
     } finally {
@@ -61,7 +59,7 @@ const SignInScreen = ({ navigation }) => {
       if (isValid) {
         login(email, password);
       }
-      navigation.navigate("App", { Screen: "Home" });
+      //navigation.navigate("App", { Screen: "Home" });
     } catch (e) {
       alert("Login failed! Please try again!");
     } finally {
