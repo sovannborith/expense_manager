@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
-import FormLineButton from "../../components/form/FormLineButton";
+import FormOutLineButton from "../../components/form/FormOutLineButton";
 import { UserContext } from "../../server/context/UserContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
+import { COLORS } from "../../constants";
 
 const ForgetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -53,13 +54,10 @@ const ForgetPasswordScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "padding" : null}
-        style={styles.container}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ alignItems: "center" }}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
+        <View style={styles.container}>
+          <View style={styles.logoCover}>
             <Image
               source={require("../../assets/logo_01.png")}
               style={styles.logo}
@@ -87,7 +85,7 @@ const ForgetPasswordScreen = ({ navigation }) => {
                   loading={loading}
                   onPress={handleSubmit}
                 />
-                <FormLineButton
+                <FormOutLineButton
                   buttonTitle="Sign In"
                   onPress={() => navigation.navigate("SignIn")}
                 />
@@ -104,9 +102,15 @@ export default ForgetPasswordScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9fafd",
+    backgroundColor: COLORS.primary,
     flex: 1,
-    padding: 10,
+  },
+  logoCover: {
+    alignItems: "center",
+    height: 160,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   logo: {
     height: 150,

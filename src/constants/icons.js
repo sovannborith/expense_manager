@@ -12,20 +12,26 @@ export const more = require("../assets/icons/more_icon.png");
 export const pin = require("../assets/icons/pin.png");
 export const sports_icon = require("../assets/icons/sports_icon.png");
 export const up_arrow = require("../assets/icons/up_arrow.png");
+export const user = require("../assets/icons/user.png");
+export const home = require("../assets/icons/home_icon.png");
+export const plus = require("../assets/icons/plus_icon.png");
 
 export default {
-    baby_car,
-    back_arrow,
-    calendar,
-    chart,
-    cloth_icon,
-    down_arrow,
-    education,
-    food,
-    healthcare,
-    menu,
-    more,
-    pin,
-    sports_icon,
-    up_arrow
-}
+  baby_car,
+  back_arrow,
+  calendar,
+  chart,
+  cloth_icon,
+  down_arrow,
+  education,
+  food,
+  healthcare,
+  menu,
+  more,
+  pin,
+  sports_icon,
+  up_arrow,
+  user,
+  home,
+  plus,
+};

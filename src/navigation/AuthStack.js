@@ -5,21 +5,23 @@ import { createStackNavigator } from "@react-navigation/stack";
 import SignupScreen from "../screens/authentication/SignUpScreen";
 import SignInScreen from "../screens/authentication/SignInScreen";
 import ForgetPasswordScreen from "../screens/authentication/ForgetPasswordScreen";
+import BackButton from "../components/BackButton";
+import { COLORS } from "../constants";
 
-const AuthStack = () => {
+const AuthStack = ({ navigation }) => {
   const Stack = createStackNavigator();
 
   return (
     <Stack.Navigator
       initialRouteName="SignIn"
-      options={{ header: () => null, headerTintColor: "#fff" }}
+      options={{ header: () => null, headerTintColor: COLORS.white }}
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#ee3431",
-          shadowColor: "#ee3431", // iOS
+          backgroundColor: COLORS.primary,
+          shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
         },
-        headerTintColor: "#fff",
+        headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: "bold",
         },
@@ -37,6 +39,7 @@ const AuthStack = () => {
         component={ForgetPasswordScreen}
         options={{
           title: "Forget Password",
+          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }}
       />
       <Stack.Screen
@@ -44,6 +47,7 @@ const AuthStack = () => {
         component={SignupScreen}
         options={{
           title: "Sign Up",
+          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }}
       />
     </Stack.Navigator>

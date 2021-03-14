@@ -2,10 +2,8 @@ import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 //import { useTheme } from "react-native-paper";
 
-import { windowHeight, windowWidth } from "../../utils/Dimensions";
-
 import { AntDesign } from "@expo/vector-icons";
-
+import { COLORS } from "../../constants";
 const FormInput = ({
   labelValue,
   placeholderText,
@@ -22,12 +20,16 @@ const FormInput = ({
         marginBottom: 10,
         width: "100%",
         height: 40,
-        borderColor: !touched ? "#878787" : !error ? "#246b6b" : "#d10000",
+        borderColor: !touched
+          ? COLORS.gray
+          : !error
+          ? COLORS.primary
+          : COLORS.danger,
         borderRadius: 3,
         borderWidth: 1,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: COLORS.white,
       }}
     >
       <View
@@ -37,12 +39,16 @@ const FormInput = ({
           justifyContent: "center",
           alignItems: "center",
           width: 50,
-          color: !touched ? "#878787" : !error ? "#246b6b" : "#d10000",
-          borderRightColor: !touched
-            ? "#878787"
+          color: !touched
+            ? COLORS.gray
             : !error
-            ? "#246b6b"
-            : "#d10000",
+            ? COLORS.primary
+            : COLORS.danger,
+          borderRightColor: !touched
+            ? COLORS.gray
+            : !error
+            ? COLORS.primary
+            : COLORS.danger,
           borderRightWidth: 1,
         }}
       >

@@ -18,9 +18,9 @@ import * as Yup from "yup";
 
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
-import FormLineButton from "../../components/form/FormLineButton";
+import FormOutLineButton from "../../components/form/FormOutLineButton";
 import { UserContext } from "../../server/context/UserContext";
-
+import { COLORS } from "../../constants";
 import Loader from "../../components/LoadingComponent";
 
 const SignUpScreen = ({ navigation }) => {
@@ -72,13 +72,10 @@ const SignUpScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "height" : null}
-        style={styles.container}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ alignItems: "center" }}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
+        <View style={styles.container}>
+          <View style={styles.logoCover}>
             <Image
               source={require("../../assets/logo_01.png")}
               style={styles.logo}
@@ -121,7 +118,7 @@ const SignUpScreen = ({ navigation }) => {
                   loading={loading}
                   onPress={handleSubmit}
                 />
-                <FormLineButton
+                <FormOutLineButton
                   buttonTitle="Sign In"
                   onPress={() => navigation.navigate("SignIn")}
                 />
@@ -138,9 +135,15 @@ export default SignUpScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9fafd",
+    backgroundColor: COLORS.primary,
     flex: 1,
-    padding: 10,
+  },
+  logoCover: {
+    alignItems: "center",
+    height: 160,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   logo: {
     height: 150,
@@ -148,9 +151,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   signInWrapper: {
-    /* borderColor: "#246b6b",
-    borderWidth: 1,
-    borderRadius: 25, */
     alignItems: "center",
     justifyContent: "flex-start",
     height: "100%",

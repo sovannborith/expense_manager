@@ -1,12 +1,16 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Avatar } from "react-native-paper";
+
+import { COLORS } from "../constants";
 
 import HomeScreen from "../screens/HomeScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
-import ProfileScreen from "../screens/profile/ProfileScreen";
-//import HeaderRight from "../components/HeaderRight";
+import HeaderRight from "../components/HeaderRight";
+import BackButton from "../components/BackButton";
+import ProfileStack from "../navigation/ProfileStack";
+import AuthStack from "../navigation/AuthStack";
+
 const Stack = createStackNavigator();
 
 const AppStack = ({ navigation }) => {
@@ -14,17 +18,18 @@ const AppStack = ({ navigation }) => {
     <Stack.Navigator
       initialRouteName="Home"
       options={{
-        headerTintColor: "#fff",
+        headerTintColor: COLORS.white,
         title: "",
       }}
+      /* headerMode="none" */
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#ee3431",
-          shadowColor: "#ee3431", // iOS
+          backgroundColor: COLORS.primary,
+          shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
         },
-
-        headerTintColor: "#fff",
+        /* headerShown: false, */
+        headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: "bold",
         },
@@ -33,30 +38,40 @@ const AppStack = ({ navigation }) => {
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ header: () => null }}
+        options={{ header: () => null, title: "" }}
       />
       <Stack.Screen
         name="Home"
         component={HomeScreen}
         options={{
-          title: "",
-          HeaderRight: () => (
-            <View style={styles.container}>
-              <TouchableOpacity onPress={navigation.navigate("Profile")}>
-                <Avatar.Image
-                  source={require("../assets/favicon.png")}
-                  height={30}
-                />
-              </TouchableOpacity>
-            </View>
+          title: "Expense Tracker",
+          /* headerLeft: () => <BackButton onPress={() => navigation.goBack()} />, */
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),
         }}
       />
       <Stack.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStack}
         options={{
           title: "Your Profile",
+          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="Auth"
+        component={AuthStack}
+        options={{
+          title: "Sign In",
+          headerShown: false,
+          /*  headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
+          ), */
         }}
       />
     </Stack.Navigator>

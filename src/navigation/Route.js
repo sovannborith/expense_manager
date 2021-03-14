@@ -1,17 +1,15 @@
+import "react-native-gesture-handler";
 import React, { useState, useEffect, useContext } from "react";
-
-import { StatusBar } from "react-native";
-
 import { NavigationContainer } from "@react-navigation/native";
 
 import { firebase } from "../server/firebase/firebase";
 import { UserContext } from "../server/context/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loader from "../components/LoadingComponent";
-import MainStack from "./MainStack";
-import { set } from "react-native-reanimated";
+import MainTabNavigation from "./MainTabNavigation";
+import AuthStack from "./AuthStack";
 const Route = () => {
-  const { setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const [isLoading, setLoading] = useState(true);
   const [initializing, setInitializing] = useState(true);
 
@@ -42,10 +40,10 @@ const Route = () => {
   if (initializing) {
     return <Loader />;
   }
-
   return (
     <NavigationContainer>
-      <MainStack />
+      {/* <MainTabNavigation /> */}
+      {user ? <MainTabNavigation /> : <AuthStack />}
     </NavigationContainer>
   );
 };

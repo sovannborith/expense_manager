@@ -17,10 +17,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 import SocialButton from "../../components/form/SocialButton";
-import FormLineButton from "../../components/form/FormLineButton";
+import FormOutLineButton from "../../components/form/FormOutLineButton";
 import { UserContext } from "../../server/context/UserContext";
 import Loader from "../../components/LoadingComponent";
 import api from "../../services/api";
+import { COLORS } from "../../constants";
 
 const SignInScreen = ({ navigation }) => {
   const {
@@ -61,13 +62,6 @@ const SignInScreen = ({ navigation }) => {
         login(email, password);
       }
       navigation.navigate("App", { Screen: "Home" });
-      /* 
-      const loginUser = getLoginUser();
-      console.log(loginUser);
-      if (loginUser) {
-        setLoginUser(loginUser);
-        navigation.navigate("App", { Screen: "Home" });
-      } */
     } catch (e) {
       alert("Login failed! Please try again!");
     } finally {
@@ -97,13 +91,10 @@ const SignInScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#ee3431" }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "height" : null}
-        style={styles.container}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ alignItems: "center" }}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "position" : null}>
+        <View style={styles.container}>
+          <View style={styles.logoCover}>
             <Image
               source={require("../../assets/logo_01.png")}
               style={styles.logo}
@@ -136,8 +127,6 @@ const SignInScreen = ({ navigation }) => {
                   error={errors.password}
                   touched={touched.password}
                   onSubmitEditing={handleSubmit}
-                  gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
-                  bff
                 />
 
                 <FormButton
@@ -146,28 +135,26 @@ const SignInScreen = ({ navigation }) => {
                   onPress={handleSubmit}
                 />
 
-                <View>
-                  <SocialButton
-                    buttonTitle="Sign In with Facebook"
-                    btnType="facebook"
-                    color="#4867aa"
-                    backgroundColor="#e6eaf4"
-                    onPress={() => signInWithFacebook()}
-                  />
+                <SocialButton
+                  buttonTitle="Sign In with Facebook"
+                  btnType="facebook"
+                  color="#4867aa"
+                  backgroundColor="#e6eaf4"
+                  onPress={() => signInWithFacebook()}
+                />
 
-                  <SocialButton
-                    buttonTitle="Sign In with Google"
-                    btnType="google"
-                    color="#de4d41"
-                    backgroundColor="#f5e7ea"
-                    onPress={() => signInWithGoogle()}
-                  />
-                </View>
-                <FormLineButton
+                <SocialButton
+                  buttonTitle="Sign In with Google"
+                  btnType="google"
+                  color="#de4d41"
+                  backgroundColor="#f5e7ea"
+                  onPress={() => signInWithGoogle()}
+                />
+                <FormOutLineButton
                   buttonTitle="Forgot Password"
                   onPress={() => navigation.navigate("ForgetPassword")}
                 />
-                <FormLineButton
+                <FormOutLineButton
                   buttonTitle="Sign Up"
                   onPress={() => navigation.navigate("SignUp")}
                 />
@@ -184,9 +171,15 @@ export default SignInScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9fafd",
+    backgroundColor: COLORS.primary,
     flex: 1,
-    padding: 10,
+  },
+  logoCover: {
+    alignItems: "center",
+    height: 160,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   logo: {
     height: 150,
@@ -194,11 +187,9 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   signInWrapper: {
-    /* borderColor: "#246b6b",
-    borderWidth: 1,
-    borderRadius: 25, */
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "flex-start",
     height: "100%",
     marginTop: 20,
   },

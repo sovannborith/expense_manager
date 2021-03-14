@@ -1,7 +1,9 @@
 import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import Loading from "../LoadingComponent";
-const FormLineButton = ({ buttonTitle, loading, ...rest }) => {
+import { COLORS, SIZES } from "../../constants";
+
+const FormOutLineButton = ({ buttonTitle, loading, ...rest }) => {
   return (
     <TouchableOpacity style={styles.forgotButton} {...rest}>
       {loading ? (
@@ -13,23 +15,23 @@ const FormLineButton = ({ buttonTitle, loading, ...rest }) => {
   );
 };
 
-export default FormLineButton;
+export default FormOutLineButton;
 
 const styles = StyleSheet.create({
   forgotButton: {
     marginTop: 10,
     width: "100%",
-    height: 50,
+    height: SIZES.largeTitle,
     padding: 10,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#BEC1D2",
-    borderLeftWidth: 3,
-    borderLeftColor: "#ee3431",
-    borderRightColor: "#ee3431",
-    borderRightWidth: 3,
+    borderColor: COLORS.gray,
+    borderLeftWidth: 5,
+    borderLeftColor: COLORS.primary,
+    borderRightColor: COLORS.primary,
+    borderRightWidth: 5,
   },
   buttonText: {
     fontSize: 16,
