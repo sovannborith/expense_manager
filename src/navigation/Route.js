@@ -7,14 +7,14 @@ import { AuthContext } from "../server/context/AuthProvider";
 import Loader from "../components/LoadingComponent";
 import MainTabNavigation from "./MainTabNavigation";
 import AuthStack from "./AuthStack";
-import api from "../services/api";
+
 const Route = () => {
   const { loginUser, setLoginUser } = useContext(AuthContext);
   const [initializing, setInitializing] = useState(true);
 
-  const onAuthStateChanged = (loginUser) => {
-    if (loginUser !== null || loginUser !== "undefined") {
-      setLoginUser(loginUser);
+  const onAuthStateChanged = (user) => {
+    if (user) {
+      setLoginUser(user);
     }
     if (initializing) setInitializing(false);
   };

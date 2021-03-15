@@ -1,11 +1,12 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Avatar } from "react-native-paper";
 import { COLORS } from "../constants";
 
 import EditProfileScreen from "../screens/profile/EditProfileScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
+import BackButton from "../components/BackButton";
+import EditProfileIcon from "../components/EditProfileIcon";
 //import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
 
@@ -33,23 +34,21 @@ const ProfileStack = ({ navigation }) => {
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ header: () => null }}
+        options={{
+          header: () => null,
+          headerRight: () => (
+            <EditProfileIcon
+              onPress={() => navigation.navigate("EditProfile")}
+            />
+          ),
+        }}
       />
       <Stack.Screen
         name="EditProfile"
         component={EditProfileScreen}
         options={{
           title: "",
-          HeaderRight: () => (
-            <View style={styles.container}>
-              <TouchableOpacity onPress={navigation.navigate("Profile")}>
-                <Avatar.Image
-                  source={require("../assets/favicon.png")}
-                  height={30}
-                />
-              </TouchableOpacity>
-            </View>
-          ),
+          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         }}
       />
     </Stack.Navigator>

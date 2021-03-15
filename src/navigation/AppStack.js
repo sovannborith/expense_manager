@@ -10,6 +10,7 @@ import HeaderRight from "../components/HeaderRight";
 import BackButton from "../components/BackButton";
 import ProfileStack from "../navigation/ProfileStack";
 import AuthStack from "../navigation/AuthStack";
+import EditProfileIcon from "../components/EditProfileIcon";
 
 const Stack = createStackNavigator();
 
@@ -48,25 +49,6 @@ const AppStack = ({ navigation }) => {
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),
-        }}
-      />
-      <Stack.Screen
-        name="Profile"
-        component={ProfileStack}
-        options={{
-          title: "Your Profile",
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-          headerRight: () => (
-            <HeaderRight onPress={() => navigation.navigate("Profile")} />
-          ),
-        }}
-      />
-      <Stack.Screen
-        name="Auth"
-        component={AuthStack}
-        options={{
-          title: "Sign In",
-          headerShown: false,
         }}
       />
     </Stack.Navigator>

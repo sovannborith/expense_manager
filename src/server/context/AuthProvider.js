@@ -2,11 +2,8 @@ import React, { createContext, useState } from "react";
 import { firebase } from "../firebase/firebase";
 import * as Facebook from "expo-facebook";
 import * as Google from "expo-google-app-auth";
-
-import api from "../../services/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import Loader from "../../components/LoadingComponent";
+import api from "../../services/api";
 
 export const AuthContext = createContext();
 
@@ -28,14 +25,12 @@ export const AuthProvider = ({ children }) => {
       const user = await firebase
         .auth()
         .signInWithCredential(credential)
+        .then((res) => {
+          api.setToken(JSON.stringify(res.user.uid));
+        })
         .catch((error) => {
           alert("Error @AuthProvider - googleSignIn: " + e);
         });
-      if (!user) {
-        api.setToken(JSON.stringify(user.email));
-      }
-    } else {
-      alert("User already signed-in");
     }
   };
   const isUserEqual = (googleUser, user) => {
@@ -64,7 +59,6 @@ export const AuthProvider = ({ children }) => {
           .auth()
           .signInWithEmailAndPassword(email, password)
           .then((res) => {
-            console.log(res.user);
             api.setToken(JSON.stringify(res.user.uid));
           })
           .catch((error) => {
@@ -83,7 +77,7 @@ export const AuthProvider = ({ children }) => {
             api.setToken(JSON.stringify(res.user.uid));
           });
       } catch (e) {
-        alert(e);
+        alert("Error @register: " + e);
       }
     },
     resetPassword: async (email) => {
@@ -206,5 +200,3 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={userAuth}>{children}</AuthContext.Provider>
   );
 };
-
-//export { UserContext, UserProvider };

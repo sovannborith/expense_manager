@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
 import {
   View,
-  Text,
-  TouchableOpacity,
   Image,
   StyleSheet,
   KeyboardAvoidingView,
@@ -16,7 +14,7 @@ import { AuthContext } from "../../server/context/AuthProvider";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
-import { COLORS } from "../../constants";
+import { COLORS, SIZES } from "../../constants";
 
 const ForgetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
@@ -62,36 +60,36 @@ const ForgetPasswordScreen = ({ navigation }) => {
               source={require("../../assets/logo_01.png")}
               style={styles.logo}
             />
-          </View>
-          <Animatable.View animation="fadeInUpBig">
-            <View style={styles.signInWrapper}>
-              <View style={styles.formElement}>
-                <FormInput
-                  labelValue={values.email}
-                  onChangeText={handleChange("email")}
-                  onBlur={handleBlur("email")}
-                  placeholderText="Email"
-                  iconType="user"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  error={errors.email}
-                  touched={touched.email}
-                  autoFocus={true}
-                />
+            <Animatable.View animation="fadeInUpBig">
+              <View style={styles.signInWrapper}>
+                <View style={styles.formElement}>
+                  <FormInput
+                    labelValue={values.email}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    placeholderText="Email"
+                    iconType="user"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    error={errors.email}
+                    touched={touched.email}
+                    autoFocus={true}
+                  />
 
-                <FormButton
-                  buttonTitle="Reset Password"
-                  loading={loading}
-                  onPress={handleSubmit}
-                />
-                <FormOutLineButton
-                  buttonTitle="Sign In"
-                  onPress={() => navigation.navigate("SignIn")}
-                />
+                  <FormButton
+                    buttonTitle="Reset Password"
+                    loading={loading}
+                    onPress={handleSubmit}
+                  />
+                  <FormOutLineButton
+                    buttonTitle="Sign In"
+                    onPress={() => navigation.navigate("SignIn")}
+                  />
+                </View>
               </View>
-            </View>
-          </Animatable.View>
+            </Animatable.View>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -107,35 +105,26 @@ const styles = StyleSheet.create({
   },
   logoCover: {
     alignItems: "center",
-    height: 160,
     backgroundColor: COLORS.primary,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    alignItems: "center",
+    height: SIZES.height,
   },
   logo: {
-    height: 150,
-    width: 150,
+    height: 120,
+    width: 120,
     resizeMode: "cover",
   },
   signInWrapper: {
-    alignItems: "center",
-    justifyContent: "flex-start",
-    height: "100%",
-    marginTop: 20,
-  },
-  loginHeader: {
-    position: "relative",
-    top: -1,
-    height: 50,
-    backgroundColor: "#246b6b",
-    borderColor: "#246b6b",
-    borderWidth: 1,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    width: "100%",
-    alignItems: "center",
+    flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+    width: SIZES.width,
+    marginTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: COLORS.white,
   },
+
   text: {
     fontSize: 28,
     marginBottom: 10,
@@ -148,37 +137,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     width: "100%",
-  },
-  signIn: {},
-  navButton: {
-    marginTop: 15,
-  },
-  forgotButton: {
-    marginTop: 10,
-    width: "100%",
-    height: 50,
-    padding: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#246b6b",
-  },
-  navButtonText: {
-    fontSize: 16,
-    color: "#246b6b",
-  },
-  formFooter: {
-    height: 50,
-    backgroundColor: "#246b6b",
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
-    width: "100%",
-    top: 1,
-    borderColor: "#246b6b",
-    borderWidth: 1,
-  },
-  footer: {
-    flex: Platform.OS === "ios" ? 3 : 5,
   },
 });

@@ -1,15 +1,8 @@
-import React, { useState, useContext, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  StatusBar,
-  Image,
-  SafeAreaView,
-} from "react-native";
-
+import React from "react";
+import { View, StyleSheet, Image, SafeAreaView } from "react-native";
+import * as Animatable from "react-native-animatable";
 import FormInput from "../../components/form/FormInput";
-import { COLORS } from "../../constants";
+import { COLORS, SIZES } from "../../constants";
 
 const ProfileScreen = () => {
   return (
@@ -20,13 +13,15 @@ const ProfileScreen = () => {
             source={require("../../assets/logo_01.png")}
             style={styles.logo}
           />
-        </View>
-        <View style={styles.signInWrapper}>
-          <FormInput labelValue="User ID" iconType="user" />
-          <FormInput labelValue="Display Name" iconType="user" />
-          <FormInput labelValue="Email" iconType="user" />
-          <FormInput labelValue="Phone Number" iconType="contacts" />
-          <FormInput labelValue="Photo Url" iconType="picture" />
+          <Animatable.View animation="fadeInUpBig">
+            <View style={styles.signInWrapper}>
+              <FormInput labelValue="User ID" iconType="user" />
+              <FormInput labelValue="Display Name" iconType="user" />
+              <FormInput labelValue="Email" iconType="user" />
+              <FormInput labelValue="Phone Number" iconType="contacts" />
+              <FormInput labelValue="Photo Url" iconType="picture" />
+            </View>
+          </Animatable.View>
         </View>
       </View>
     </SafeAreaView>
@@ -36,14 +31,14 @@ export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: COLORS.primary,
     flex: 1,
   },
   logoCover: {
     alignItems: "center",
-    height: 125,
     backgroundColor: COLORS.primary,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    alignItems: "center",
+    height: SIZES.height,
   },
   logo: {
     height: 120,
@@ -52,9 +47,12 @@ const styles = StyleSheet.create({
   },
   signInWrapper: {
     flex: 1,
-
     alignItems: "center",
-    height: "100%",
+    width: SIZES.width,
+    marginTop: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    backgroundColor: COLORS.lightGray,
     padding: 10,
   },
 });

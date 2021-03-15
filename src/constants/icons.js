@@ -15,6 +15,7 @@ export const up_arrow = require("../assets/icons/up_arrow.png");
 export const user = require("../assets/icons/user.png");
 export const home = require("../assets/icons/home_icon.png");
 export const plus = require("../assets/icons/plus_icon.png");
+export const eye = require("../assets/icons/eye.png");
 
 export default {
   baby_car,
@@ -34,4 +35,5 @@ export default {
   user,
   home,
   plus,
+  eye,
 };

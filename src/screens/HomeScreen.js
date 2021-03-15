@@ -30,8 +30,6 @@ const HomeScreen = ({ navigation }) => {
   LogBox.ignoreLogs([
     "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation - use another VirtualizedList-backed container instead.",
   ]);
-  const { colors } = useTheme();
-  const theme = useTheme();
   const [isLoading, setLoading] = useState(false);
   const { signOut } = useContext(AuthContext);
   //const isFocused = useIsFocused();
@@ -42,7 +40,8 @@ const HomeScreen = ({ navigation }) => {
       if (value !== "0") {
         navigation.navigate("Onboarding");
       } else {
-        let userData = await api.getToken();
+        let userData = api.getToken();
+        console.log(userData);
         if (userData === null || userData == "undefined") {
           navigation.replace("Auth", { screen: "SignIn" });
         }
