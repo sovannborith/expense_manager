@@ -15,7 +15,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
 import { COLORS, SIZES } from "../../constants";
-
+import Loader from "../../components/LoadingComponent";
 const ForgetPasswordScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { resetPassword } = useContext(AuthContext);
@@ -50,7 +50,7 @@ const ForgetPasswordScreen = ({ navigation }) => {
       }
     },
   });
-
+  if (isLoading) return <Loader />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>

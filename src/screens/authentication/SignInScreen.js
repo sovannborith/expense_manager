@@ -25,6 +25,7 @@ const SignInScreen = ({ navigation }) => {
   const {
     loginUser,
     getLoginUser,
+    login,
     loginWithFacebook,
     loginWithGoogle,
   } = useContext(AuthContext);
@@ -44,12 +45,15 @@ const SignInScreen = ({ navigation }) => {
 
   const signInWithFacebook = () => {
     try {
+      setLoading(true);
       loginWithFacebook();
       if (loginUser) {
         navigation.navigate("App", { Screen: "Home" });
       }
     } catch (e) {
       alert(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,6 +68,7 @@ const SignInScreen = ({ navigation }) => {
       }
       //navigation.navigate("App", { Screen: "Home" });
     } catch (e) {
+      //alert(e);
       alert("Login failed! Please try again!");
     } finally {
       setLoading(false);
@@ -91,6 +96,7 @@ const SignInScreen = ({ navigation }) => {
     },
   });
 
+  if (isLoading) return <Loader />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "position" : null}>

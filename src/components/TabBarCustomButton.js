@@ -16,7 +16,7 @@ const TabBarCustomButton = ({ children, onPress }) => {
       onPress={onPress}
     >
       <LinearGradient
-        colors={[COLORS.primary, COLORS.secondary]}
+        colors={[COLORS.secondary, COLORS.primary]}
         style={{
           width: 70,
           height: 70,

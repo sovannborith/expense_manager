@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 /* import ProfileStack from "./ProfileStack"; */
 import AppStack from "./AppStack";
 import ReportStack from "./ReportStack";
-import ProfileStack from "./ProfileStack";
+/* import ProfileStack from "./ProfileStack"; */
 import AddTransactionStack from "./AddTransactionStack";
 import TabBarCustomButton from "../components/TabBarCustomButton";
 import { COLORS, icons } from "../constants";
@@ -71,6 +71,7 @@ const Tabs = () => {
               style={{
                 alignItem: "center",
                 justifyContent: "center",
+                marginLeft: -80,
               }}
             >
               <Image
@@ -96,7 +97,7 @@ const Tabs = () => {
         }}
       />
 
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Profile"
         component={ProfileStack}
         options={{
@@ -129,7 +130,7 @@ const Tabs = () => {
             </View>
           ),
         }}
-      ></Tab.Screen>
+      /> */}
 
       <Tab.Screen
         name="AddTransaction"

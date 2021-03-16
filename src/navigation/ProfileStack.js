@@ -16,7 +16,7 @@ const ProfileStack = ({ navigation }) => {
       initialRouteName="Profile"
       options={{
         headerTintColor: COLORS.white,
-        title: "",
+        title: "Your Profile",
       }}
       screenOptions={{
         headerStyle: {
@@ -35,7 +35,8 @@ const ProfileStack = ({ navigation }) => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          header: () => null,
+          title: "Your Profile",
+          headerLeft: null,
           headerRight: () => (
             <EditProfileIcon
               onPress={() => navigation.navigate("EditProfile")}
@@ -47,8 +48,14 @@ const ProfileStack = ({ navigation }) => {
         name="EditProfile"
         component={EditProfileScreen}
         options={{
-          title: "",
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          title: "Edit Profile",
+          headerLeft: () => (
+            <BackButton
+              onPress={() =>
+                navigation.navigate("Profile", { screen: "Profile" })
+              }
+            />
+          ),
         }}
       />
     </Stack.Navigator>

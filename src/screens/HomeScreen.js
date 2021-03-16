@@ -41,7 +41,6 @@ const HomeScreen = ({ navigation }) => {
         navigation.navigate("Onboarding");
       } else {
         let userData = api.getToken();
-        console.log(userData);
         if (userData === null || userData == "undefined") {
           navigation.replace("Auth", { screen: "SignIn" });
         }
@@ -49,18 +48,21 @@ const HomeScreen = ({ navigation }) => {
     } catch (e) {
       alert("Error @HomeScreen - validate: " + e);
     } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     validate();
+    let data = api.getToken("loginUser");
+    console.log(data);
     if (isLoading) setLoading(false);
   }, []);
 
   const logOff = () => {
     signOut();
 
-    navigation.replace("Auth", { screen: "SignIn" });
+    navigation.navigate("SignIn");
   };
 
   const handleSignOut = () => {
@@ -88,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleSignIn = () => {
-    navigation.replace("Auth", { screen: "SignIn" });
+    navigation.navigate("SignIn");
   };
   /* Category section */
   const [viewMode, setViewMode] = useState("list");
@@ -423,11 +425,13 @@ const HomeScreen = ({ navigation }) => {
       </View>
     );
   };
+
+  if (isLoading) return <Loader />;
+
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 20 }}>
       <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
       <View style={styles.container}>
-        {/* <NavBar /> */}
         <View style={styles.summary}>
           <View style={styles.summarySection}>
             <Text style={styles.sectionHeader}>Revenue</Text>

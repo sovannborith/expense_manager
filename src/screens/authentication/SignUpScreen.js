@@ -20,15 +20,16 @@ import { AuthContext } from "../../server/context/AuthProvider";
 import { COLORS, SIZES } from "../../constants";
 import Loader from "../../components/LoadingComponent";
 const SignUpScreen = ({ navigation }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   const { loginUser, register } = useContext(AuthContext);
 
   const signUp = async (email, password) => {
     try {
+      setLoading(true);
       if (isValid) {
         register(email, password);
         if (loginUser) {
-          navigation.navigate("App", { Screen: "Home" });
+          navigation.navigate("Home");
         }
       }
     } catch (e) {
@@ -58,6 +59,8 @@ const SignUpScreen = ({ navigation }) => {
       signUp(values.email, values.password);
     },
   });
+
+  if (isLoading) return <Loader />;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -100,11 +103,7 @@ const SignUpScreen = ({ navigation }) => {
                     onSubmitEditing={handleSubmit}
                   />
 
-                  <FormButton
-                    buttonTitle="Register"
-                    loading={loading}
-                    onPress={handleSubmit}
-                  />
+                  <FormButton buttonTitle="Register" onPress={handleSubmit} />
                   <FormOutLineButton
                     buttonTitle="Sign In"
                     onPress={() => navigation.navigate("SignIn")}

@@ -10,7 +10,7 @@ export const AuthContext = createContext();
 const db = firebase.firestore();
 export const AuthProvider = ({ children }) => {
   const [loginUser, setLoginUser] = useState(null);
-  const tokenKey = "@loginUser";
+
   const androidClientId =
     "170056723597-jbp72nsfklf9calfdr8s7qjq383f6tf9.apps.googleusercontent.com";
   const iosClientId =
@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
 
         return url;
       } catch (error) {
-        console.log("Error @uploadProfilePhoto: ", error);
+        alert(error);
       }
     },
 

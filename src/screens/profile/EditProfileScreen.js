@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Image, SafeAreaView } from "react-native";
 import * as Animatable from "react-native-animatable";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 import FormInput from "../../components/form/FormInput";
 import { COLORS, SIZES } from "../../constants";
@@ -10,10 +11,12 @@ const EditProfileScreen = () => {
     <SafeAreaView>
       <View style={styles.container}>
         <View style={styles.logoCover}>
-          <Image
-            source={require("../../assets/logo_01.png")}
-            style={styles.logo}
-          />
+          <TouchableOpacity>
+            <Image
+              source={require("../../assets/logo_01.png")}
+              style={styles.logo}
+            />
+          </TouchableOpacity>
           <Animatable.View animation="fadeInUpBig">
             <View style={styles.signInWrapper}>
               <FormInput labelValue="User ID" iconType="user" />

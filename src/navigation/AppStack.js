@@ -7,20 +7,19 @@ import { COLORS } from "../constants";
 import HomeScreen from "../screens/HomeScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import HeaderRight from "../components/HeaderRight";
-import BackButton from "../components/BackButton";
-import ProfileStack from "../navigation/ProfileStack";
 import AuthStack from "../navigation/AuthStack";
-import EditProfileIcon from "../components/EditProfileIcon";
+import ProfileStack from "../navigation/ProfileStack";
 
-const Stack = createStackNavigator();
+import LogOutButton from "../components/LogOutButton";
 
 const AppStack = ({ navigation }) => {
+  const Stack = createStackNavigator();
+
   return (
     <Stack.Navigator
       initialRouteName="Home"
       options={{
         headerTintColor: COLORS.white,
-        title: "",
       }}
       /* headerMode="none" */
       screenOptions={{
@@ -34,12 +33,13 @@ const AppStack = ({ navigation }) => {
         headerTitleStyle: {
           fontWeight: "bold",
         },
+        headerLeft: () => <LogOutButton />,
       }}
     >
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ header: () => null, title: "" }}
+        options={{ header: () => null, title: "", headerShown: false }}
       />
       <Stack.Screen
         name="Home"
@@ -49,6 +49,20 @@ const AppStack = ({ navigation }) => {
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),
+        }}
+      />
+      <Stack.Screen
+        name="SignIn"
+        component={AuthStack}
+        options={{
+          title: "",
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileStack}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
