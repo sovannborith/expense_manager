@@ -5,54 +5,11 @@ import * as Google from "expo-google-app-auth";
 import Loader from "../../components/LoadingComponent";
 import api from "../../services/api";
 
-export const AuthContext = createContext();
+export const ProfileContext = createContext();
 
 const db = firebase.firestore();
-export const AuthProvider = ({ children }) => {
-  const [loginUser, setLoginUser] = useState(null);
-
-  const androidClientId =
-    "170056723597-jbp72nsfklf9calfdr8s7qjq383f6tf9.apps.googleusercontent.com";
-  const iosClientId =
-    "170056723597-v6go477npl5upfraifas991at6r4bcoc.apps.googleusercontent.com";
-
-  const googleSignIn = async (googleUser) => {
-    if (!isUserEqual(googleUser, loginUser)) {
-      const credential = firebase.auth.GoogleAuthProvider.credential(
-        googleUser.idToken,
-        googleUser.accessToken
-      );
-      const user = await firebase
-        .auth()
-        .signInWithCredential(credential)
-        .then((res) => {
-          api.setToken(JSON.stringify(res.user.uid));
-        })
-        .catch((error) => {
-          alert("Error @AuthProvider - googleSignIn: " + e);
-        });
-    }
-  };
-  const isUserEqual = (googleUser, user) => {
-    if (user) {
-      var providerData = user.providerData;
-      for (var i = 0; i < providerData.length; i++) {
-        if (
-          providerData[i].providerId ===
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
-          providerData[i].uid === googleUser.getBasicProfile().getId()
-        ) {
-          // We don't need to reauth the Firebase connection.
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-
-  const userAuth = {
-    loginUser,
-    setLoginUser,
+export const ProfileProvider = ({ children }) => {
+  const profile = {
     login: async (email, password) => {
       try {
         await firebase
@@ -195,14 +152,6 @@ export const AuthProvider = ({ children }) => {
         alert("Error @Login with Google: " + e);
       }
     },
-    getUserProfile: async () => {},
-    updateUserProfile: async (
-      uid,
-      displayName,
-      email,
-      contactNumber,
-      photoUrl
-    ) => {},
   };
   return (
     <AuthContext.Provider value={userAuth}>{children}</AuthContext.Provider>

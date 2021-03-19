@@ -15,11 +15,27 @@ const ProfileScreen = () => {
           />
           <Animatable.View animation="fadeInUpBig">
             <View style={styles.signInWrapper}>
-              <FormInput labelValue="User ID" iconType="user" />
-              <FormInput labelValue="Display Name" iconType="user" />
-              <FormInput labelValue="Email" iconType="user" />
-              <FormInput labelValue="Phone Number" iconType="contacts" />
-              <FormInput labelValue="Photo Url" iconType="picture" />
+              <FormInput
+                labelValue="User ID"
+                iconType="user"
+                editable={false}
+              />
+              <FormInput
+                labelValue="Display Name"
+                iconType="user"
+                editable={false}
+              />
+              <FormInput labelValue="Email" iconType="user" editable={false} />
+              <FormInput
+                labelValue="Phone Number"
+                iconType="contacts"
+                editable={false}
+              />
+              <FormInput
+                labelValue="Photo Url"
+                iconType="picture"
+                editable={false}
+              />
             </View>
           </Animatable.View>
         </View>

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, Component } from "react";
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -22,13 +22,9 @@ import api from "../../services/api";
 import { COLORS, SIZES } from "../../constants";
 
 const SignInScreen = ({ navigation }) => {
-  const {
-    loginUser,
-    getLoginUser,
-    login,
-    loginWithFacebook,
-    loginWithGoogle,
-  } = useContext(AuthContext);
+  const { loginUser, login, loginWithFacebook, loginWithGoogle } = useContext(
+    AuthContext
+  );
 
   const [isLoading, setLoading] = useState(false);
 
