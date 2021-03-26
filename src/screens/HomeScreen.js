@@ -55,17 +55,16 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     validate();
     let data = api.getToken("loginUser");
-    console.log(data);
     if (isLoading) setLoading(false);
   }, []);
 
-  const logOff = () => {
+  /*   const logOff = () => {
     signOut();
 
     navigation.navigate("SignIn");
-  };
+  }; */
 
-  const handleSignOut = () => {
+  /* const handleSignOut = () => {
     Alert.alert(
       //title
       "Sign Out Confirmation",
@@ -91,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
 
   const handleSignIn = () => {
     navigation.navigate("SignIn");
-  };
+  }; */
   /* Category section */
   const [viewMode, setViewMode] = useState("list");
   const [categories, setCategories] = useState(category);
@@ -515,11 +514,12 @@ const HomeScreen = ({ navigation }) => {
             </View>
           )}
         </ScrollView>
+        {/* 
 
         <View style={{ flex: 1 }}>
           <FormButton buttonTitle="Sign Out" onPress={handleSignOut} />
           <FormButton buttonTitle="Sign In" onPress={handleSignIn} />
-        </View>
+        </View> */}
       </View>
     </SafeAreaView>
   );

@@ -2,9 +2,8 @@ import React, { createContext, useState } from "react";
 import { firebase } from "../firebase/firebase";
 import * as Facebook from "expo-facebook";
 import * as Google from "expo-google-app-auth";
-import Loader from "../../components/LoadingComponent";
+import util from "../../utils/util";
 import api from "../../services/api";
-
 export const AuthContext = createContext();
 
 const db = firebase.firestore();
@@ -26,7 +25,16 @@ export const AuthProvider = ({ children }) => {
         .auth()
         .signInWithCredential(credential)
         .then((res) => {
-          api.setToken(JSON.stringify(res.user.uid));
+          db.collection("tbl_user_profile").doc(res.user.uid).set({
+            display_name: res.user.displayName,
+            is_active: true,
+            is_first_launch: false,
+            user_email: res.user.email,
+            phone_num: res.user.providerData[0].phoneNumber,
+            uid: res.user.uid,
+            photo_url: res.user.providerData[0].photoURL,
+            created_dt: util.getCurrentDateTime(),
+          });
         })
         .catch((error) => {
           alert("Error @AuthProvider - googleSignIn: " + e);
@@ -68,13 +76,23 @@ export const AuthProvider = ({ children }) => {
         alert(e);
       }
     },
+
     register: async (email, password) => {
       try {
         await firebase
           .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
-            api.setToken(JSON.stringify(res.user.uid));
+            db.collection("tbl_user_profile").doc(res.user.uid).set({
+              display_name: res.user.displayName,
+              is_active: true,
+              is_first_launch: false,
+              user_email: res.user.email,
+              phone_num: res.user.providerData[0].phoneNumber,
+              uid: res.user.uid,
+              photo_url: res.user.providerData[0].photoURL,
+              created_dt: util.getCurrentDateTime(),
+            });
           });
       } catch (e) {
         alert("Error @register: " + e);

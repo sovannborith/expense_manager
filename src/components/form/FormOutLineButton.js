@@ -3,9 +3,16 @@ import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import Loading from "../LoadingComponent";
 import { COLORS, SIZES } from "../../constants";
 
-const FormOutLineButton = ({ buttonTitle, loading, ...rest }) => {
+const FormOutLineButton = ({ buttonTitle, loading, danger, ...rest }) => {
   return (
-    <TouchableOpacity style={styles.forgotButton} {...rest}>
+    <TouchableOpacity
+      style={
+        danger
+          ? [styles.forgotButton, styles.dangerButton]
+          : [styles.forgotButton]
+      }
+      {...rest}
+    >
       {loading ? (
         <Loading size="small" />
       ) : (
@@ -28,10 +35,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.gray,
-    borderLeftWidth: 5,
+    borderLeftWidth: 10,
     borderLeftColor: COLORS.primary,
     borderRightColor: COLORS.primary,
-    borderRightWidth: 5,
+    borderRightWidth: 10,
+  },
+  dangerButton: {
+    borderLeftColor: COLORS.red,
+    borderRightColor: COLORS.red,
   },
   buttonText: {
     fontSize: 16,

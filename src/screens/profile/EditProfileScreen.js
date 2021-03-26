@@ -47,13 +47,10 @@ const EditProfileScreen = () => {
       });
       if (!result.cancelled) {
         setImage(result.uri);
-        console.log(result.uri);
         this.bs.current.snapTo(1);
       }
-
-      console.log(result);
-    } catch (E) {
-      console.log(E);
+    } catch (e) {
+      alert(e);
     }
   };
 
@@ -67,13 +64,10 @@ const EditProfileScreen = () => {
       });
       if (!result.cancelled) {
         setImage(result.uri);
-        console.log(result.uri);
         this.bs.current.snapTo(1);
       }
-
-      //console.log(result);
-    } catch (E) {
-      console.log(E);
+    } catch (e) {
+      alert(e);
     }
   };
 

@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { firebase } from "../server/firebase/firebase";
 import { COLORS, icons } from "../constants";
+import util from "../utils/util";
+
+const db = firebase.firestore();
 
 const HeaderRight = ({ onPress }) => {
+  const [userData, setUserData] = useState(null);
+
+  const getUserData = async (uid) => {
+    try {
+      await db
+        .collection("tbl_user_profile")
+        .doc(uid)
+        .get()
+        .then((documentSnapshot) => {
+          if (documentSnapshot.exists) {
+            setUserData(documentSnapshot.data());
+          } else console.log("No data found!");
+        });
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  useEffect(() => {
+    const curLoginUser = util.getCurrentLoginUser();
+    if (curLoginUser) {
+      getUserData(curLoginUser.uid);
+    }
+  }, []);
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} style={styles.profileButton}>
         <Image
-          source={icons.user}
+          source={userData.photo_url !== null ? userData.photo_url : icons.user}
           resizeMode="contain"
           style={styles.image}
           color={COLORS.white}

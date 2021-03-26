@@ -1,11 +1,14 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { firebase } from "../firebase/firebase";
 
-const api = {
+const db = firebase.firestore();
+
+const transactionApi = {
+  addTransaction: ({}) => {},
   setToken: async ({ token }) => {
     try {
       await AsyncStorage.setItem("loginUser", token);
     } catch (e) {
-      //alert("Error @ api - setToken: " + e);
+      alert("Error @ api - setToken: " + e);
     }
   },
   getToken: async () => {
@@ -26,4 +29,4 @@ const api = {
   },
 };
 
-export default api;
+export default transactionApi;
