@@ -7,6 +7,8 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -95,75 +97,79 @@ const SignInScreen = ({ navigation }) => {
   if (isLoading) return <Loader />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "position" : null}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "position" : "height"}
+      >
         <View style={styles.container}>
-          <View style={styles.logoCover}>
-            <Image
-              source={require("../../assets/logo_01.png")}
-              style={styles.logo}
-            />
-            <Animatable.View animation="fadeInUpBig">
-              <View style={styles.signInWrapper}>
-                <View style={styles.formElement}>
-                  <FormInput
-                    labelValue={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    placeholderText="Email"
-                    iconType="user"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    error={errors.email}
-                    touched={touched.email}
-                    autoFocus={true}
-                  />
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.logoCover}>
+              <Image
+                source={require("../../assets/logo_01.png")}
+                style={styles.logo}
+              />
+              <Animatable.View animation="fadeInUpBig">
+                <View style={styles.signInWrapper}>
+                  <View style={styles.formElement}>
+                    <FormInput
+                      labelValue={values.email}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      placeholderText="Email"
+                      iconType="user"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      error={errors.email}
+                      touched={touched.email}
+                      autoFocus={true}
+                    />
 
-                  <FormInput
-                    labelValue={values.password}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    placeholderText="Password"
-                    iconType="lock"
-                    secureTextEntry={true}
-                    error={errors.password}
-                    touched={touched.password}
-                    onSubmitEditing={handleSubmit}
-                  />
+                    <FormInput
+                      labelValue={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      placeholderText="Password"
+                      iconType="lock"
+                      secureTextEntry={true}
+                      error={errors.password}
+                      touched={touched.password}
+                      onSubmitEditing={handleSubmit}
+                    />
 
-                  <FormButton
-                    buttonTitle="Sign In"
-                    loading={isLoading}
-                    onPress={handleSubmit}
-                  />
+                    <FormButton
+                      buttonTitle="Sign In"
+                      loading={isLoading}
+                      onPress={handleSubmit}
+                    />
 
-                  <SocialButton
-                    buttonTitle="Sign In with Facebook"
-                    btnType="facebook"
-                    color="#4867aa"
-                    backgroundColor="#e6eaf4"
-                    onPress={() => signInWithFacebook()}
-                  />
+                    <SocialButton
+                      buttonTitle="Sign In with Facebook"
+                      btnType="facebook"
+                      color="#4867aa"
+                      backgroundColor="#e6eaf4"
+                      onPress={() => signInWithFacebook()}
+                    />
 
-                  <SocialButton
-                    buttonTitle="Sign In with Google"
-                    btnType="google"
-                    color="#de4d41"
-                    backgroundColor="#f5e7ea"
-                    onPress={() => signInWithGoogle()}
-                  />
-                  <FormOutLineButton
-                    buttonTitle="Forgot Password"
-                    onPress={() => navigation.navigate("ForgetPassword")}
-                  />
-                  <FormOutLineButton
-                    buttonTitle="Sign Up"
-                    onPress={() => navigation.navigate("SignUp")}
-                  />
+                    <SocialButton
+                      buttonTitle="Sign In with Google"
+                      btnType="google"
+                      color="#de4d41"
+                      backgroundColor="#f5e7ea"
+                      onPress={() => signInWithGoogle()}
+                    />
+                    <FormOutLineButton
+                      buttonTitle="Forgot Password"
+                      onPress={() => navigation.navigate("ForgetPassword")}
+                    />
+                    <FormOutLineButton
+                      buttonTitle="Sign Up"
+                      onPress={() => navigation.navigate("SignUp")}
+                    />
+                  </View>
                 </View>
-              </View>
-            </Animatable.View>
-          </View>
+              </Animatable.View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

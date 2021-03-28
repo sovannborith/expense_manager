@@ -38,7 +38,13 @@ const AuthStack = ({ navigation }) => {
         component={ForgetPasswordScreen}
         options={{
           title: "Forget Password",
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          headerLeft: () => (
+            <BackButton
+              onPress={() =>
+                navigation.navigate("SignIn", { screen: "SignIn" })
+              }
+            />
+          ),
         }}
       />
       <Stack.Screen
@@ -46,7 +52,13 @@ const AuthStack = ({ navigation }) => {
         component={SignupScreen}
         options={{
           title: "Sign Up",
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
+          headerLeft: () => (
+            <BackButton
+              onPress={() =>
+                navigation.navigate("SignIn", { screen: "SignIn" })
+              }
+            />
+          ),
         }}
       />
     </Stack.Navigator>

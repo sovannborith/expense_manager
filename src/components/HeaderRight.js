@@ -35,7 +35,12 @@ const HeaderRight = ({ onPress }) => {
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} style={styles.profileButton}>
         <Image
-          source={userData.photo_url !== null ? userData.photo_url : icons.user}
+          source={{
+            uri:
+              userData && userData.photo_url !== null
+                ? userData.photo_url
+                : util.getDefaultProfilePicture(),
+          }}
           resizeMode="contain"
           style={styles.image}
           color={COLORS.white}
@@ -51,7 +56,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     marginRight: 10,
   },
   profileButton: {
@@ -59,7 +64,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderColor: COLORS.white,
     borderWidth: 1,
-    padding: 6,
+    padding: 3,
     shadowColor: COLORS.gray,
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.25,
@@ -67,8 +72,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     tintColor: COLORS.white,
+    borderRadius: 14,
   },
 });

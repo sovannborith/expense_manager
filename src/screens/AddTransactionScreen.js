@@ -63,10 +63,11 @@ const AddTransactionScreen = ({ navigation }) => {
               <View
                 style={{
                   flexDirection: "row",
+                  justifyContent: "space-between",
                   backgroundColor: COLORS.lightGray,
                   width: SIZES.width,
                   padding: 10,
-                  borderTopEndRadius: 20,
+                  borderTopRightRadius: 20,
                   borderTopLeftRadius: 20,
                 }}
               >
@@ -81,11 +82,9 @@ const AddTransactionScreen = ({ navigation }) => {
                 </Text>
                 <View
                   style={{
-                    flex: 1,
                     flexDirection: "row",
-                    justifyContent: "space-between",
+                    justifyContent: "flex-end",
                     height: 50,
-                    width: 140,
                     borderColor: COLORS.primary,
                     borderWidth: 3,
                     borderRadius: 30,
@@ -95,7 +94,6 @@ const AddTransactionScreen = ({ navigation }) => {
                     shadowOffset: { width: 0, height: 2 },
                     elevation: 5,
                     padding: 1,
-                    marginLeft: 72,
                   }}
                 >
                   <TouchableOpacity
@@ -111,6 +109,7 @@ const AddTransactionScreen = ({ navigation }) => {
                       elevation: 5,
                       borderColor: "blue",
                       borderWidth: expType == "R" ? 1 : null,
+                      width: 80,
                     }}
                     onPress={() => setExptype("R")}
                   >
@@ -138,6 +137,7 @@ const AddTransactionScreen = ({ navigation }) => {
                       elevation: 5,
                       borderColor: COLORS.red,
                       borderWidth: expType == "E" ? 1 : null,
+                      width: 80,
                     }}
                     onPress={() => setExptype("E")}
                   >
@@ -161,7 +161,7 @@ const AddTransactionScreen = ({ navigation }) => {
                       ? "Expense Description"
                       : "Revenue Description"
                   }
-                  labelValue={expDesc}
+                  //labelValue={expDesc}
                   iconType="filetext1"
                   labelValue={values.description}
                   onChangeText={handleChange("description")}
@@ -175,7 +175,7 @@ const AddTransactionScreen = ({ navigation }) => {
                   iconType="user"
                   keyboardType="numeric"
                   labelValue={values.expAmount}
-                  onChangeText={handleChange("descrexpAmountiption")}
+                  onChangeText={handleChange("expAmount")}
                   onBlur={handleBlur("expAmount")}
                   error={errors.expAmount}
                   touched={touched.expAmount}

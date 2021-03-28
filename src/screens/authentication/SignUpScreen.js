@@ -7,6 +7,8 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 
@@ -66,52 +68,54 @@ const SignUpScreen = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
         <View style={styles.container}>
-          <View style={styles.logoCover}>
-            <Image
-              source={require("../../assets/logo_01.png")}
-              style={styles.logo}
-            />
-            <Animatable.View animation="fadeInUpBig">
-              <View style={styles.signInWrapper}>
-                <View>
-                  <Text style={styles.text}>Sign In</Text>
-                </View>
-                <View style={styles.formElement}>
-                  <FormInput
-                    labelValue={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    placeholderText="Email"
-                    iconType="user"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    error={errors.email}
-                    touched={touched.email}
-                    autoFocus={true}
-                  />
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.logoCover}>
+              <Image
+                source={require("../../assets/logo_01.png")}
+                style={styles.logo}
+              />
+              <Animatable.View animation="fadeInUpBig">
+                <View style={styles.signInWrapper}>
+                  <View>
+                    <Text style={styles.text}>Sign In</Text>
+                  </View>
+                  <View style={styles.formElement}>
+                    <FormInput
+                      labelValue={values.email}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      placeholderText="Email"
+                      iconType="user"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      error={errors.email}
+                      touched={touched.email}
+                      autoFocus={true}
+                    />
 
-                  <FormInput
-                    labelValue={values.password}
-                    onChangeText={handleChange("password")}
-                    onBlur={handleBlur("password")}
-                    placeholderText="Password"
-                    iconType="lock"
-                    secureTextEntry={true}
-                    error={errors.password}
-                    touched={touched.password}
-                    onSubmitEditing={handleSubmit}
-                  />
+                    <FormInput
+                      labelValue={values.password}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
+                      placeholderText="Password"
+                      iconType="lock"
+                      secureTextEntry={true}
+                      error={errors.password}
+                      touched={touched.password}
+                      onSubmitEditing={handleSubmit}
+                    />
 
-                  <FormButton buttonTitle="Register" onPress={handleSubmit} />
-                  <FormOutLineButton
-                    buttonTitle="Sign In"
-                    onPress={() => navigation.navigate("SignIn")}
-                  />
+                    <FormButton buttonTitle="Register" onPress={handleSubmit} />
+                    <FormOutLineButton
+                      buttonTitle="Sign In"
+                      onPress={() => navigation.navigate("SignIn")}
+                    />
+                  </View>
                 </View>
-              </View>
-            </Animatable.View>
-          </View>
+              </Animatable.View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

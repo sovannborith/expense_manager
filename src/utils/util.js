@@ -3,6 +3,9 @@ import { firebase } from "../server/firebase/firebase";
 const db = firebase.firestore();
 
 const util = {
+  getDefaultProfilePicture: () => {
+    return "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png";
+  },
   getCurrentLoginUser: () => {
     try {
       const firebaseUser = firebase.auth().currentUser;

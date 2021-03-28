@@ -6,6 +6,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
@@ -50,46 +52,48 @@ const ForgetPasswordScreen = ({ navigation }) => {
       }
     },
   });
-  if (isLoading) return <Loader />;
+  if (loading) return <Loader />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
         <View style={styles.container}>
-          <View style={styles.logoCover}>
-            <Image
-              source={require("../../assets/logo_01.png")}
-              style={styles.logo}
-            />
-            <Animatable.View animation="fadeInUpBig">
-              <View style={styles.signInWrapper}>
-                <View style={styles.formElement}>
-                  <FormInput
-                    labelValue={values.email}
-                    onChangeText={handleChange("email")}
-                    onBlur={handleBlur("email")}
-                    placeholderText="Email"
-                    iconType="user"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    error={errors.email}
-                    touched={touched.email}
-                    autoFocus={true}
-                  />
+          <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.logoCover}>
+              <Image
+                source={require("../../assets/logo_01.png")}
+                style={styles.logo}
+              />
+              <Animatable.View animation="fadeInUpBig">
+                <View style={styles.signInWrapper}>
+                  <View style={styles.formElement}>
+                    <FormInput
+                      labelValue={values.email}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
+                      placeholderText="Email"
+                      iconType="user"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      error={errors.email}
+                      touched={touched.email}
+                      autoFocus={true}
+                    />
 
-                  <FormButton
-                    buttonTitle="Reset Password"
-                    loading={loading}
-                    onPress={handleSubmit}
-                  />
-                  <FormOutLineButton
-                    buttonTitle="Sign In"
-                    onPress={() => navigation.navigate("SignIn")}
-                  />
+                    <FormButton
+                      buttonTitle="Reset Password"
+                      loading={loading}
+                      onPress={handleSubmit}
+                    />
+                    <FormOutLineButton
+                      buttonTitle="Sign In"
+                      onPress={() => navigation.navigate("SignIn")}
+                    />
+                  </View>
                 </View>
-              </View>
-            </Animatable.View>
-          </View>
+              </Animatable.View>
+            </View>
+          </TouchableWithoutFeedback>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
