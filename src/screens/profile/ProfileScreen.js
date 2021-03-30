@@ -52,7 +52,6 @@ const ProfileScreen = () => {
       <View style={styles.container}>
         <View style={styles.logoCover}>
           <Image
-            /* source={require("../../assets/logo_01.png")} */
             source={{
               uri: photoUrl ? photoUrl : util.getDefaultProfilePicture(),
             }}
@@ -97,7 +96,7 @@ export default ProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.lightGray,
     flex: 1,
   },
   logoCover: {

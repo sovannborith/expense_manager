@@ -7,6 +7,7 @@ import api from "../../services/api";
 export const AuthContext = createContext();
 
 const db = firebase.firestore();
+const storage = firebase.storage();
 export const AuthProvider = ({ children }) => {
   const [loginUser, setLoginUser] = useState(null);
 
@@ -21,6 +22,9 @@ export const AuthProvider = ({ children }) => {
         googleUser.idToken,
         googleUser.accessToken
       );
+      await firebase
+        .auth()
+        .setPersistence(firebase.auth.Auth.Persistence.LOCAL);
       const user = await firebase
         .auth()
         .signInWithCredential(credential)
@@ -58,6 +62,17 @@ export const AuthProvider = ({ children }) => {
     return false;
   };
 
+  const convertImage = (img) => {
+    if (img == null) {
+      return null;
+    }
+    let fileName = img.substring(img.lastIndexOf("/") + 1);
+    const extension = fileName.split(".").pop();
+    const name = fileName.split(".").slice(0, -1).join(".");
+    fileName = name + Date.now() + "." + extension;
+    return fileName;
+  };
+
   const userAuth = {
     loginUser,
     setLoginUser,
@@ -92,6 +107,7 @@ export const AuthProvider = ({ children }) => {
               uid: res.user.uid,
               photo_url: res.user.providerData[0].photoURL,
               created_dt: util.getCurrentDateTime(),
+              last_login_dt: util.getCurrentDateTime(),
             });
           });
       } catch (e) {
@@ -116,24 +132,6 @@ export const AuthProvider = ({ children }) => {
         setLoginUser(null);
       } catch (e) {
         alert(e);
-      }
-    },
-
-    uploadProfilePhoto: async (uri) => {
-      const uid = getCurrentUser().uid;
-      try {
-        const photo = await Firebase.getBlob(uri);
-        const imgRef = firebase.storage().ref("profilePhotos").child(uid);
-        await imgRef.put(photo);
-        const url = await imgRef.getDownloadURL();
-
-        await db.collection("tbl_user_profile").doc(uid).update({
-          profile_pic: url,
-        });
-
-        return url;
-      } catch (error) {
-        alert(error);
       }
     },
 
@@ -177,15 +175,11 @@ export const AuthProvider = ({ children }) => {
           await firebase
             .auth()
             .setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
-          const credential = firebase.auth.FacebookAuthProvider.credential(
-            token
-          );
+          const credential = firebase.auth.Faceboo;
+          kAuthProvider.credential(token);
           firebase
             .auth()
             .signInWithCredential(credential)
-            .then((res) => {
-              api.setToken(JSON.stringify(res.user.uid));
-            })
             .catch((error) => {
               alert(error);
             });
@@ -214,13 +208,62 @@ export const AuthProvider = ({ children }) => {
       }
     },
     getUserProfile: async () => {},
+
+    uploadProfilePhoto: async (img) => {
+      const uid = loginUser.uid;
+      let fileName = convertImage(img);
+      try {
+        if (fileName == null) {
+          return;
+        }
+
+        const imgRef = storage.ref(`user_profile_pic/${fileName}`);
+        const task = imgRef.put(img);
+
+        //Show progress bar if we want
+        /* task.on('state_changed', (taskSnapshot) => {
+          console.log(
+            `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+          );
+    
+          setTransferred(
+            Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+              100,
+          );
+        }); */
+
+        const url = await imgRef.getDownloadURL();
+
+        await db.collection("tbl_user_profile").doc(uid).update({
+          photo_url: url,
+        });
+
+        return url;
+      } catch (error) {
+        alert(error);
+      }
+    },
+
     updateUserProfile: async (
       uid,
       displayName,
       email,
       contactNumber,
       photoUrl
-    ) => {},
+    ) => {
+      try {
+        const imgUrl = await userAuth.uploadProfilePhoto(photoUrl);
+
+        db.collection("tbl_user_profile").doc(uid).update({
+          display_name: displayName,
+          user_email: email,
+          phone_num: contactNumber,
+          photo_url: imgUrl,
+        });
+      } catch (e) {
+        alert(e);
+      }
+    },
   };
   return (
     <AuthContext.Provider value={userAuth}>{children}</AuthContext.Provider>

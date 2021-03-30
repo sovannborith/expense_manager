@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import { firebase } from "../../server/firebase/firebase";
@@ -28,7 +29,7 @@ import { AuthContext } from "../../server/context/AuthProvider";
 
 const db = firebase.firestore();
 
-const EditProfileScreen = () => {
+const EditProfileScreen = ({ navigation }) => {
   const [image, setImage] = useState();
 
   const [userData, setUserData] = useState(null);
@@ -40,6 +41,9 @@ const EditProfileScreen = () => {
   const [createdDate, setCreatedDate] = useState();
 
   const [loading, setLoading] = useState(null);
+
+  bs = React.createRef();
+  fall = new Animated.Value(1);
 
   const getPermissionAsync = async () => {
     if (Platform.OS == "ios") {
@@ -61,6 +65,7 @@ const EditProfileScreen = () => {
         quality: 1,
       });
       if (!result.cancelled) {
+        //const imageUri = Platform.OS === "ios" ? result.sourceURL : result.path;
         setImage(result.uri);
         this.bs.current.snapTo(1);
       }
@@ -78,6 +83,8 @@ const EditProfileScreen = () => {
         quality: 1,
       });
       if (!result.cancelled) {
+        /* const imageUri = Platform.OS === "ios" ? result.sourceURL : result.path;
+        console.log(imageUri); */
         setImage(result.uri);
         this.bs.current.snapTo(1);
       }
@@ -116,7 +123,7 @@ const EditProfileScreen = () => {
     },
   });
 
-  const { loginUser } = useContext(AuthContext);
+  const { loginUser, updateUserProfile } = useContext(AuthContext);
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -164,6 +171,44 @@ const EditProfileScreen = () => {
     }
   };
 
+  const convertImage = (img) => {
+    if (img == null) {
+      return null;
+    }
+    let fileName = img.substring(uploadUri.lastIndexOf("/") + 1);
+    const extension = fileName.split(".").pop();
+    const name = fileName.split(".").slice(0, -1).join(".");
+    fileName = name + Date.now() + "." + extension;
+    return fileName;
+  };
+
+  const handleUpdate = async () => {
+    if (image == null && userData.photo_url) {
+      setImage(userData.photo_url);
+    }
+
+    try {
+      //uploadProfilePhoto(image);
+      console.log(image);
+      console.log(values.phoneNumber);
+      updateUserProfile(
+        values.uid,
+        values.displayName,
+        values.email,
+        values.phoneNumber,
+        image
+      );
+      setImage(null);
+      Alert.alert(
+        "Profile Updated!",
+        "Your profile has been updated successfully."
+      );
+      navigation.navigate("Profile", { screen: "Profile" });
+    } catch (e) {
+      alert(e);
+    }
+  };
+
   useEffect(() => {
     try {
       getUserData();
@@ -175,8 +220,6 @@ const EditProfileScreen = () => {
     }
   }, []);
 
-  bs = React.createRef();
-  fall = new Animated.Value(1);
   //if (loading) return <Loader />;
 
   return (
@@ -195,7 +238,11 @@ const EditProfileScreen = () => {
             >
               <Image
                 source={{
-                  uri: photoUrl ? photoUrl : util.getDefaultProfilePicture(),
+                  uri: image
+                    ? image
+                    : photoUrl
+                    ? photoUrl
+                    : util.getDefaultProfilePicture(),
                 }}
                 style={styles.logo}
               />
@@ -247,9 +294,10 @@ const EditProfileScreen = () => {
                   placeholderText="Contact Number"
                   onBlur={handleBlur("phoneNumber")}
                   onSubmitEditing={handleSubmit}
+                  keyboardType="numeric"
                 />
 
-                <FormButton buttonTitle="Update" onPress={handleSubmit} />
+                <FormButton buttonTitle="Update" onPress={handleUpdate} />
               </View>
               <BottomSheet
                 ref={this.bs}

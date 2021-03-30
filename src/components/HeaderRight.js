@@ -37,7 +37,7 @@ const HeaderRight = ({ onPress }) => {
         <Image
           source={{
             uri:
-              userData && userData.photo_url !== null
+              userData && userData.photo_url
                 ? userData.photo_url
                 : util.getDefaultProfilePicture(),
           }}

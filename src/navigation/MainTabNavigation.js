@@ -34,7 +34,7 @@ const Tabs = () => {
               style={{
                 alignItem: "center",
                 justifyContent: "center",
-                /* marginLeft: -80, */
+                marginLeft: 8,
               }}
             >
               <Image
@@ -97,7 +97,7 @@ const Tabs = () => {
                 style={{
                   width: 26,
                   height: 26,
-                  //marginLeft: 4,
+                  marginLeft: 8,
                   tintColor: focused ? COLORS.primary : COLORS.gray,
                 }}
               />
