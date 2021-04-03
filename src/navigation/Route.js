@@ -1,14 +1,11 @@
 import "react-native-gesture-handler";
 import React, { useState, useEffect, useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-
 import { firebase } from "../server/firebase/firebase";
 import { AuthContext } from "../server/context/AuthProvider";
 import Loader from "../components/LoadingComponent";
 import api from "../services/api";
-import util from "../utils/util";
-import MainTabNavigation from "./MainTabNavigation";
-import AuthStack from "./AuthStack";
+import AppStack from "./AppStack";
 
 const Route = () => {
   const { loginUser, setLoginUser } = useContext(AuthContext);
@@ -17,11 +14,10 @@ const Route = () => {
   const onAuthStateChanged = (user) => {
     if (user) {
       setLoginUser(user);
-      //console.log(util.getCurrentLoginUser());
       try {
         api.setToken(JSON.stringify(user.uid));
       } catch (e) {
-        null;
+        alert(e);
       }
     }
     if (initializing) setInitializing(false);
@@ -33,11 +29,12 @@ const Route = () => {
   }, []);
 
   if (initializing) {
-    return <Loader />;
+    return <Loader loadingLabel="Loading..." />;
   }
   return (
     <NavigationContainer>
-      {loginUser ? <MainTabNavigation /> : <AuthStack />}
+      {/* {loginUser ? <AppStack /> : <AuthStack />} */}
+      <AppStack />
     </NavigationContainer>
   );
 };

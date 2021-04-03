@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -11,16 +11,17 @@ import {
   FlatList,
   Animated,
   LogBox,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { AuthContext } from "../server/context/AuthProvider";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { VictoryPie } from "victory-native";
-
+import { firebase } from "../server/firebase/firebase";
 import { Svg } from "react-native-svg";
 
 import api from "../services/api";
-import FormButton from "../components/form/FormButton";
+import util from "../utils/util";
 import Loader from "../components/LoadingComponent";
 import { COLORS, SIZES, FONTS, icons } from "../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -30,20 +31,37 @@ const HomeScreen = ({ navigation }) => {
   LogBox.ignoreLogs([
     "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation - use another VirtualizedList-backed container instead.",
   ]);
-  const [isLoading, setLoading] = useState(false);
-  const { signOut } = useContext(AuthContext);
-  //const isFocused = useIsFocused();
+  const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState("list");
+  const [categories, setCategories] = useState(category);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showMoreToggle, setShowMoreToggle] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  const db = firebase.firestore();
+
+  let categoryListHeightAnimationValue = useRef(new Animated.Value(140))
+    .current;
 
   const validate = async () => {
     try {
-      const value = await AsyncStorage.getItem("@isFirstLaunch");
-      if (value !== "0") {
-        navigation.navigate("Onboarding");
+      if (!util.getCurrentLoginUser()) {
+        navigation.navigate("Auth", { screen: "SignIn" });
       } else {
-        let userData = api.getToken();
-        if (userData === null || userData == "undefined") {
-          navigation.replace("Auth", { screen: "SignIn" });
-        }
+        await db
+          .collection("tbl_user_profile")
+          .doc(util.getCurrentLoginUser().uid)
+          .get()
+          .then((documentSnapshot) => {
+            if (documentSnapshot.exists) {
+              let firstLaunch = documentSnapshot.data().is_first_launch;
+              if (firstLaunch == true) {
+                navigation.navigate("Onboarding");
+              }
+            } else {
+              alert("No data found");
+            }
+          });
       }
     } catch (e) {
       alert("Error @HomeScreen - validate: " + e);
@@ -53,52 +71,15 @@ const HomeScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    validate();
-    let data = api.getToken("loginUser");
-    if (isLoading) setLoading(false);
+    setLoading(true);
+    try {
+      validate();
+    } catch (e) {
+      alert(e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
-
-  /*   const logOff = () => {
-    signOut();
-
-    navigation.navigate("SignIn");
-  }; */
-
-  /* const handleSignOut = () => {
-    Alert.alert(
-      //title
-      "Sign Out Confirmation",
-      //body
-      "Are you sure want to sign out?",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            logOff();
-          },
-        },
-        {
-          text: "Cancel",
-          onPress: () => true,
-          style: "cancel",
-        },
-      ],
-      { cancelable: false }
-      //clicking out side of alert will not cancel
-    );
-  };
-
-  const handleSignIn = () => {
-    navigation.navigate("SignIn");
-  }; */
-  /* Category section */
-  const [viewMode, setViewMode] = useState("list");
-  const [categories, setCategories] = useState(category);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [showMoreToggle, setShowMoreToggle] = useState(false);
-
-  let categoryListHeightAnimationValue = useRef(new Animated.Value(140))
-    .current;
 
   const renderCategoryList = () => {
     const renderItem = ({ item }) => {
@@ -425,103 +406,102 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
-  if (isLoading) return <Loader />;
-
+  if (loading) return <Loader loadingLabel="Loading..." />;
+  /* if (!util.getCurrentLoginUser()) {
+    navigation.navigate("Auth", { screen: "SignIn" });
+  } */
   return (
-    <SafeAreaView style={{ flex: 1, paddingTop: 20 }}>
-      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
-      <View style={styles.container}>
-        <View style={styles.summary}>
-          <View style={styles.summarySection}>
-            <Text style={styles.sectionHeader}>Revenue</Text>
-            <Text style={styles.sectionNumber}>0.00</Text>
-          </View>
-          <View style={styles.summarySection}>
-            <Text style={styles.sectionHeader}>Expense</Text>
-            <Text style={styles.sectionNumber}>0.00</Text>
-          </View>
-          <View style={styles.summarySection}>
-            <Text style={styles.sectionHeader}>Balance</Text>
-            <Text style={styles.sectionNumber}>0.00</Text>
-          </View>
-        </View>
-        <View style={{ ...styles.category }}>
-          <View style={styles.categoryCaption}>
-            <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
-            <Text style={styles.categoryCaptionTotal}>
-              {categories.length} total
-            </Text>
-          </View>
-          <View style={styles.chart}>
-            <TouchableOpacity
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                height: 50,
-                width: 50,
-                backgroundColor: viewMode == "list" ? COLORS.primary : null,
-                borderRadius: 25,
-                color: COLORS.primary,
-              }}
-              onPress={() => setViewMode("list")}
-            >
-              <Image
-                source={icons.menu}
-                resizeMode="contain"
-                style={{
-                  width: 20,
-                  height: 20,
-                  tintColor:
-                    viewMode == "list" ? COLORS.white : COLORS.darkgray,
-                }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                height: 50,
-                width: 50,
-                backgroundColor: viewMode == "chart" ? COLORS.primary : null,
-                borderRadius: 25,
-                color: COLORS.primary,
-              }}
-              onPress={() => setViewMode("chart")}
-            >
-              <Image
-                source={icons.chart}
-                resizeMode="contain"
-                style={{
-                  width: 20,
-                  height: 20,
-                  tintColor:
-                    viewMode == "chart" ? COLORS.white : COLORS.darkgray,
-                }}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 60 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {viewMode == "list" && <View>{renderCategoryList()}</View>}
-          {viewMode == "chart" && (
-            <View>
-              {renderChart()}
-              {renderExpenseSummary()}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss()}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+        <View style={styles.container}>
+          <View style={styles.summary}>
+            <View style={styles.summarySection}>
+              <Text style={styles.sectionHeader}>Revenue</Text>
+              <Text style={styles.sectionNumber}>0.00</Text>
             </View>
-          )}
-        </ScrollView>
-        {/* 
+            <View style={styles.summarySection}>
+              <Text style={styles.sectionHeader}>Expense</Text>
+              <Text style={styles.sectionNumber}>0.00</Text>
+            </View>
+            <View style={styles.summarySection}>
+              <Text style={styles.sectionHeader}>Balance</Text>
+              <Text style={styles.sectionNumber}>0.00</Text>
+            </View>
+          </View>
 
-        <View style={{ flex: 1 }}>
-          <FormButton buttonTitle="Sign Out" onPress={handleSignOut} />
-          <FormButton buttonTitle="Sign In" onPress={handleSignIn} />
-        </View> */}
-      </View>
-    </SafeAreaView>
+          <View style={{ ...styles.category }}>
+            <View style={styles.categoryCaption}>
+              <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
+              <Text style={styles.categoryCaptionTotal}>
+                {categories.length} total
+              </Text>
+            </View>
+            <View style={styles.chart}>
+              <TouchableOpacity
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 50,
+                  width: 50,
+                  backgroundColor: viewMode == "list" ? COLORS.primary : null,
+                  borderRadius: 25,
+                  color: COLORS.primary,
+                }}
+                onPress={() => setViewMode("list")}
+              >
+                <Image
+                  source={icons.menu}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    tintColor:
+                      viewMode == "list" ? COLORS.white : COLORS.darkgray,
+                  }}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 50,
+                  width: 50,
+                  backgroundColor: viewMode == "chart" ? COLORS.primary : null,
+                  borderRadius: 25,
+                  color: COLORS.primary,
+                }}
+                onPress={() => setViewMode("chart")}
+              >
+                <Image
+                  source={icons.chart}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    tintColor:
+                      viewMode == "chart" ? COLORS.white : COLORS.darkgray,
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: 60 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {viewMode == "list" && <View>{renderCategoryList()}</View>}
+            {viewMode == "chart" && (
+              <View>
+                {renderChart()}
+                {renderExpenseSummary()}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

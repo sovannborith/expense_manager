@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
         googleUser.idToken,
         googleUser.accessToken
       );
+
       await firebase
         .auth()
         .setPersistence(firebase.auth.Auth.Persistence.LOCAL);
@@ -29,16 +30,23 @@ export const AuthProvider = ({ children }) => {
         .auth()
         .signInWithCredential(credential)
         .then((res) => {
-          db.collection("tbl_user_profile").doc(res.user.uid).set({
-            display_name: res.user.displayName,
-            is_active: true,
-            is_first_launch: false,
-            user_email: res.user.email,
-            phone_num: res.user.providerData[0].phoneNumber,
-            uid: res.user.uid,
-            photo_url: res.user.providerData[0].photoURL,
-            created_dt: util.getCurrentDateTime(),
-          });
+          if (res.additionalUserInfo.isNewUser) {
+            db.collection("tbl_user_profile").doc(res.user.uid).set({
+              display_name: res.user.displayName,
+              is_active: true,
+              is_first_launch: true,
+              user_email: res.user.email,
+              phone_num: res.user.providerData[0].phoneNumber,
+              uid: res.user.uid,
+              photo_url: res.user.providerData[0].photoURL,
+              created_dt: util.getCurrentDateTime(),
+              last_login_dt: util.getCurrentDateTime(),
+            });
+          } else {
+            db.collection("tbl_user_profile").doc(res.user.uid).update({
+              last_login_dt: util.getCurrentDateTime(),
+            });
+          }
         })
         .catch((error) => {
           alert("Error @AuthProvider - googleSignIn: " + e);
@@ -60,17 +68,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
     return false;
-  };
-
-  const convertImage = (img) => {
-    if (img == null) {
-      return null;
-    }
-    let fileName = img.substring(img.lastIndexOf("/") + 1);
-    const extension = fileName.split(".").pop();
-    const name = fileName.split(".").slice(0, -1).join(".");
-    fileName = name + Date.now() + "." + extension;
-    return fileName;
   };
 
   const userAuth = {
@@ -101,7 +98,7 @@ export const AuthProvider = ({ children }) => {
             db.collection("tbl_user_profile").doc(res.user.uid).set({
               display_name: res.user.displayName,
               is_active: true,
-              is_first_launch: false,
+              is_first_launch: true,
               user_email: res.user.email,
               phone_num: res.user.providerData[0].phoneNumber,
               uid: res.user.uid,
@@ -135,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       }
     },
 
-    getBlob: async (url) => {
+    /* getBlob: async (url) => {
       return await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
@@ -151,7 +148,7 @@ export const AuthProvider = ({ children }) => {
         xhr.open("GET", url, true);
         xhr.send(null);
       });
-    },
+    }, */
     toggleTheme: () => {
       setIsDarkTheme((isDarkTheme) => !isDarkTheme);
     },
@@ -162,29 +159,44 @@ export const AuthProvider = ({ children }) => {
         await Facebook.initializeAsync({
           appId: appId,
         });
-        const {
-          type,
-          token,
-          expirationDate,
-          permissions,
-          declinedPermissions,
-        } = await Facebook.logInWithReadPermissionsAsync({
+        const { type, token } = await Facebook.logInWithReadPermissionsAsync({
           permissions: ["public_profile"],
         });
         if (type === "success") {
           await firebase
             .auth()
             .setPersistence(firebase.auth.Auth.Persistence.LOCAL); // Set persistent auth state
-          const credential = firebase.auth.Faceboo;
-          kAuthProvider.credential(token);
+          const credential = firebase.auth.FacebookAuthProvider.credential(
+            token
+          );
           firebase
             .auth()
             .signInWithCredential(credential)
+            .then((res) => {
+              if (res.additionalUserInfo.isNewUser) {
+                db.collection("tbl_user_profile").doc(res.user.uid).set({
+                  display_name: res.user.displayName,
+                  is_active: true,
+                  is_first_launch: true,
+                  user_email: res.user.email,
+                  phone_num: res.user.providerData[0].phoneNumber,
+                  uid: res.user.uid,
+                  photo_url: res.user.providerData[0].photoURL,
+                  created_dt: util.getCurrentDateTime(),
+                  last_login_dt: util.getCurrentDateTime(),
+                });
+              } else {
+                db.collection("tbl_user_profile").doc(res.user.uid).update({
+                  last_login_dt: util.getCurrentDateTime(),
+                });
+              }
+            })
             .catch((error) => {
               alert(error);
+              return;
             });
         } else {
-          //alert("Cancelled!");
+          alert("Operations cancelled!");
         }
       } catch (e) {
         alert(`Facebook Login Error: ${e}`);
@@ -201,46 +213,27 @@ export const AuthProvider = ({ children }) => {
         if (result.type === "success") {
           googleSignIn(result);
         } else {
+          alert("Operations cancelled.");
           return { cancelled: true };
         }
       } catch (e) {
         alert("Error @Login with Google: " + e);
       }
     },
-    getUserProfile: async () => {},
-
-    uploadProfilePhoto: async (img) => {
-      const uid = loginUser.uid;
-      let fileName = convertImage(img);
+    getUserProfile: async () => {
       try {
-        if (fileName == null) {
-          return;
-        }
-
-        const imgRef = storage.ref(`user_profile_pic/${fileName}`);
-        const task = imgRef.put(img);
-
-        //Show progress bar if we want
-        /* task.on('state_changed', (taskSnapshot) => {
-          console.log(
-            `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-          );
-    
-          setTransferred(
-            Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
-              100,
-          );
-        }); */
-
-        const url = await imgRef.getDownloadURL();
-
-        await db.collection("tbl_user_profile").doc(uid).update({
-          photo_url: url,
-        });
-
-        return url;
-      } catch (error) {
-        alert(error);
+        await db
+          .collection("tbl_user_profile")
+          .doc(loginUser.uid)
+          .get()
+          .then((documentSnapshot) => {
+            if (documentSnapshot.exists) {
+              return documentSnapshot.data();
+            } else return null;
+          });
+      } catch (e) {
+        alert(e);
+        return null;
       }
     },
 
@@ -252,13 +245,22 @@ export const AuthProvider = ({ children }) => {
       photoUrl
     ) => {
       try {
-        const imgUrl = await userAuth.uploadProfilePhoto(photoUrl);
+        //const imgUrl = await userAuth.uploadProfilePhoto(photoUrl);
 
         db.collection("tbl_user_profile").doc(uid).update({
           display_name: displayName,
           user_email: email,
           phone_num: contactNumber,
-          photo_url: imgUrl,
+          photo_url: photoUrl,
+        });
+      } catch (e) {
+        alert(e);
+      }
+    },
+    updateUserFirstLaunch: async (flag) => {
+      try {
+        db.collection("tbl_user_profile").doc(loginUser.uid).update({
+          is_first_launch: flag,
         });
       } catch (e) {
         alert(e);

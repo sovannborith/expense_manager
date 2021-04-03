@@ -68,7 +68,7 @@ export default [
         status: confirmStatus,
       },
     ],
-  },
+  }, 
   {
     id: 3,
     name: "Child",

@@ -11,14 +11,8 @@ import Loader from "../../components/LoadingComponent";
 const db = firebase.firestore();
 const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
-  const [userID, setUserId] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [createdDate, setCreatedDate] = useState("");
 
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const getUserData = async () => {
     try {
@@ -38,14 +32,16 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     try {
+      setLoading(true);
       getUserData();
     } catch (e) {
       alert(e);
     } finally {
+      setLoading(false);
     }
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader loadingLabel="Loading..." />;
 
   return (
     <SafeAreaView>
@@ -53,7 +49,9 @@ const ProfileScreen = () => {
         <View style={styles.logoCover}>
           <Image
             source={{
-              uri: photoUrl ? photoUrl : util.getDefaultProfilePicture(),
+              uri: userData
+                ? userData.photo_url
+                : util.getDefaultProfilePicture(),
             }}
             style={styles.logo}
           />

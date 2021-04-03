@@ -36,7 +36,14 @@ const ProfileStack = ({ navigation }) => {
         component={ProfileScreen}
         options={{
           title: "Your Profile",
-          headerLeft: null,
+          headerLeft: () => (
+            <BackButton
+              onPress={() =>
+                //navigation.navigate("App", { screen: "Home" })
+                navigation.goBack()
+              }
+            />
+          ),
           headerRight: () => (
             <EditProfileIcon
               onPress={() => navigation.navigate("EditProfile")}

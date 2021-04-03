@@ -4,6 +4,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Avatar } from "react-native-paper";
 import { COLORS } from "../constants";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
+import BackButton from "../components/BackButton";
+import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
 
 const AddTransactionStack = ({ navigation }) => {
@@ -20,7 +22,7 @@ const AddTransactionStack = ({ navigation }) => {
           shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
         },
-
+        //headerShown: false,
         headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: "bold",
@@ -30,7 +32,18 @@ const AddTransactionStack = ({ navigation }) => {
       <Stack.Screen
         name="AddTransaction"
         component={AddTransactionScreen}
-        options={{ header: () => null }}
+        options={{
+          //header: () => null,
+          /* headerLeft: () => (
+            <BackButton
+              //onPress={() => navigation.navigate("App", { screen: "Home" })}
+              onPress={() => navigation.goBack()}
+            />
+          ), */
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
+          ),
+        }}
       />
     </Stack.Navigator>
   );

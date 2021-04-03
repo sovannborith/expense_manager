@@ -26,21 +26,16 @@ import FormOutLineButton from "../../components/form/FormOutLineButton";
 import util from "../../utils/util";
 import { COLORS, SIZES } from "../../constants";
 import { AuthContext } from "../../server/context/AuthProvider";
+import Loader from "../../components/LoadingComponent";
 
 const db = firebase.firestore();
+const storage = firebase.storage();
 
 const EditProfileScreen = ({ navigation }) => {
   const [image, setImage] = useState();
-
   const [userData, setUserData] = useState(null);
-  const [userID, setUserID] = useState();
-  const [displayName, setDisplayName] = useState();
-  const [email, setEmail] = useState();
-  const [phoneNumber, setPhoneNumber] = useState();
-  const [photoUrl, setPhotoUrl] = useState();
-  const [createdDate, setCreatedDate] = useState();
-
-  const [loading, setLoading] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [transferred, setTransferred] = useState(0);
 
   bs = React.createRef();
   fall = new Animated.Value(1);
@@ -65,7 +60,6 @@ const EditProfileScreen = ({ navigation }) => {
         quality: 1,
       });
       if (!result.cancelled) {
-        //const imageUri = Platform.OS === "ios" ? result.sourceURL : result.path;
         setImage(result.uri);
         this.bs.current.snapTo(1);
       }
@@ -83,8 +77,6 @@ const EditProfileScreen = ({ navigation }) => {
         quality: 1,
       });
       if (!result.cancelled) {
-        /* const imageUri = Platform.OS === "ios" ? result.sourceURL : result.path;
-        console.log(imageUri); */
         setImage(result.uri);
         this.bs.current.snapTo(1);
       }
@@ -123,7 +115,7 @@ const EditProfileScreen = ({ navigation }) => {
     },
   });
 
-  const { loginUser, updateUserProfile } = useContext(AuthContext);
+  const { loginUser } = useContext(AuthContext);
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -164,6 +156,7 @@ const EditProfileScreen = ({ navigation }) => {
         .then((documentSnapshot) => {
           if (documentSnapshot.exists) {
             setUserData(documentSnapshot.data());
+            //setImage(userData.photo_url);
           } else console.log("No data found!");
         });
     } catch (e) {
@@ -175,35 +168,120 @@ const EditProfileScreen = ({ navigation }) => {
     if (img == null) {
       return null;
     }
-    let fileName = img.substring(uploadUri.lastIndexOf("/") + 1);
-    const extension = fileName.split(".").pop();
+    let fileName = loginUser.uid + img.substring(img.lastIndexOf("."));
+    /* const extension = fileName.split(".").pop();
     const name = fileName.split(".").slice(0, -1).join(".");
-    fileName = name + Date.now() + "." + extension;
+    fileName = name + Date.now() + "." + extension; */
     return fileName;
   };
 
-  const handleUpdate = async () => {
-    if (image == null && userData.photo_url) {
-      setImage(userData.photo_url);
-    }
-
+  const getBlob = async (uri) => {
     try {
-      //uploadProfilePhoto(image);
-      console.log(image);
-      console.log(values.phoneNumber);
-      updateUserProfile(
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.error = () => {
+          reject(new TypeError("Network request failed!"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", uri, true);
+        xhr.send(null);
+      });
+      return blob;
+    } catch (e) {
+      alert(e);
+      return null;
+    }
+  };
+
+  const uploadProfilePhoto = async (img) => {
+    setUploading(true);
+    setTransferred(0);
+    const fileName = convertImage(img);
+    try {
+      if (fileName == null) {
+        return;
+      }
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.error = () => {
+          reject(new TypeError("Network request failed!"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", img, true);
+        xhr.send(null);
+      });
+      const imgRef = storage.ref(`user_profile_pic/${fileName}`);
+
+      const task = imgRef.put(blob);
+
+      // Set transferred state
+      task.on("state_changed", (taskSnapshot) => {
+        /* console.log(
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`
+        ); */
+
+        setTransferred(
+          Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+            100
+        );
+        console.log(transferred);
+      });
+
+      await task;
+
+      const url = await imgRef.getDownloadURL();
+
+      setUploading(false);
+      setImage(null);
+      return url;
+    } catch (error) {
+      alert(error);
+      return null;
+    }
+  };
+
+  const updateUserProfile = async (
+    uid,
+    displayName,
+    email,
+    contactNumber,
+    photoUrl
+  ) => {
+    try {
+      const url = await uploadProfilePhoto(photoUrl);
+      db.collection("tbl_user_profile").doc(uid).update({
+        display_name: displayName,
+        user_email: email,
+        phone_num: contactNumber,
+        photo_url: url,
+      });
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      await updateUserProfile(
         values.uid,
         values.displayName,
         values.email,
         values.phoneNumber,
         image
-      );
-      setImage(null);
-      Alert.alert(
-        "Profile Updated!",
-        "Your profile has been updated successfully."
-      );
-      navigation.navigate("Profile", { screen: "Profile" });
+      ).then(() => {
+        setImage(null);
+        Alert.alert(
+          "Profile Updated!",
+          "Your profile has been updated successfully."
+        );
+        navigation.replace("Profile", { screen: "Profile" });
+      });
     } catch (e) {
       alert(e);
     }
@@ -220,7 +298,7 @@ const EditProfileScreen = ({ navigation }) => {
     }
   }, []);
 
-  //if (loading) return <Loader />;
+  if (uploading) return <Loader loadingLabel="Updating your profile..." />;
 
   return (
     <SafeAreaView>
@@ -240,8 +318,8 @@ const EditProfileScreen = ({ navigation }) => {
                 source={{
                   uri: image
                     ? image
-                    : photoUrl
-                    ? photoUrl
+                    : userData
+                    ? userData.photo_url
                     : util.getDefaultProfilePicture(),
                 }}
                 style={styles.logo}

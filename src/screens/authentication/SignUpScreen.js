@@ -62,7 +62,7 @@ const SignUpScreen = ({ navigation }) => {
     },
   });
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader loadingLabel="Registrating..." />;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -77,7 +77,7 @@ const SignUpScreen = ({ navigation }) => {
               <Animatable.View animation="fadeInUpBig">
                 <View style={styles.signInWrapper}>
                   <View>
-                    <Text style={styles.text}>Sign In</Text>
+                    <Text style={styles.text}>Register</Text>
                   </View>
                   <View style={styles.formElement}>
                     <FormInput

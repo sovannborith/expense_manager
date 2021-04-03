@@ -16,6 +16,13 @@ export const user = require("../assets/icons/user.png");
 export const home = require("../assets/icons/home_icon.png");
 export const plus = require("../assets/icons/plus_icon.png");
 export const eye = require("../assets/icons/eye.png");
+export const beauty = require("../assets/icons/wind_icon.png");
+export const travel = require("../assets/icons/airplane_icon.png");
+export const transportation = require("../assets/icons/bus_icon.png");
+export const insurance = require("../assets/icons/like.png");
+export const salary = require("../assets/icons/bill.png");
+export const villa = require("../assets/icons/villa_icon.png");
+export const interest = require("../assets/icons/wallet.png");
 
 export default {
   baby_car,
@@ -36,4 +43,11 @@ export default {
   home,
   plus,
   eye,
+  beauty,
+  travel,
+  transportation,
+  insurance,
+  salary,
+  villa,
+  interest,
 };

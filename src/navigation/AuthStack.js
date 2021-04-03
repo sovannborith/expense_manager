@@ -13,13 +13,17 @@ const AuthStack = ({ navigation }) => {
   return (
     <Stack.Navigator
       initialRouteName="SignIn"
-      options={{ header: () => null, headerTintColor: COLORS.white }}
+      options={{
+        headerTintColor: COLORS.white,
+        title: "Your Profile",
+      }}
       screenOptions={{
         headerStyle: {
           backgroundColor: COLORS.primary,
           shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
         },
+
         headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: "bold",
@@ -31,6 +35,7 @@ const AuthStack = ({ navigation }) => {
         component={SignInScreen}
         options={{
           title: "Sign In",
+          headerLeft: () => null,
         }}
       />
       <Stack.Screen
@@ -40,9 +45,7 @@ const AuthStack = ({ navigation }) => {
           title: "Forget Password",
           headerLeft: () => (
             <BackButton
-              onPress={() =>
-                navigation.navigate("SignIn", { screen: "SignIn" })
-              }
+              onPress={() => navigation.navigate("Auth", { screen: "SignIn" })}
             />
           ),
         }}
@@ -53,11 +56,7 @@ const AuthStack = ({ navigation }) => {
         options={{
           title: "Sign Up",
           headerLeft: () => (
-            <BackButton
-              onPress={() =>
-                navigation.navigate("SignIn", { screen: "SignIn" })
-              }
-            />
+            <BackButton onPress={() => navigation.navigate("SignIn")} />
           ),
         }}
       />

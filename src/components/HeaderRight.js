@@ -27,6 +27,7 @@ const HeaderRight = ({ onPress }) => {
 
   useEffect(() => {
     const curLoginUser = util.getCurrentLoginUser();
+
     if (curLoginUser) {
       getUserData(curLoginUser.uid);
     }
@@ -36,12 +37,10 @@ const HeaderRight = ({ onPress }) => {
       <TouchableOpacity onPress={onPress} style={styles.profileButton}>
         <Image
           source={{
-            uri:
-              userData && userData.photo_url
-                ? userData.photo_url
-                : util.getDefaultProfilePicture(),
+            uri: userData
+              ? userData.photo_url
+              : util.getDefaultProfilePicture(),
           }}
-          resizeMode="contain"
           style={styles.image}
           color={COLORS.white}
         />
@@ -74,7 +73,8 @@ const styles = StyleSheet.create({
   image: {
     width: 28,
     height: 28,
-    tintColor: COLORS.white,
+    //tintColor: COLORS.white,
     borderRadius: 14,
+    resizeMode: "cover",
   },
 });

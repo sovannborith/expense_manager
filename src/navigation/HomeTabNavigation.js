@@ -1,9 +1,10 @@
 import React from "react";
 import { SafeAreaView, Image, View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import AppStack from "./AppStack";
+
 import ReportStack from "./ReportStack";
 import AddTransactionStack from "./AddTransactionStack";
+import HomeStack from "./HomeStack";
 import TabBarCustomButton from "../components/TabBarCustomButton";
 import { COLORS, icons } from "../constants";
 
@@ -11,7 +12,7 @@ const Tab = createBottomTabNavigator();
 const Tabs = () => {
   return (
     <Tab.Navigator
-      initialRouteName="App"
+      initialRouteName="Home"
       tabBarOptions={{
         showLabel: false,
         style: {
@@ -26,8 +27,8 @@ const Tabs = () => {
       }}
     >
       <Tab.Screen
-        name="App"
-        component={AppStack}
+        name="Home"
+        component={HomeStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <View
@@ -51,6 +52,7 @@ const Tabs = () => {
                   color: focused ? COLORS.primary : COLORS.gray,
                   fontSize: 12,
                   fontWeight: "700",
+                  width: 100,
                 }}
               >
                 Home
@@ -63,7 +65,7 @@ const Tabs = () => {
       <Tab.Screen
         name="AddTransaction"
         component={AddTransactionStack}
-        options={({ route }) => ({
+        options={() => ({
           tabBarIcon: ({ focused }) => (
             <Image
               source={icons.plus}
@@ -76,7 +78,6 @@ const Tabs = () => {
             />
           ),
           tabBarButton: (props) => <TabBarCustomButton {...props} />,
-          //tabBarVisible: getTabBarVisibility(route),
         })}
       />
 
@@ -89,6 +90,7 @@ const Tabs = () => {
               style={{
                 alignItem: "center",
                 justifyContent: "center",
+                marginLeft: 90,
               }}
             >
               <Image
@@ -106,6 +108,7 @@ const Tabs = () => {
                   color: focused ? COLORS.primary : COLORS.gray,
                   fontSize: 12,
                   fontWeight: "700",
+                  width: 100,
                 }}
               >
                 Report
@@ -118,7 +121,7 @@ const Tabs = () => {
   );
 };
 
-const MainTabNavigation = () => {
+const HomeTabNavigation = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.primary }}>
       <Tabs />
@@ -126,4 +129,4 @@ const MainTabNavigation = () => {
   );
 };
 
-export default MainTabNavigation;
+export default HomeTabNavigation;

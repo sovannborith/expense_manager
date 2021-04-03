@@ -1,9 +1,9 @@
 import React from "react";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Avatar } from "react-native-paper";
 import { COLORS } from "../constants";
-
+import BackButton from "../components/BackButton";
+import HeaderRight from "../components/HeaderRight";
 import ReportScreen from "../screens/report/ReportScreen";
 const Stack = createStackNavigator();
 
@@ -13,7 +13,7 @@ const ReportStack = ({ navigation }) => {
       initialRouteName="Report"
       options={{
         headerTintColor: COLORS.white,
-        title: "",
+        title: "Report",
       }}
       screenOptions={{
         headerStyle: {
@@ -21,7 +21,7 @@ const ReportStack = ({ navigation }) => {
           shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
         },
-
+        //headerShown: false,
         headerTintColor: COLORS.white,
         headerTitleStyle: {
           fontWeight: "bold",
@@ -31,7 +31,18 @@ const ReportStack = ({ navigation }) => {
       <Stack.Screen
         name="Report"
         component={ReportScreen}
-        options={{ header: () => null }}
+        options={{
+          headerLeft: () => (
+            <BackButton
+              onPress={() =>
+                navigation.goBack()
+              }
+            />
+          ),
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
+          ),
+        }}
       />
     </Stack.Navigator>
   );

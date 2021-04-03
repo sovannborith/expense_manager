@@ -44,21 +44,22 @@ const AddTransactionScreen = ({ navigation }) => {
     isValid,
   } = useFormik({
     validationSchema: AddTransactionSchema,
-    initialValues: { description: "", expAmount: "0", remark: "" },
+    initialValues: { description:expDesc, expAmount: "0", remark: "" },
     onSubmit: () => {
       null;
     },
   });
 
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <View style={styles.logoCover}>
-          <Image
-            source={require("../assets/logo_01.png")}
-            style={styles.logo}
-          />
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <SafeAreaView>
+        <View style={styles.container}>
+          <View style={styles.logoCover}>
+            <Image
+              source={require("../assets/logo_01.png")}
+              style={styles.logo}
+            />
+
             <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
               <View
                 style={{
@@ -98,7 +99,8 @@ const AddTransactionScreen = ({ navigation }) => {
                 >
                   <TouchableOpacity
                     style={{
-                      backgroundColor: expType == "R" ? "blue" : COLORS.gray,
+                      backgroundColor:
+                        expType == "R" ? COLORS.primary : COLORS.gray,
                       padding: 10,
                       borderTopLeftRadius: "50%",
                       borderBottomLeftRadius: "50%",
@@ -107,7 +109,7 @@ const AddTransactionScreen = ({ navigation }) => {
                       shadowOpacity: 2,
                       shadowOffset: { width: 0, height: 2 },
                       elevation: 5,
-                      borderColor: "blue",
+                      borderColor: COLORS.white,
                       borderWidth: expType == "R" ? 1 : null,
                       width: 80,
                     }}
@@ -135,7 +137,7 @@ const AddTransactionScreen = ({ navigation }) => {
                       shadowOpacity: 2,
                       shadowOffset: { width: 0, height: 2 },
                       elevation: 5,
-                      borderColor: COLORS.red,
+                      borderColor: COLORS.white,
                       borderWidth: expType == "E" ? 1 : null,
                       width: 80,
                     }}
@@ -161,7 +163,6 @@ const AddTransactionScreen = ({ navigation }) => {
                       ? "Expense Description"
                       : "Revenue Description"
                   }
-                  //labelValue={expDesc}
                   iconType="filetext1"
                   labelValue={values.description}
                   onChangeText={handleChange("description")}
@@ -199,10 +200,10 @@ const AddTransactionScreen = ({ navigation }) => {
                 />
               </View>
             </Animatable.View>
-          </TouchableWithoutFeedback>
+          </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 export default AddTransactionScreen;

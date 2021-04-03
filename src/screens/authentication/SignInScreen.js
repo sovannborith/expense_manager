@@ -30,43 +30,46 @@ const SignInScreen = ({ navigation }) => {
 
   const [isLoading, setLoading] = useState(false);
 
-  const signInWithGoogle = () => {
+  const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      loginWithGoogle();
-    } catch (e) {
-      alert(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signInWithFacebook = () => {
-    try {
-      setLoading(true);
-      loginWithFacebook();
+      await loginWithGoogle();
       if (loginUser) {
         navigation.navigate("App", { Screen: "Home" });
       }
     } catch (e) {
       alert(e);
+      return;
     } finally {
       setLoading(false);
     }
   };
 
-  const signIn = (email, password) => {
+  const signInWithFacebook = async () => {
+    try {
+      setLoading(true);
+      await loginWithFacebook();
+      if (loginUser) {
+        navigation.navigate("App", { Screen: "Home" });
+      }
+    } catch (e) {
+      alert(e);
+      return;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signIn = async (email, password) => {
     try {
       setLoading(true);
       if (isValid) {
-        login(email, password);
+        await login(email, password);
+        if (loginUser) {
+          navigation.navigate("App", { Screen: "Home" });
+        }
       }
-      if (loginUser) {
-        navigation.navigate("App", { Screen: "Home" });
-      }
-      //navigation.navigate("App", { Screen: "Home" });
     } catch (e) {
-      //alert(e);
       alert("Login failed! Please try again!");
     } finally {
       setLoading(false);
@@ -94,7 +97,7 @@ const SignInScreen = ({ navigation }) => {
     },
   });
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader loadingLabel="Signing in..." />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView

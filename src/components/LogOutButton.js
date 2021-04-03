@@ -1,40 +1,15 @@
 import React, { useContext } from "react";
-import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
-import api from "../services/api";
 
-const LogOutButton = ({ props }) => {
+const LogOutButton = ({ onPress }) => {
   const { loginUser, signOut } = useContext(AuthContext);
-
-  const handleSignOut = () => {
-    Alert.alert(
-      //title
-      "Sign Out Confirmation",
-      //body
-      "Are you sure want to sign out?",
-      [
-        {
-          text: "Yes",
-          onPress: () => {
-            signOut();
-          },
-        },
-        {
-          text: "Cancel",
-          onPress: () => true,
-          style: "cancel",
-        },
-      ],
-      { cancelable: false }
-      //clicking out side of alert will not cancel
-    );
-  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handleSignOut} style={styles.profileButton}>
+      <TouchableOpacity onPress={onPress} style={styles.profileButton}>
         {loginUser ? (
           <AntDesign name="logout" size={24} color={COLORS.white} />
         ) : null}

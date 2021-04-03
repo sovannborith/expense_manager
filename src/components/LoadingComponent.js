@@ -4,7 +4,7 @@ import { View, Dimensions, Text, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
 
 const windowWidth = Dimensions.get("window").width;
-const Loader = () => {
+const Loader = ({ loadingLabel }) => {
   return (
     <View
       style={{
@@ -20,7 +20,7 @@ const Loader = () => {
         loop
         width={windowWidth}
       />
-      <Text style={styles.loadingText}>Loading...</Text>
+      <Text style={styles.loadingText}>{loadingLabel}</Text>
     </View>
   );
 };

@@ -4,9 +4,9 @@ import { COLORS } from "../../constants";
 
 const ReportScreen = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text>Report</Text>
+        <Text style={{ color: "red" }}>Report</Text>
       </View>
     </SafeAreaView>
   );
@@ -15,8 +15,6 @@ export default ReportScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    color: COLORS.primary,
     alignItems: "center",
     justifyContent: "center",
   },

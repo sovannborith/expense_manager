@@ -52,7 +52,7 @@ const ForgetPasswordScreen = ({ navigation }) => {
       }
     },
   });
-  if (loading) return <Loader />;
+  if (loading) return <Loader loadingLabel="Requesting new password..." />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
