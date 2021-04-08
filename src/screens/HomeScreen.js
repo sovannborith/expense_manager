@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -14,17 +13,19 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { useTheme } from "@react-navigation/native";
-import { AuthContext } from "../server/context/AuthProvider";
+//import { useTheme } from "@react-navigation/native";
+//import { AuthContext } from "../server/context/AuthProvider";
 import { VictoryPie } from "victory-native";
 import { firebase } from "../server/firebase/firebase";
 import { Svg } from "react-native-svg";
 
-import api from "../services/api";
+//import api from "../services/api";
 import util from "../utils/util";
 import Loader from "../components/LoadingComponent";
 import { COLORS, SIZES, FONTS, icons } from "../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
+
+//import Header from "../components/Header";
 import category from "../services/category";
 
 const HomeScreen = ({ navigation }) => {
@@ -58,9 +59,9 @@ const HomeScreen = ({ navigation }) => {
               if (firstLaunch == true) {
                 navigation.navigate("Onboarding");
               }
-            } else {
+            } /*  else {
               alert("No data found");
-            }
+            } */
           });
       }
     } catch (e) {
@@ -415,6 +416,7 @@ const HomeScreen = ({ navigation }) => {
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
         <View style={styles.container}>
+          {/* <Header title="Expense Manager" /> */}
           <View style={styles.summary}>
             <View style={styles.summarySection}>
               <Text style={styles.sectionHeader}>Revenue</Text>

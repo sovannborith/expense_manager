@@ -63,7 +63,7 @@ const FormInput = ({
         style={{
           padding: 10,
           flex: 1,
-          fontSize: 16,
+          fontSize: 14,
           color: !touched ? "#878787" : !error ? "#246b6b" : "#d10000",
           justifyContent: "center",
           alignItems: "center",

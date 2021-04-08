@@ -9,10 +9,9 @@ const db = firebase.firestore();
 const HeaderRight = ({ onPress }) => {
   const [userData, setUserData] = useState(null);
 
-  const getUserData = async (uid) => {
+  const getUserData = (uid) => {
     try {
-      await db
-        .collection("tbl_user_profile")
+      db.collection("tbl_user_profile")
         .doc(uid)
         .get()
         .then((documentSnapshot) => {
@@ -29,6 +28,8 @@ const HeaderRight = ({ onPress }) => {
     const curLoginUser = util.getCurrentLoginUser();
 
     if (curLoginUser) {
+      /* const unsubscribe = getUserData(curLoginUser.uid);
+      return unsubscribe; */
       getUserData(curLoginUser.uid);
     }
   }, []);

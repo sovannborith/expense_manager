@@ -66,7 +66,9 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.logoCover}>
@@ -76,9 +78,9 @@ const SignUpScreen = ({ navigation }) => {
               />
               <Animatable.View animation="fadeInUpBig">
                 <View style={styles.signInWrapper}>
-                  <View>
+                  {/* <View>
                     <Text style={styles.text}>Register</Text>
-                  </View>
+                  </View> */}
                   <View style={styles.formElement}>
                     <FormInput
                       labelValue={values.email}

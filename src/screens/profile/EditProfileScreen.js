@@ -230,7 +230,6 @@ const EditProfileScreen = ({ navigation }) => {
           Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
             100
         );
-        console.log(transferred);
       });
 
       await task;
@@ -289,8 +288,8 @@ const EditProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     try {
-      getUserData();
       getPermissionAsync();
+      getUserData();
     } catch (e) {
       alert(e);
     } finally {
@@ -302,7 +301,12 @@ const EditProfileScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          Keyboard.dismiss();
+          this.bs.current.snapTo(1);
+        }}
+      >
         <View style={styles.container}>
           <View style={styles.logoCover}>
             <TouchableOpacity

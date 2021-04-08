@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { StyleSheet, Alert } from "react-native";
+import { Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthContext } from "../server/context/AuthProvider";
 
@@ -17,6 +17,7 @@ const HomeStack = ({ navigation }) => {
     <Stack.Navigator
       initialRouteName="Home"
       screenOptions={{
+        title: "Expense Manager",
         headerStyle: {
           backgroundColor: COLORS.primary,
           shadowColor: COLORS.primary, // iOS

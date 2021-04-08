@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: COLORS.gray,
-    borderLeftWidth: 10,
+    borderLeftWidth: 6,
     borderLeftColor: COLORS.primary,
     borderRightColor: COLORS.primary,
-    borderRightWidth: 10,
+    borderRightWidth: 6,
   },
   dangerButton: {
     borderLeftColor: COLORS.red,

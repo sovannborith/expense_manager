@@ -2,7 +2,7 @@ import React from "react";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { COLORS } from "../constants";
-import BackButton from "../components/BackButton";
+//mport BackButton from "../components/BackButton";
 import HeaderRight from "../components/HeaderRight";
 import ReportScreen from "../screens/report/ReportScreen";
 const Stack = createStackNavigator();
@@ -32,13 +32,13 @@ const ReportStack = ({ navigation }) => {
         name="Report"
         component={ReportScreen}
         options={{
-          headerLeft: () => (
+          /* headerLeft: () => (
             <BackButton
               onPress={() =>
                 navigation.goBack()
               }
             />
-          ),
+          ), */
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),

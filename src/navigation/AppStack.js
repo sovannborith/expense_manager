@@ -9,26 +9,19 @@ import ProfileStack from "../navigation/ProfileStack";
 import HeaderRight from "../components/HeaderRight";
 import LogOutButton from "../components/LogOutButton";
 
-const AppStack = ({ navigation }) => {
+const AppStack = () => {
   const Stack = createStackNavigator();
 
   return (
     <Stack.Navigator
       initialRouteName="App"
+      headerMode="none"
       screenOptions={{
         headerShown: false,
-
-        //header: () => null,
-        //title: "Expense Manager",
-        /* headerStyle: {
-          backgroundColor: COLORS.primary,
-          shadowColor: COLORS.primary, // iOS
-          elevation: 0, // Android
+        header: null,
+        navigationOptions: {
+          headerForceInset: { top: "never", bottom: "never" },
         },
-        headerTintColor: COLORS.white,
-        headerTitleStyle: {
-          fontWeight: "bold",
-        }, */
       }}
     >
       <Stack.Screen name="App" component={HomeTabNavigation} />

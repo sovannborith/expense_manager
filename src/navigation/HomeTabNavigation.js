@@ -22,7 +22,7 @@ const Tabs = () => {
           elevation: 0,
           backgroundColor: COLORS.white,
           borderTopColor: "transparent",
-          height: 60,
+          height: 80,
         },
       }}
     >
@@ -123,9 +123,9 @@ const Tabs = () => {
 
 const HomeTabNavigation = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.primary }}>
+    <>
       <Tabs />
-    </SafeAreaView>
+    </>
   );
 };
 

@@ -55,7 +55,9 @@ const ForgetPasswordScreen = ({ navigation }) => {
   if (loading) return <Loader loadingLabel="Requesting new password..." />;
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.logoCover}>

@@ -1,26 +1,27 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Avatar } from "react-native-paper";
 import { COLORS } from "../constants";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
-import BackButton from "../components/BackButton";
+import LogOutButton from "../components/LogOutButton";
 import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
 
 const AddTransactionStack = ({ navigation }) => {
   return (
     <Stack.Navigator
-      initialRouteName="Profile"
+      initialRouteName="AddTransaction"
       options={{
         headerTintColor: COLORS.white,
-        title: "",
       }}
       screenOptions={{
+        title: "Add New Transaction",
         headerStyle: {
           backgroundColor: COLORS.primary,
           shadowColor: COLORS.primary, // iOS
           elevation: 0, // Android
+
+          //marginTop: 500,
         },
         //headerShown: false,
         headerTintColor: COLORS.white,
@@ -33,13 +34,36 @@ const AddTransactionStack = ({ navigation }) => {
         name="AddTransaction"
         component={AddTransactionScreen}
         options={{
-          //header: () => null,
-          /* headerLeft: () => (
-            <BackButton
-              //onPress={() => navigation.navigate("App", { screen: "Home" })}
-              onPress={() => navigation.goBack()}
+          headerLeft: () => (
+            <LogOutButton
+              onPress={() => {
+                Alert.alert(
+                  //title
+                  "Sign Out Confirmation",
+                  //body
+                  "Are you sure want to sign out?",
+                  [
+                    {
+                      text: "Yes",
+
+                      onPress: async () => {
+                        await signOut().then(() => {
+                          navigation.navigate("Auth", { screen: "SignIn" });
+                        });
+                      },
+                    },
+                    {
+                      text: "Cancel",
+                      onPress: () => true,
+                      style: "cancel",
+                    },
+                  ],
+                  { cancelable: false }
+                  //clicking out side of alert will not cancel
+                );
+              }}
             />
-          ), */
+          ),
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),

@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       await firebase
         .auth()
         .setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      const user = await firebase
+      await firebase
         .auth()
         .signInWithCredential(credential)
         .then((res) => {
@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }) => {
               created_dt: util.getCurrentDateTime(),
               last_login_dt: util.getCurrentDateTime(),
             });
+            setLoginUser(res.user);
           } else {
             db.collection("tbl_user_profile").doc(res.user.uid).update({
               last_login_dt: util.getCurrentDateTime(),
@@ -79,10 +80,14 @@ export const AuthProvider = ({ children }) => {
           .auth()
           .signInWithEmailAndPassword(email, password)
           .then((res) => {
-            api.setToken(JSON.stringify(res.user.uid));
+            db.collection("tbl_user_profile").doc(res.user.uid).update({
+              last_login_dt: util.getCurrentDateTime(),
+            });
+            setLoginUser(res.user);
           })
           .catch((error) => {
             alert("Login failed. " + error.message);
+            return null;
           });
       } catch (e) {
         alert(e);
@@ -91,7 +96,7 @@ export const AuthProvider = ({ children }) => {
 
     register: async (email, password) => {
       try {
-        await firebase
+        const user = await firebase
           .auth()
           .createUserWithEmailAndPassword(email, password)
           .then((res) => {
@@ -106,6 +111,7 @@ export const AuthProvider = ({ children }) => {
               created_dt: util.getCurrentDateTime(),
               last_login_dt: util.getCurrentDateTime(),
             });
+            setLoginUser(res.user);
           });
       } catch (e) {
         alert("Error @register: " + e);
@@ -169,7 +175,7 @@ export const AuthProvider = ({ children }) => {
           const credential = firebase.auth.FacebookAuthProvider.credential(
             token
           );
-          firebase
+          const user = await firebase
             .auth()
             .signInWithCredential(credential)
             .then((res) => {
@@ -190,13 +196,15 @@ export const AuthProvider = ({ children }) => {
                   last_login_dt: util.getCurrentDateTime(),
                 });
               }
+              setLoginUser(res.user);
             })
             .catch((error) => {
               alert(error);
-              return;
             });
+          return user;
         } else {
           alert("Operations cancelled!");
+          return null;
         }
       } catch (e) {
         alert(`Facebook Login Error: ${e}`);
@@ -211,13 +219,14 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (result.type === "success") {
-          googleSignIn(result);
+          await googleSignIn(result);
         } else {
           alert("Operations cancelled.");
           return { cancelled: true };
         }
       } catch (e) {
         alert("Error @Login with Google: " + e);
+        return null;
       }
     },
     getUserProfile: async () => {

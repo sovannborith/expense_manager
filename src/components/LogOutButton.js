@@ -5,7 +5,7 @@ import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
 
 const LogOutButton = ({ onPress }) => {
-  const { loginUser, signOut } = useContext(AuthContext);
+  const { loginUser } = useContext(AuthContext);
 
   return (
     <View style={styles.container}>

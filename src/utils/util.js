@@ -68,6 +68,13 @@ const util = {
       return null;
     }
   },
+  getRandomNumber: (s, e) => {
+    try {
+      return Math.floor(Math.random() * e) + s;
+    } catch (e) {
+      return null;
+    }
+  },
 };
 
 export default util;

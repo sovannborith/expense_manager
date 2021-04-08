@@ -30,10 +30,10 @@ const SignInScreen = ({ navigation }) => {
 
   const [isLoading, setLoading] = useState(false);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = () => {
     try {
       setLoading(true);
-      await loginWithGoogle();
+      loginWithGoogle();
       if (loginUser) {
         navigation.navigate("App", { Screen: "Home" });
       }
@@ -49,6 +49,7 @@ const SignInScreen = ({ navigation }) => {
     try {
       setLoading(true);
       await loginWithFacebook();
+
       if (loginUser) {
         navigation.navigate("App", { Screen: "Home" });
       }
@@ -101,7 +102,7 @@ const SignInScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS == "ios" ? "position" : "height"}
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
       >
         <View style={styles.container}>
           <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -183,13 +184,12 @@ export default SignInScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: COLORS.primary,
     height: SIZES.height,
-    flex: 1,
   },
   logoCover: {
     alignItems: "center",
-
     backgroundColor: COLORS.primary,
     alignItems: "center",
     height: SIZES.height,
