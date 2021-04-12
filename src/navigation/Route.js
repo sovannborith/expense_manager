@@ -4,21 +4,15 @@ import { NavigationContainer } from "@react-navigation/native";
 import { firebase } from "../server/firebase/firebase";
 import { AuthContext } from "../server/context/AuthProvider";
 import Loader from "../components/LoadingComponent";
-import api from "../services/api";
 import AppStack from "./AppStack";
 
 const Route = () => {
-  const { loginUser, setLoginUser } = useContext(AuthContext);
+  const { setLoginUser } = useContext(AuthContext);
   const [initializing, setInitializing] = useState(true);
 
   const onAuthStateChanged = (user) => {
     if (user) {
       setLoginUser(user);
-      try {
-        api.setToken(JSON.stringify(user.uid));
-      } catch (e) {
-        alert(e);
-      }
     }
     if (initializing) setInitializing(false);
   };

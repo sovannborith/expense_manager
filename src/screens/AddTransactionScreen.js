@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -13,7 +13,7 @@ import * as Animatable from "react-native-animatable";
 import { Formik, useFormik } from "formik";
 import * as Yup from "yup";
 
-import { AuthContext } from "../server/context/AuthProvider";
+//import { AuthContext } from "../server/context/AuthProvider";
 
 import DropDownPicker from "react-native-dropdown-picker";
 import FormInput from "../components/form/FormInput";
@@ -22,16 +22,17 @@ import FormOutLineButton from "../components/form/FormOutLineButton";
 import { COLORS, SIZES } from "../constants";
 import { firebase } from "../server/firebase/firebase";
 import util from "../utils/util";
-import Loader from "../components/LoadingComponent";
+//import Loader from "../components/LoadingComponent";
 const db = firebase.firestore();
 
 const AddTransactionScreen = ({ navigation }) => {
   const [tranItems, setTranItems] = useState([]);
   const [expType, setExptype] = useState("EXP");
-  const [selectedItem, setSelectedItem] = useState();
+  const [selectedItem, setSelectedItem] = useState([]);
+  const [filterTranItems, setFilterTranItems] = useState([]);
 
   const [isLoading, setLoading] = useState(false);
-  const { loginUser } = useContext(AuthContext);
+  //const { loginUser } = useContext(AuthContext);
 
   const AddTransactionSchema = Yup.object().shape({
     description: Yup.string().required(),
@@ -53,12 +54,16 @@ const AddTransactionScreen = ({ navigation }) => {
     initialValues: {
       description: "",
       expAmount: "1",
-      expItem: "",
+      expItem: selectedItem?.value,
       remark: "",
     },
     onSubmit: async () => {
+      /* console.log(selectedItem);
+      console.log(values.expItem);
+      return; */
       if (isValid) {
         setLoading(true);
+
         try {
           await db
             .collection("tbl_transactions")
@@ -68,9 +73,11 @@ const AddTransactionScreen = ({ navigation }) => {
               tran_desc: values.description,
               tran_amt: parseInt(values.expAmount),
               tran_rmk: values.remark,
+              timestamp: new Date().getTime(),
             })
             .then(() => {
               formik.resetForm();
+              filterData(expType);
               alert("Transaction created!");
             });
         } catch (err) {
@@ -82,13 +89,41 @@ const AddTransactionScreen = ({ navigation }) => {
     },
   }));
 
-  const getTransactionType = async (type) => {
+  const filterData = (type) => {
+    let filter = [];
+    tranItems.filter((item) => {
+      if (item.val_id === type) {
+        filter.push(item);
+      }
+      setFilterTranItems(filter);
+      setSelectedItem(filter[0]);
+    });
+  };
+
+  const handleExpClick = () => {
+    setExptype("EXP");
+    console.log(expType);
+    filterData(expType);
+  };
+  const handleRevClick = () => {
+    setExptype("REVN");
+    console.log(expType);
+    filterData(expType);
+  };
+
+  bindTranType = () => {
+    return filterTranItems;
+  };
+
+  useEffect(() => {
+    setLoading(true);
     try {
-      await db
+      const unsubscribe = db
         .collection("tbl_trx_type")
-        .where("val_id", "==", type)
+        //.where("val_id", "==", type)
         .get()
         .then((querySnapshot) => {
+          //Store all transaction items in the state for easy access in future
           setTranItems(
             querySnapshot.docs.map((doc) => ({
               label: doc.data().type_nm_en,
@@ -96,38 +131,29 @@ const AddTransactionScreen = ({ navigation }) => {
               val_id: doc.data().val_id,
             }))
           );
-          setSelectedItem(tranItems ? tranItems[0] : null);
+          let data = [];
+          querySnapshot.docs.map((doc) => {
+            if (doc.data().val_id === expType) {
+              let filter = {
+                label: doc.data().type_nm_en,
+                value: doc.data().type_id,
+                val_id: doc.data().val_id,
+              };
+              data.push(filter);
+            }
+          });
+          setFilterTranItems(data);
+          setSelectedItem(data[0]);
         })
+
         .catch((err) => alert(err));
-    } catch (err) {
-      alert(err);
-    }
-  };
-
-  const handleExpClick = () => {
-    setExptype("EXP");
-    getTransactionType(expType);
-    setSelectedItem(tranItems[0]);
-  };
-  const handleRevClick = () => {
-    setExptype("REVN");
-    getTransactionType(expType);
-    setSelectedItem(tranItems[0]);
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    try {
-      getTransactionType("EXP");
+      return () => unsubscribe;
     } catch (e) {
       alert(e);
     } finally {
       setLoading(false);
     }
-    /* const unsubscribe = getTransactionType(expType);
-    return unsubscribe.unsubscribe; */
-  }, []);
-  if (isLoading) return <Loader loadingLabel="Loadding..." />;
+  }, [expType]);
   return (
     <SafeAreaView>
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -176,6 +202,7 @@ const AddTransactionScreen = ({ navigation }) => {
                   }}
                 >
                   <TouchableOpacity
+                    activeOpacity={0.7}
                     style={{
                       backgroundColor:
                         expType == "REVN" ? COLORS.primary : COLORS.gray,
@@ -206,6 +233,7 @@ const AddTransactionScreen = ({ navigation }) => {
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    activeOpacity={0.7}
                     style={{
                       backgroundColor:
                         expType == "EXP" ? COLORS.red : COLORS.gray,
@@ -252,6 +280,7 @@ const AddTransactionScreen = ({ navigation }) => {
                   error={errors.description}
                   touched={touched.description}
                   autoFocus={true}
+                  autoCorrect={false}
                 />
                 <FormInput
                   placeholderText="Amount (in USD)"
@@ -264,25 +293,16 @@ const AddTransactionScreen = ({ navigation }) => {
                   touched={touched.expAmount}
                 />
                 <DropDownPicker
-                  items={
-                    tranItems
-                    /* .filter((item) => {
-                      item.val_id == expType;
-                    })
-                    .map(({ value, label, val_id }) => ({
-                      value,
-                      label,
-                      val_id,
-                    })) */
-                  }
+                  //controller={(instance) => (controller = instance)}
+                  items={filterTranItems}
                   onBlur={handleBlur("expItem")}
                   touched={touched.expItem}
                   onChangeItem={(item) => {
                     setSelectedItem(item);
-                    formik.setFieldValue("expItem", item.value);
+                    formik.setFieldValue("expItem", selectedItem.value);
+                    alert(selectedItem.value);
                   }}
                   containerStyle={{ height: 40, width: SIZES.width - 20 }}
-                  //searchable={true}
                   autoScrollToDefaultValue={true}
                   defaultValue={selectedItem?.value}
                   globalTextStyle={{
@@ -292,6 +312,8 @@ const AddTransactionScreen = ({ navigation }) => {
                   itemStyle={{
                     justifyContent: "flex-start",
                   }}
+                  onOpen={() => Keyboard.dismiss()}
+                  onClose={() => Keyboard.dismiss()}
                 />
                 <FormInput
                   placeholderText="Remark"
@@ -302,8 +324,13 @@ const AddTransactionScreen = ({ navigation }) => {
                   onBlur={handleBlur("remark")}
                   touched={touched.remark}
                   onSubmitEditing={handleSubmit}
+                  disable={!isValid}
                 />
-                <FormButton buttonTitle="Create" onPress={handleSubmit} />
+                <FormButton
+                  buttonTitle="Create"
+                  onPress={handleSubmit}
+                  loading={isLoading}
+                />
                 <FormOutLineButton
                   buttonTitle="Cancel"
                   onPress={() => navigation.replace("App", { screen: "Home" })}

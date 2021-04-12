@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { firebase } from "../server/firebase/firebase";
+import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS, icons } from "../constants";
 import util from "../utils/util";
 
@@ -8,7 +9,7 @@ const db = firebase.firestore();
 
 const HeaderRight = ({ onPress }) => {
   const [userData, setUserData] = useState(null);
-
+  const { loginUser } = useContext(AuthContext);
   const getUserData = (uid) => {
     try {
       db.collection("tbl_user_profile")
@@ -20,25 +21,25 @@ const HeaderRight = ({ onPress }) => {
           } else console.log("No data found!");
         });
     } catch (e) {
-      alert(e);
+      console.log(e);
     }
   };
 
   useEffect(() => {
     const curLoginUser = util.getCurrentLoginUser();
-
     if (curLoginUser) {
-      /* const unsubscribe = getUserData(curLoginUser.uid);
-      return unsubscribe; */
       getUserData(curLoginUser.uid);
     }
   }, []);
+  if (!loginUser) return null;
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onPress} style={styles.profileButton}>
         <Image
           source={{
-            uri: userData
+            uri: !userData
+              ? util.getDefaultProfilePicture()
+              : userData.photo_url
               ? userData.photo_url
               : util.getDefaultProfilePicture(),
           }}

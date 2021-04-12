@@ -46,6 +46,8 @@ const HomeScreen = ({ navigation }) => {
 
   const validate = async () => {
     try {
+      //console.log(util.getCurrentLoginUser().uid);
+
       if (!util.getCurrentLoginUser()) {
         navigation.navigate("Auth", { screen: "SignIn" });
       } else {
@@ -59,10 +61,11 @@ const HomeScreen = ({ navigation }) => {
               if (firstLaunch == true) {
                 navigation.navigate("Onboarding");
               }
-            } /*  else {
-              alert("No data found");
-            } */
-          });
+            } else {
+              console.log("No data found");
+            }
+          })
+          .catch((err) => alert(err));
       }
     } catch (e) {
       alert("Error @HomeScreen - validate: " + e);

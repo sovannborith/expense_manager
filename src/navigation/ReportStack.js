@@ -1,13 +1,15 @@
-import React from "react";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import React, { useContext } from "react";
+import { StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
-//mport BackButton from "../components/BackButton";
 import HeaderRight from "../components/HeaderRight";
 import ReportScreen from "../screens/report/ReportScreen";
+import LogOutButton from "../components/LogOutButton";
 const Stack = createStackNavigator();
 
 const ReportStack = ({ navigation }) => {
+  const { signOut } = useContext(AuthContext);
   return (
     <Stack.Navigator
       initialRouteName="Report"
@@ -39,6 +41,36 @@ const ReportStack = ({ navigation }) => {
               }
             />
           ), */
+          headerLeft: () => (
+            <LogOutButton
+              onPress={() => {
+                Alert.alert(
+                  //title
+                  "Sign Out Confirmation",
+                  //body
+                  "Are you sure want to sign out?",
+                  [
+                    {
+                      text: "Yes",
+
+                      onPress: async () => {
+                        await signOut().then(() => {
+                          navigation.navigate("Auth", { screen: "SignIn" });
+                        });
+                      },
+                    },
+                    {
+                      text: "Cancel",
+                      onPress: () => true,
+                      style: "cancel",
+                    },
+                  ],
+                  { cancelable: false }
+                  //clicking out side of alert will not cancel
+                );
+              }}
+            />
+          ),
           headerRight: () => (
             <HeaderRight onPress={() => navigation.navigate("Profile")} />
           ),

@@ -201,10 +201,8 @@ export const AuthProvider = ({ children }) => {
             .catch((error) => {
               alert(error);
             });
-          return user;
         } else {
           alert("Operations cancelled!");
-          return null;
         }
       } catch (e) {
         alert(`Facebook Login Error: ${e}`);
@@ -226,7 +224,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (e) {
         alert("Error @Login with Google: " + e);
-        return null;
       }
     },
     getUserProfile: async () => {

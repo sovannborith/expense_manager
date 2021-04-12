@@ -55,7 +55,7 @@ const ProfileStack = ({ navigation }) => {
         name="EditProfile"
         component={EditProfileScreen}
         options={{
-          title: "Edit Profile",
+          title: "Edit Your Profile",
           headerLeft: () => (
             <BackButton
               onPress={() =>

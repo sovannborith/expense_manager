@@ -1,6 +1,6 @@
 import { firebase } from "../server/firebase/firebase";
 
-const db = firebase.firestore();
+//const db = firebase.firestore();
 
 const util = {
   getDefaultProfilePicture: () => {

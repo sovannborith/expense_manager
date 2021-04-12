@@ -1,7 +1,6 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   KeyboardAvoidingView,
@@ -13,6 +12,7 @@ import {
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as Animatable from "react-native-animatable";
+import { firebase } from "../../server/firebase/firebase";
 
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
@@ -20,23 +20,25 @@ import SocialButton from "../../components/form/SocialButton";
 import FormOutLineButton from "../../components/form/FormOutLineButton";
 import { AuthContext } from "../../server/context/AuthProvider";
 import Loader from "../../components/LoadingComponent";
-import api from "../../services/api";
 import { COLORS, SIZES } from "../../constants";
 
 const SignInScreen = ({ navigation }) => {
-  const { loginUser, login, loginWithFacebook, loginWithGoogle } = useContext(
-    AuthContext
-  );
+  const {
+    loginUser,
+    setLoginUser,
+    login,
+    loginWithFacebook,
+    loginWithGoogle,
+  } = useContext(AuthContext);
 
   const [isLoading, setLoading] = useState(false);
 
-  const signInWithGoogle = () => {
+  const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      loginWithGoogle();
-      if (loginUser) {
+      await loginWithGoogle().then(() => {
         navigation.navigate("App", { Screen: "Home" });
-      }
+      });
     } catch (e) {
       alert(e);
       return;
@@ -61,17 +63,19 @@ const SignInScreen = ({ navigation }) => {
     }
   };
 
-  const signIn = async (email, password) => {
+  const signIn = (email, password) => {
     try {
       setLoading(true);
       if (isValid) {
-        await login(email, password);
-        if (loginUser) {
-          navigation.navigate("App", { Screen: "Home" });
-        }
+        login(email, password);
+      }
+      console.log(loginUser);
+      if (loginUser) {
+        navigation.navigate("App", { Screen: "Home" });
       }
     } catch (e) {
       alert("Login failed! Please try again!");
+      console.log(e);
     } finally {
       setLoading(false);
     }
@@ -98,7 +102,8 @@ const SignInScreen = ({ navigation }) => {
     },
   });
 
-  if (isLoading) return <Loader loadingLabel="Signing in..." />;
+  //if (isLoading) return <Loader loadingLabel="Loading..." />;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
@@ -144,6 +149,7 @@ const SignInScreen = ({ navigation }) => {
                       buttonTitle="Sign In"
                       loading={isLoading}
                       onPress={handleSubmit}
+                      loadingLabel="Signing in..."
                     />
 
                     <SocialButton
@@ -152,6 +158,8 @@ const SignInScreen = ({ navigation }) => {
                       color="#4867aa"
                       backgroundColor="#e6eaf4"
                       onPress={() => signInWithFacebook()}
+                      loading={isLoading}
+                      loadingLabel="Signing in with Facebook..."
                     />
 
                     <SocialButton
@@ -160,6 +168,8 @@ const SignInScreen = ({ navigation }) => {
                       color="#de4d41"
                       backgroundColor="#f5e7ea"
                       onPress={() => signInWithGoogle()}
+                      loading={isLoading}
+                      loadingLabel="Signing in with Google..."
                     />
                     <FormOutLineButton
                       buttonTitle="Forgot Password"
@@ -178,6 +188,12 @@ const SignInScreen = ({ navigation }) => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+
+  /* if (isLoading) {
+    return <Loader loadingLabel="Signing in..." />;
+  } else {
+    
+  } */
 };
 
 export default SignInScreen;

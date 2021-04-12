@@ -169,9 +169,7 @@ const EditProfileScreen = ({ navigation }) => {
       return null;
     }
     let fileName = loginUser.uid + img.substring(img.lastIndexOf("."));
-    /* const extension = fileName.split(".").pop();
-    const name = fileName.split(".").slice(0, -1).join(".");
-    fileName = name + Date.now() + "." + extension; */
+
     return fileName;
   };
 

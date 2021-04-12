@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { StyleSheet, Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
 import LogOutButton from "../components/LogOutButton";
@@ -8,6 +9,7 @@ import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
 
 const AddTransactionStack = ({ navigation }) => {
+  const { signOut } = useContext(AuthContext);
   return (
     <Stack.Navigator
       initialRouteName="AddTransaction"

@@ -1,7 +1,6 @@
 import React, { useContext, useState } from "react";
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   KeyboardAvoidingView,
@@ -58,11 +57,15 @@ const SignUpScreen = ({ navigation }) => {
     validationSchema: SignUpSchema,
     initialValues: { email: "", password: "" },
     onSubmit: () => {
-      signUp(values.email, values.password);
+      signUp(values.email, values.password, onSignUpCompleted);
     },
   });
 
-  if (isLoading) return <Loader loadingLabel="Registrating..." />;
+  const onSignUpCompleted = (user) => {
+    navigation.replace("App", { screen: "Home" });
+  };
+
+  //if (isLoading) return <Loader loadingLabel="Registrating..." />;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -108,7 +111,12 @@ const SignUpScreen = ({ navigation }) => {
                       onSubmitEditing={handleSubmit}
                     />
 
-                    <FormButton buttonTitle="Register" onPress={handleSubmit} />
+                    <FormButton
+                      buttonTitle="Sign Up"
+                      onPress={handleSubmit}
+                      loading={isLoading}
+                      loadingLabel="Signing up..."
+                    />
                     <FormOutLineButton
                       buttonTitle="Sign In"
                       onPress={() => navigation.navigate("SignIn")}

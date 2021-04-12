@@ -2,11 +2,11 @@ import React from "react";
 import { Text, TouchableOpacity, StyleSheet } from "react-native";
 import Loading from "../LoadingComponent";
 import { COLORS, SIZES } from "../../constants";
-const FormButton = ({ buttonTitle, loading, ...rest }) => {
+const FormButton = ({ buttonTitle, loading, loadingLabel, ...rest }) => {
   return (
     <TouchableOpacity style={styles.buttonContainer} {...rest}>
       {loading ? (
-        <Loading size="small" />
+        <Loading size="small" loadingLabel={loadingLabel} />
       ) : (
         <Text style={styles.buttonText}>{buttonTitle}</Text>
       )}

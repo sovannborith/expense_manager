@@ -52,7 +52,7 @@ const ForgetPasswordScreen = ({ navigation }) => {
       }
     },
   });
-  if (loading) return <Loader loadingLabel="Requesting new password..." />;
+  /* if (loading) return <Loader loadingLabel="Requesting new password..." />; */
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
@@ -86,6 +86,7 @@ const ForgetPasswordScreen = ({ navigation }) => {
                       buttonTitle="Reset Password"
                       loading={loading}
                       onPress={handleSubmit}
+                      loadingLabel="Requesting new password..."
                     />
                     <FormOutLineButton
                       buttonTitle="Sign In"
