@@ -75,6 +75,16 @@ const util = {
       return null;
     }
   },
+  formartYearMonth: (date) => {
+    const cYear = date.getFullYear();
+    const cMonth = date.getMonth() + 1;
+    const result = cYear + "" + cMonth;
+    try {
+      return result;
+    } catch (e) {
+      return null;
+    }
+  },
 };
 
 export default util;

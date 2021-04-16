@@ -37,7 +37,7 @@ const HomeScreen = ({ navigation }) => {
   const [categories, setCategories] = useState(category);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showMoreToggle, setShowMoreToggle] = useState(false);
-  const [userData, setUserData] = useState(null);
+  const [tranData, setTranData] = useState(null);
 
   const db = firebase.firestore();
 
@@ -46,12 +46,10 @@ const HomeScreen = ({ navigation }) => {
 
   const validate = async () => {
     try {
-      //console.log(util.getCurrentLoginUser().uid);
-
       if (!util.getCurrentLoginUser()) {
         navigation.navigate("Auth", { screen: "SignIn" });
       } else {
-        await db
+        const unsubscribe_01 = await db
           .collection("tbl_user_profile")
           .doc(util.getCurrentLoginUser().uid)
           .get()
@@ -66,6 +64,9 @@ const HomeScreen = ({ navigation }) => {
             }
           })
           .catch((err) => alert(err));
+        return () => {
+          unsubscribe_01;
+        };
       }
     } catch (e) {
       alert("Error @HomeScreen - validate: " + e);
@@ -74,10 +75,65 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const getHomeData = async () => {
+    var trxType = [];
+    var transactions = [];
+    var totalExp = 0;
+    var totalRev = 0;
+    var curDate = new Date();
+    try {
+      const unsubscribe_01 = await db
+        .collection("tbl_trx_type")
+        .get()
+        .then((documentSnapshot) => {
+          documentSnapshot.docs.map((trx) => {
+            trxType.push(trx.data());
+          });
+        })
+        .catch((err) => alert(err));
+
+      const unsubscribe_02 = await db
+        .collection("tbl_transactions")
+        .where("uid", "==", util.getCurrentLoginUser().uid)
+        .where("tran_year", "==", curDate.getFullYear())
+        .where("tran_month", "==", curDate.getMonth() + 1)
+        .get()
+        .then((documentSnapshot) => {
+          documentSnapshot.docs.map((trx) => {
+            transactions.push(trx.data());
+          });
+        })
+        .catch((err) => alert(err));
+      trxType.forEach((type) => {
+        transactions.forEach((trx) => {
+          if (trx.exp_item === type.type_id) {
+            if (type.val_id === "EXP") {
+              totalExp = totalExp + parseInt(trx.tran_amt);
+            } else {
+              totalRev = totalRev + parseInt(trx.tran_amt);
+            }
+          }
+        });
+      });
+      setTranData({
+        totalRevenue: totalRev,
+        totalExpense: totalExp,
+        totalBalance: totalRev - totalExp,
+      });
+      return () => {
+        unsubscribe_01;
+        unsubscribe_02;
+      };
+    } catch (e) {
+      alert("Error @HomeScreen - getHomeData: " + e);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     try {
       validate();
+      getHomeData();
     } catch (e) {
       alert(e);
     } finally {
@@ -410,6 +466,10 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
+  const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   if (loading) return <Loader loadingLabel="Loading..." />;
   /* if (!util.getCurrentLoginUser()) {
     navigation.navigate("Auth", { screen: "SignIn" });
@@ -423,15 +483,21 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.summary}>
             <View style={styles.summarySection}>
               <Text style={styles.sectionHeader}>Revenue</Text>
-              <Text style={styles.sectionNumber}>0.00</Text>
+              <Text style={styles.sectionNumber}>
+                {numberWithCommas(Number(tranData?.totalRevenue))}
+              </Text>
             </View>
             <View style={styles.summarySection}>
               <Text style={styles.sectionHeader}>Expense</Text>
-              <Text style={styles.sectionNumber}>0.00</Text>
+              <Text style={styles.sectionNumber}>
+                {numberWithCommas(Number(tranData?.totalExpense))}
+              </Text>
             </View>
             <View style={styles.summarySection}>
               <Text style={styles.sectionHeader}>Balance</Text>
-              <Text style={styles.sectionNumber}>0.00</Text>
+              <Text style={styles.sectionNumber}>
+                {numberWithCommas(Number(tranData?.totalBalance))}
+              </Text>
             </View>
           </View>
 

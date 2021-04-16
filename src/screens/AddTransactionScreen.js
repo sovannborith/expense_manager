@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   StyleSheet,
@@ -13,7 +13,7 @@ import * as Animatable from "react-native-animatable";
 import { Formik, useFormik } from "formik";
 import * as Yup from "yup";
 
-//import { AuthContext } from "../server/context/AuthProvider";
+import { AuthContext } from "../server/context/AuthProvider";
 
 import DropDownPicker from "react-native-dropdown-picker";
 import FormInput from "../components/form/FormInput";
@@ -22,7 +22,7 @@ import FormOutLineButton from "../components/form/FormOutLineButton";
 import { COLORS, SIZES } from "../constants";
 import { firebase } from "../server/firebase/firebase";
 import util from "../utils/util";
-//import Loader from "../components/LoadingComponent";
+import Loader from "../components/LoadingComponent";
 const db = firebase.firestore();
 
 const AddTransactionScreen = ({ navigation }) => {
@@ -32,7 +32,7 @@ const AddTransactionScreen = ({ navigation }) => {
   const [filterTranItems, setFilterTranItems] = useState([]);
 
   const [isLoading, setLoading] = useState(false);
-  //const { loginUser } = useContext(AuthContext);
+  const { loginUser } = useContext(AuthContext);
 
   const AddTransactionSchema = Yup.object().shape({
     description: Yup.string().required(),
@@ -54,16 +54,13 @@ const AddTransactionScreen = ({ navigation }) => {
     initialValues: {
       description: "",
       expAmount: "1",
-      expItem: selectedItem?.value,
       remark: "",
     },
     onSubmit: async () => {
-      /* console.log(selectedItem);
-      console.log(values.expItem);
-      return; */
       if (isValid) {
         setLoading(true);
-
+        formik.setFieldValue("expItem", selectedItem?.value);
+        var curDate = new Date();
         try {
           await db
             .collection("tbl_transactions")
@@ -74,10 +71,13 @@ const AddTransactionScreen = ({ navigation }) => {
               tran_amt: parseInt(values.expAmount),
               tran_rmk: values.remark,
               timestamp: new Date().getTime(),
+              uid: loginUser.uid,
+              tran_year: curDate.getFullYear(),
+              tran_month: curDate.getMonth()+1,
+              tran_day: curDate.getDate(),
             })
             .then(() => {
               formik.resetForm();
-              filterData(expType);
               alert("Transaction created!");
             });
         } catch (err) {
@@ -98,21 +98,46 @@ const AddTransactionScreen = ({ navigation }) => {
       setFilterTranItems(filter);
       setSelectedItem(filter[0]);
     });
+    formik.setFieldValue("expItem", selectedItem?.value);
   };
 
   const handleExpClick = () => {
     setExptype("EXP");
-    console.log(expType);
     filterData(expType);
   };
   const handleRevClick = () => {
     setExptype("REVN");
-    console.log(expType);
     filterData(expType);
   };
 
-  bindTranType = () => {
-    return filterTranItems;
+  const fetchTransaction = async () => {
+    try {
+      await db
+        .collection("tbl_transactions")
+        .get()
+        .then((querySnapshot) => {
+          setTransaction(
+            querySnapshot.docs.map((doc) => ({
+              doc,
+            }))
+          );
+          let exp = 0;
+          let rev = 0;
+          querySnapshot.docs.map((doc) => {
+            if (doc.data().val_id === expType) {
+              let filter = {
+                label: doc.data().type_nm_en,
+                value: doc.data().type_id,
+                val_id: doc.data().val_id,
+              };
+              data.push(filter);
+            }
+          });
+        })
+        .catch((err) => alert(err));
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
@@ -144,10 +169,13 @@ const AddTransactionScreen = ({ navigation }) => {
           });
           setFilterTranItems(data);
           setSelectedItem(data[0]);
+          formik.setFieldValue("expItem", "1");
         })
-
         .catch((err) => alert(err));
-      return () => unsubscribe;
+
+      return () => {
+        unsubscribe;
+      };
     } catch (e) {
       alert(e);
     } finally {
@@ -163,7 +191,6 @@ const AddTransactionScreen = ({ navigation }) => {
               source={require("../assets/logo_01.png")}
               style={styles.logo}
             />
-
             <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
               <View
                 style={{
@@ -299,8 +326,8 @@ const AddTransactionScreen = ({ navigation }) => {
                   touched={touched.expItem}
                   onChangeItem={(item) => {
                     setSelectedItem(item);
-                    formik.setFieldValue("expItem", selectedItem.value);
-                    alert(selectedItem.value);
+                    formik.setFieldValue("expItem", selectedItem?.value);
+                    //alert(selectedItem.value);
                   }}
                   containerStyle={{ height: 40, width: SIZES.width - 20 }}
                   autoScrollToDefaultValue={true}
