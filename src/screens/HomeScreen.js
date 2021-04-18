@@ -31,6 +31,7 @@ const HomeScreen = ({ navigation }) => {
   LogBox.ignoreLogs([
     "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation - use another VirtualizedList-backed container instead.",
   ]);
+
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("list");
   const [tranType, setTranType] = useState(null);
@@ -277,11 +278,6 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
-  const setSelectCategoryByName = ({ name }) => {
-    let category = categories.filter((a) => a.name == name);
-    setSelectedCategory(category[0]);
-  };
-
   const formatDataForChart = () => {
     let tempData = [];
     let chartData = viewMode == "list" ? revType : expType;
@@ -338,7 +334,7 @@ const HomeScreen = ({ navigation }) => {
             radius={({ datum }) =>
               selectedCategory && selectedCategory == datum.type_id
                 ? SIZES.width * 0.4
-                : SIZES.width * 0.4 - 10
+                : SIZES.width * 0.4 - 20
             }
             innerRadius={70}
             labelRadius={({ innerRadius }) =>
@@ -353,7 +349,6 @@ const HomeScreen = ({ navigation }) => {
             width={SIZES.width * 0.8}
             height={SIZES.width * 0.8}
             colorScale={colorScales}
-            animate={{ duration: 2000 }}
             events={[
               {
                 target: "data",
@@ -363,13 +358,23 @@ const HomeScreen = ({ navigation }) => {
                       {
                         target: "labels",
                         mutation: (props) => {
-                          let category = chartData[props.index].type_id;
-                          if (Number(category) !== Number(selectedCategory)) {
+                          let category = chartData[props.index];
+                          if (
+                            Number(category.type_id) !==
+                            Number(selectedCategory)
+                          ) {
                             return;
                           } else {
+                            let titleDtl =
+                              category.val_id == "EXP"
+                                ? `Expense on ${category.type_nm_en}`
+                                : `Revenue from ${category.type_nm_en}`;
                             navigation.navigate("Transaction", {
                               screen: "TransactionByCategory",
-                              type_id: chartData[props.index],
+                              params: {
+                                trxItem: chartData[props.index],
+                                title: titleDtl,
+                              },
                             });
                           }
                         },
@@ -402,10 +407,9 @@ const HomeScreen = ({ navigation }) => {
               data={chartData}
               labels={(datum) => `${datum.label}`}
               radius={({ datum }) =>
-                selectedCategory &&
-                selectedCategory.type_nm_en == datum.type_nm_en
+                selectedCategory && selectedCategory == datum.type_id
                   ? SIZES.width * 0.4
-                  : SIZES.width * 0.4 - 10
+                  : SIZES.width * 0.4 - 20
               }
               innerRadius={70}
               labelRadius={({ innerRadius }) =>
@@ -424,15 +428,27 @@ const HomeScreen = ({ navigation }) => {
                 {
                   target: "data",
                   eventHandlers: {
-                    onClick: () => {
+                    onPressIn: () => {
                       return [
                         {
                           target: "labels",
                           mutation: (props) => {
-                            let categoryName =
-                              chartData[props.index].type_nm_en;
-                            setSelectCategoryByName(categoryName);
-                            alert("Hello");
+                            let category = chartData[props.index].type_id;
+                            if (Number(category) !== Number(selectedCategory)) {
+                              return;
+                            } else {
+                              let titleDtl =
+                                category.val_id == "EXP"
+                                  ? `Expense on ${category.type_nm_en}`
+                                  : `Revenue from ${category.type_nm_en}`;
+                              navigation.navigate("Transaction", {
+                                screen: "TransactionByCategory",
+                                params: {
+                                  trxItem: chartData[props.index],
+                                  title: titleDtl,
+                                },
+                              });
+                            }
                           },
                         },
                       ];
@@ -451,80 +467,6 @@ const HomeScreen = ({ navigation }) => {
         </View>
       );
     }
-  };
-  const renderExpenseSummary = () => {
-    let data = processCategoryDataToDisplay();
-
-    const renderItem = ({ item }) => (
-      <TouchableOpacity
-        style={{
-          flexDirection: "row",
-          height: 40,
-          paddingHorizontal: SIZES.radius,
-          borderRadius: 10,
-          marginBottom: 5,
-          backgroundColor:
-            selectedCategory && selectedCategory.name == item.name
-              ? item.color
-              : COLORS.white,
-        }}
-        onPress={() => {
-          let categoryName = item.name;
-          setSelectCategoryByName(categoryName);
-        }}
-      >
-        {/* Name/Category */}
-        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
-          <View
-            style={{
-              width: 20,
-              height: 20,
-              backgroundColor:
-                selectedCategory && selectedCategory.name == item.name
-                  ? COLORS.white
-                  : item.color,
-              borderRadius: 5,
-            }}
-          />
-
-          <Text
-            style={{
-              marginLeft: SIZES.base,
-              color:
-                selectedCategory && selectedCategory.name == item.name
-                  ? COLORS.white
-                  : COLORS.primary,
-            }}
-          >
-            {item.name}
-          </Text>
-        </View>
-
-        {/* Expenses */}
-        <View style={{ justifyContent: "center" }}>
-          <Text
-            style={{
-              color:
-                selectedCategory && selectedCategory.name == item.name
-                  ? COLORS.white
-                  : COLORS.primary,
-            }}
-          >
-            {item.y} USD - {item.label}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-
-    return (
-      <View style={{ padding: SIZES.padding }}>
-        <FlatList
-          data={data}
-          renderItem={renderItem}
-          keyExtractor={(item) => `${item.id}`}
-        />
-      </View>
-    );
   };
 
   const numberWithCommas = (x) => {

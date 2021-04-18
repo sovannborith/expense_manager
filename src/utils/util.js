@@ -85,6 +85,31 @@ const util = {
       return null;
     }
   },
+  formartDate: (date) => {
+    const cDay = date.getDate();
+    const cMonth = date.getMonth() + 1;
+    const cYear = date.getFullYear();
+    const cHour = date.getHours();
+    const cMinute = date.getMinutes();
+    const cSecond = date.getSeconds();
+    const result =
+      cYear +
+      "-" +
+      cMonth +
+      "-" +
+      cDay +
+      " " +
+      cHour +
+      ":" +
+      cMinute +
+      ":" +
+      cSecond;
+    try {
+      return result;
+    } catch (e) {
+      return null;
+    }
+  },
 };
 
 export default util;

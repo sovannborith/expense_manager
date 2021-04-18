@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext, useEffect, useLayoutEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -6,368 +6,399 @@ import {
   SafeAreaView,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Keyboard,
+  Animated,
+  TouchableHighlight,
+  Alert,
 } from "react-native";
+import { SwipeListView } from "react-native-swipe-list-view";
 import * as Animatable from "react-native-animatable";
-import { Formik, useFormik } from "formik";
-import * as Yup from "yup";
 
 import { AuthContext } from "../server/context/AuthProvider";
 
-import DropDownPicker from "react-native-dropdown-picker";
-import FormInput from "../components/form/FormInput";
-import FormButton from "../components/form/FormButton";
 import FormOutLineButton from "../components/form/FormOutLineButton";
-import { COLORS, SIZES } from "../constants";
+import { COLORS, SIZES, icons } from "../constants";
 import { firebase } from "../server/firebase/firebase";
 import util from "../utils/util";
 import Loader from "../components/LoadingComponent";
 const db = firebase.firestore();
 
-const TransactionByCategoryScreen = ({ navigation }) => {
-  const [tranItems, setTranItems] = useState([]);
-  const [expType, setExptype] = useState("EXP");
-  const [selectedItem, setSelectedItem] = useState([]);
-  const [filterTranItems, setFilterTranItems] = useState([]);
-
-  const [isLoading, setLoading] = useState(false);
+const TransactionByCategoryScreen = ({ route, navigation }) => {
+  const [loading, setLoading] = useState(false);
   const { loginUser } = useContext(AuthContext);
+  const [trxType, setTrxType] = useState([]);
+  const [transactionDetails, setTransactionDetails] = useState([]);
 
-  const AddTransactionSchema = Yup.object().shape({
-    description: Yup.string().required(),
-    expAmount: Yup.number().positive().integer().min(1).required(),
-    expItem: Yup.string().required(),
-    remark: Yup.string(),
-  });
-
-  const formik = ({
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    values,
-    touched,
-    errors,
-    isValid,
-  } = useFormik({
-    validationSchema: AddTransactionSchema,
-    initialValues: {
-      description: "",
-      expAmount: "1",
-      remark: "",
-    },
-    onSubmit: async () => {
-      if (isValid) {
-        setLoading(true);
-        formik.setFieldValue("expItem", selectedItem?.value);
-        var curDate = new Date();
-        try {
-          await db
-            .collection("tbl_transactions")
-            .add({
-              tran_id: new Date().getTime() + util.getRandomNumber(1, 100),
-              exp_item: values.expItem,
-              tran_desc: values.description,
-              tran_amt: parseInt(values.expAmount),
-              tran_rmk: values.remark,
-              timestamp: new Date().getTime(),
-              uid: loginUser.uid,
-              tran_year: curDate.getFullYear(),
-              tran_month: curDate.getMonth() + 1,
-              tran_day: curDate.getDate(),
-            })
-            .then(() => {
-              formik.resetForm();
-              alert("Transaction created!");
-            });
-        } catch (err) {
-          alert(err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    },
-  }));
-
-  const filterData = (type) => {
-    let filter = [];
-    tranItems.filter((item) => {
-      if (item.val_id === type) {
-        filter.push(item);
-      }
-      setFilterTranItems(filter);
-      setSelectedItem(filter[0]);
-    });
-    formik.setFieldValue("expItem", selectedItem?.value);
-  };
-
-  const handleExpClick = () => {
-    setExptype("EXP");
-    filterData(expType);
-  };
-  const handleRevClick = () => {
-    setExptype("REVN");
-    filterData(expType);
-  };
-
-  const fetchTransaction = async () => {
+  useLayoutEffect(() => {
     try {
-      await db
+      setLoading(true);
+
+      loadTransactionDetails();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [navigation, route]);
+
+  useEffect(() => {
+    try {
+      setLoading(true);
+      console.log(transactionDetails);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  const loadTransactionDetails = async () => {
+    try {
+      const { trxItem, title } = route.params;
+      navigation.setOptions({ headerTitle: title });
+      setTrxType(trxItem);
+      let curDate = new Date();
+      const unsubscribe_01 = await db
         .collection("tbl_transactions")
+        .where("uid", "==", loginUser.uid)
+        .where("exp_item", "==", trxItem.type_id)
+        .where("tran_year", "==", curDate.getFullYear())
+        .where("tran_month", "==", curDate.getMonth() + 1)
         .get()
-        .then((querySnapshot) => {
-          setTransaction(
-            querySnapshot.docs.map((doc) => ({
-              doc,
-            }))
+        .then((documentSnapshot) => {
+          setTransactionDetails(
+            documentSnapshot.docs.map((item) => item.data())
           );
-          let exp = 0;
-          let rev = 0;
-          querySnapshot.docs.map((doc) => {
-            if (doc.data().val_id === expType) {
-              let filter = {
-                label: doc.data().type_nm_en,
-                value: doc.data().type_id,
-                val_id: doc.data().val_id,
-              };
-              data.push(filter);
-            }
-          });
-        })
-        .catch((err) => alert(err));
+        });
+      //.error((err) => console.log(err));
+      return () => {
+        unsubscribe_01;
+      };
     } catch (e) {
       console.log(e);
     }
   };
 
-  useEffect(() => {
+  const closeRow = (rowMap, rowKey) => {
+    if (rowMap[rowKey]) {
+      rowMap[rowKey].closeRow();
+    }
+  };
+
+  const deleteRow = (rowMap, rowKey) => {
     setLoading(true);
     try {
-      const unsubscribe = db
-        .collection("tbl_trx_type")
-        //.where("val_id", "==", type)
-        .get()
-        .then((querySnapshot) => {
-          //Store all transaction items in the state for easy access in future
-          setTranItems(
-            querySnapshot.docs.map((doc) => ({
-              label: doc.data().type_nm_en,
-              value: doc.data().type_id,
-              val_id: doc.data().val_id,
-            }))
-          );
-          let data = [];
-          querySnapshot.docs.map((doc) => {
-            if (doc.data().val_id === expType) {
-              let filter = {
-                label: doc.data().type_nm_en,
-                value: doc.data().type_id,
-                val_id: doc.data().val_id,
-              };
-              data.push(filter);
-            }
-          });
-          setFilterTranItems(data);
-          setSelectedItem(data[0]);
-          formik.setFieldValue("expItem", "1");
-        })
-        .catch((err) => alert(err));
-
-      return () => {
-        unsubscribe;
-      };
+      Alert.alert(
+        //title
+        "Deleting Confirmation",
+        //body
+        "Are you sure want to delete this transaction?",
+        [
+          {
+            text: "Yes",
+            onPress: async () => {
+              await deleteDBData(rowKey);
+              closeRow(rowMap, rowKey);
+            },
+          },
+          {
+            text: "Cancel",
+            onPress: () => true,
+            style: "cancel",
+          },
+        ],
+        { cancelable: false }
+        //clicking out side of alert will not cancel
+      );
     } catch (e) {
-      alert(e);
+      console.log(e);
     } finally {
       setLoading(false);
     }
-  }, [expType]);
+  };
+
+  const removeArrayData = (id) => {
+    const newTransaction = [...transactionDetails];
+    const preIdx = transactionDetails.findIndex((item) => item.key === id);
+
+    newTransaction.splice(preIdx, 1);
+    setTransactionDetails(newTransaction);
+  };
+
+  const deleteDBData = async (id) => {
+    try {
+      const unsubscribe_01 = await db
+        .collection("tbl_transactions")
+        .where("uid", "==", loginUser.uid)
+        .where("tran_id", "==", id)
+        .get()
+        .then((documentSnapShot) => {
+          documentSnapShot.docs.map((item) => {
+            item.ref.delete();
+          });
+        })
+        .then(() => {
+          removeArrayData(id);
+        });
+
+      return () => {
+        unsubscribe_01;
+      };
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const onRowDidOpen = (rowKey) => {
+    console.log("This row opened", rowKey);
+  };
+
+  const onLeftActionStatusChange = (rowKey) => {
+    console.log("onLeftActionStatusChange", rowKey);
+  };
+
+  const onRightActionStatusChange = (rowKey) => {
+    console.log("onRightActionStatusChange", rowKey);
+  };
+
+  const onRightAction = (rowKey) => {
+    console.log("onRightAction", rowKey);
+  };
+
+  const onLeftAction = (rowKey) => {
+    console.log("onLeftAction", rowKey);
+  };
+
+  const VisibleItem = (props) => {
+    const {
+      data,
+      rowHeightAnimatedValue,
+      removeRow,
+      leftActionState,
+      rightActionState,
+    } = props;
+
+    if (rightActionState) {
+      Animated.timing(rowHeightAnimatedValue, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => {
+        removeRow();
+      });
+    }
+
+    return (
+      <Animated.View
+        style={[styles.rowFront, { height: rowHeightAnimatedValue }]}
+      >
+        <TouchableHighlight
+          style={styles.rowFrontVisible}
+          onPress={() => console.log("Element touched")}
+          underlayColor={"#aaa"}
+        >
+          <View>
+            <Text style={styles.title} numberOfLines={1}>
+              {`${data.item.tran_desc} with amount of ${
+                data.item.tran_amt
+              } on ${util.formartDate(new Date(data.item.timestamp))}`}
+            </Text>
+            {/* {data.item.tran_rmk && (
+              <Text style={styles.details} numberOfLines={1}>
+                {data.item.details}
+              </Text>
+            )} */}
+          </View>
+        </TouchableHighlight>
+      </Animated.View>
+    );
+  };
+
+  const renderItem = (data, rowMap) => {
+    const rowHeightAnimatedValue = new Animated.Value(60);
+    if (data == null) rethrn(<Text>No data!</Text>);
+    return (
+      <VisibleItem
+        data={data}
+        rowHeightAnimatedValue={rowHeightAnimatedValue}
+        removeRow={() => deleteRow(rowMap, data.item.key)}
+      />
+    );
+  };
+
+  const HiddenItemWithActions = (props) => {
+    const {
+      swipeAnimatedValue,
+      leftActionActivated,
+      rightActionActivated,
+      rowActionAnimatedValue,
+      rowHeightAnimatedValue,
+      onClose,
+      onDelete,
+    } = props;
+
+    if (rightActionActivated) {
+      Animated.spring(rowActionAnimatedValue, {
+        toValue: 500,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      Animated.spring(rowActionAnimatedValue, {
+        toValue: 75,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    return (
+      <Animated.View
+        style={[styles.rowBack, { height: rowHeightAnimatedValue }]}
+      >
+        {!leftActionActivated && (
+          <TouchableOpacity
+            style={[styles.backRightBtn, styles.backRightBtnLeft]}
+            onPress={onClose}
+          >
+            <Image
+              source={icons.reload}
+              resizeMode="contain"
+              style={{
+                width: 20,
+                height: 20,
+                tintColor: COLORS.white,
+              }}
+            />
+          </TouchableOpacity>
+        )}
+        {!leftActionActivated && (
+          <Animated.View
+            style={[
+              styles.backRightBtn,
+              styles.backRightBtnRight,
+              {
+                flex: 1,
+                width: rowActionAnimatedValue,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[styles.backRightBtn, styles.backRightBtnRight]}
+              onPress={onDelete}
+            >
+              <Animated.View
+                style={[
+                  styles.trash,
+                  {
+                    transform: [
+                      {
+                        scale: swipeAnimatedValue.interpolate({
+                          inputRange: [-90, -45],
+                          outputRange: [1, 0],
+                          extrapolate: "clamp",
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <Image
+                  source={icons.trash}
+                  resizeMode="contain"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    tintColor: COLORS.white,
+                  }}
+                />
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+      </Animated.View>
+    );
+  };
+
+  const renderHiddenItem = (data, rowMap) => {
+    const rowActionAnimatedValue = new Animated.Value(75);
+    const rowHeightAnimatedValue = new Animated.Value(60);
+
+    return (
+      <HiddenItemWithActions
+        data={data}
+        rowMap={rowMap}
+        rowActionAnimatedValue={rowActionAnimatedValue}
+        rowHeightAnimatedValue={rowHeightAnimatedValue}
+        onClose={() => closeRow(rowMap, data.item.tran_id)}
+        onDelete={() => deleteRow(rowMap, data.item.tran_id)}
+      />
+    );
+  };
+
+  const getValueByKey = (obj, key) => {
+    for (const [k, val] of Object.entries(obj)) {
+      if (k === key) {
+        return val;
+      }
+    }
+  };
+  if (loading) return <Loader loadingLabel="Loading..." />;
   return (
     <SafeAreaView>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View style={styles.container}>
-          <View style={styles.logoCover}>
+      <View style={styles.container}>
+        <View style={[styles.logoCover, styles.shadow]}>
+          <View
+            style={{
+              backgroundColor: COLORS.white,
+              ...styles.logo,
+            }}
+          >
             <Image
-              source={require("../assets/logo_01.png")}
-              style={styles.logo}
+              /* source={require("../assets/logo_01.png")} */
+              source={getValueByKey(icons, trxType.icon)}
+              style={{
+                tintColor: getValueByKey(COLORS, trxType.color),
+                ...styles.logoImg,
+              }}
             />
-            <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  backgroundColor: COLORS.lightGray,
-                  width: SIZES.width,
-                  padding: 10,
-                  borderTopRightRadius: 20,
-                  borderTopLeftRadius: 20,
-                }}
-              >
-                <Text
-                  style={{
-                    color: COLORS.primary,
-                    fontWeight: "800",
-                    marginTop: 15,
-                  }}
-                >
-                  Add New Transaction
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                    height: 50,
-                    borderColor: COLORS.primary,
-                    borderWidth: 3,
-                    borderRadius: 30,
-                    shadowColor: COLORS.gray,
-                    shadowRadius: 5,
-                    shadowOpacity: 2,
-                    shadowOffset: { width: 0, height: 2 },
-                    elevation: 5,
-                    padding: 1,
-                  }}
-                >
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    style={{
-                      backgroundColor:
-                        expType == "REVN" ? COLORS.primary : COLORS.gray,
-                      padding: 10,
-                      borderTopLeftRadius: "50%",
-                      borderBottomLeftRadius: "50%",
-                      shadowColor: COLORS.gray,
-                      shadowRadius: 5,
-                      shadowOpacity: 2,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 5,
-                      borderColor: COLORS.white,
-                      borderWidth: expType == "REVN" ? 1 : null,
-                      width: 80,
-                    }}
-                    onPress={() => {
-                      handleRevClick();
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "800",
-                        color: COLORS.white,
-                        paddingTop: 1,
-                      }}
-                    >
-                      Revenue
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    style={{
-                      backgroundColor:
-                        expType == "EXP" ? COLORS.red : COLORS.gray,
-                      padding: 10,
-                      borderTopRightRadius: "50%",
-                      borderBottomRightRadius: "50%",
-                      shadowColor: COLORS.gray,
-                      shadowRadius: 5,
-                      shadowOpacity: 2,
-                      shadowOffset: { width: 0, height: 2 },
-                      elevation: 5,
-                      borderColor: COLORS.white,
-                      borderWidth: expType == "EXP" ? 1 : null,
-                      width: 80,
-                    }}
-                    onPress={() => {
-                      handleExpClick();
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "800",
-                        color: COLORS.white,
-                        paddingTop: 1,
-                      }}
-                    >
-                      Expense
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.signInWrapper}>
-                <FormInput
-                  placeholderText={
-                    expType == "EXP"
-                      ? "Expense Description"
-                      : "Revenue Description"
-                  }
-                  iconType="filetext1"
-                  labelValue={values.description}
-                  onChangeText={handleChange("description")}
-                  onBlur={handleBlur("description")}
-                  error={errors.description}
-                  touched={touched.description}
-                  autoFocus={true}
-                  autoCorrect={false}
-                />
-                <FormInput
-                  placeholderText="Amount (in USD)"
-                  iconType="user"
-                  keyboardType="numeric"
-                  labelValue={values.expAmount}
-                  onChangeText={handleChange("expAmount")}
-                  onBlur={handleBlur("expAmount")}
-                  error={errors.expAmount}
-                  touched={touched.expAmount}
-                />
-                <DropDownPicker
-                  //controller={(instance) => (controller = instance)}
-                  items={filterTranItems}
-                  onBlur={handleBlur("expItem")}
-                  touched={touched.expItem}
-                  onChangeItem={(item) => {
-                    setSelectedItem(item);
-                    formik.setFieldValue("expItem", selectedItem?.value);
-                    //alert(selectedItem.value);
-                  }}
-                  containerStyle={{ height: 40, width: SIZES.width - 20 }}
-                  autoScrollToDefaultValue={true}
-                  defaultValue={selectedItem?.value}
-                  globalTextStyle={{
-                    fontSize: 14,
-                    textAlign: "left",
-                  }}
-                  itemStyle={{
-                    justifyContent: "flex-start",
-                  }}
-                  onOpen={() => Keyboard.dismiss()}
-                  onClose={() => Keyboard.dismiss()}
-                />
-                <FormInput
-                  placeholderText="Remark"
-                  iconType="filetext1"
-                  multiline={true}
-                  labelValue={values.remark}
-                  onChangeText={handleChange("remark")}
-                  onBlur={handleBlur("remark")}
-                  touched={touched.remark}
-                  onSubmitEditing={handleSubmit}
-                  disable={!isValid}
-                />
-                <FormButton
-                  buttonTitle="Create"
-                  onPress={handleSubmit}
-                  loading={isLoading}
-                />
-                <FormOutLineButton
-                  buttonTitle="Cancel"
-                  onPress={() => navigation.replace("App", { screen: "Home" })}
-                  danger={true}
-                />
-              </View>
-            </Animatable.View>
           </View>
+          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
+            <View style={styles.signInWrapper}>
+              <SwipeListView
+                data={transactionDetails}
+                renderItem={renderItem}
+                renderHiddenItem={renderHiddenItem}
+                keyExtractor={(item) => `${item.tran_id}`}
+                leftOpenValue={75}
+                rightOpenValue={-150}
+                disableRightSwipe
+                onRowDidOpen={onRowDidOpen}
+                leftActivationValue={100}
+                rightActivationValue={-200}
+                leftActionValue={0}
+                rightActionValue={-500}
+                onLeftAction={onLeftAction}
+                onRightAction={onRightAction}
+                onLeftActionStatusChange={onLeftActionStatusChange}
+                onRightActionStatusChange={onRightActionStatusChange}
+              />
+            </View>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: COLORS.lightGray2,
+                paddingHorizontal: 20,
+              }}
+            >
+              <FormOutLineButton
+                buttonTitle="View all transaction?"
+                onPress={() =>
+                  navigation.navigate("Transaction", {
+                    screen: "TransactionList",
+                  })
+                }
+                danger={true}
+              />
+            </View>
+          </Animatable.View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </SafeAreaView>
   );
 };
@@ -387,12 +418,100 @@ const styles = StyleSheet.create({
     height: 120,
     width: 120,
     resizeMode: "cover",
+    borderRadius: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoImg: {
+    height: 60,
+    width: 60,
+    resizeMode: "contain",
   },
   signInWrapper: {
     flex: 1,
     alignItems: "center",
     width: SIZES.width,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     backgroundColor: COLORS.lightGray,
     padding: 10,
+  },
+  backTextWhite: {
+    color: "#FFF",
+  },
+  rowFront: {
+    backgroundColor: "#FFF",
+    borderRadius: 5,
+    height: 60,
+    margin: 5,
+    marginBottom: 15,
+    shadowColor: "#999",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  rowFrontVisible: {
+    backgroundColor: "#FFF",
+    borderRadius: 5,
+    height: 60,
+    padding: 10,
+    marginBottom: 15,
+  },
+  rowBack: {
+    alignItems: "center",
+    backgroundColor: "#DDD",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingLeft: 15,
+    margin: 5,
+    marginBottom: 15,
+    borderRadius: 5,
+  },
+  backRightBtn: {
+    alignItems: "flex-end",
+    bottom: 0,
+    justifyContent: "center",
+    position: "absolute",
+    top: 0,
+  },
+  backRightBtnLeft: {
+    backgroundColor: COLORS.primary,
+    right: 70,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 80,
+  },
+  backRightBtnRight: {
+    backgroundColor: COLORS.red,
+    right: 0,
+    borderTopRightRadius: 5,
+    borderBottomRightRadius: 5,
+    width: 65,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  trash: {
+    height: 25,
+    width: 25,
+    marginRight: 7,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#666",
+  },
+  details: {
+    fontSize: 12,
+    color: "#999",
+  },
+  shadow: {
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
 });

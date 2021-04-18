@@ -23,6 +23,9 @@ export const insurance = require("../assets/icons/like.png");
 export const salary = require("../assets/icons/bill.png");
 export const villa = require("../assets/icons/villa_icon.png");
 export const interest = require("../assets/icons/wallet.png");
+export const close = require("../assets/icons/close.png");
+export const trash = require("../assets/icons/delete.png");
+export const reload = require("../assets/icons/reload.png");
 
 export default {
   baby_car,
@@ -50,4 +53,7 @@ export default {
   salary,
   villa,
   interest,
+  close,
+  trash,
+  reload,
 };
