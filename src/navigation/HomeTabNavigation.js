@@ -3,7 +3,7 @@ import { SafeAreaView, Image, View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import ReportStack from "./ReportStack";
-import AddTransactionStack from "./AddTransactionStack";
+import TransactionStack from "./TransactionStack";
 import HomeStack from "./HomeStack";
 import TabBarCustomButton from "../components/TabBarCustomButton";
 import { COLORS, icons } from "../constants";
@@ -63,8 +63,8 @@ const Tabs = () => {
       />
 
       <Tab.Screen
-        name="AddTransaction"
-        component={AddTransactionStack}
+        name="Transaction"
+        component={TransactionStack}
         options={() => ({
           tabBarIcon: ({ focused }) => (
             <Image

@@ -4,11 +4,12 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
 import AddTransactionScreen from "../screens/AddTransactionScreen";
+import TransactionByCategoryScreen from "../screens/TransactionByCategoryScreen";
 import LogOutButton from "../components/LogOutButton";
 import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
 
-const AddTransactionStack = ({ navigation }) => {
+const TransactionStack = ({ navigation }) => {
   const { signOut } = useContext(AuthContext);
   return (
     <Stack.Navigator
@@ -17,7 +18,6 @@ const AddTransactionStack = ({ navigation }) => {
         headerTintColor: COLORS.white,
       }}
       screenOptions={{
-        title: "Add New Transaction",
         headerStyle: {
           backgroundColor: COLORS.primary,
           shadowColor: COLORS.primary, // iOS
@@ -36,6 +36,47 @@ const AddTransactionStack = ({ navigation }) => {
         name="AddTransaction"
         component={AddTransactionScreen}
         options={{
+          title: "Add New Transaction",
+          headerLeft: () => (
+            <LogOutButton
+              onPress={() => {
+                Alert.alert(
+                  //title
+                  "Sign Out Confirmation",
+                  //body
+                  "Are you sure want to sign out?",
+                  [
+                    {
+                      text: "Yes",
+
+                      onPress: async () => {
+                        await signOut().then(() => {
+                          navigation.navigate("Auth", { screen: "SignIn" });
+                        });
+                      },
+                    },
+                    {
+                      text: "Cancel",
+                      onPress: () => true,
+                      style: "cancel",
+                    },
+                  ],
+                  { cancelable: false }
+                  //clicking out side of alert will not cancel
+                );
+              }}
+            />
+          ),
+          headerRight: () => (
+            <HeaderRight onPress={() => navigation.navigate("Profile")} />
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="TransactionByCategory"
+        component={TransactionByCategoryScreen}
+        options={{
+          title: "Transaction By Type",
           headerLeft: () => (
             <LogOutButton
               onPress={() => {
@@ -75,7 +116,7 @@ const AddTransactionStack = ({ navigation }) => {
   );
 };
 
-export default AddTransactionStack;
+export default TransactionStack;
 
 const styles = StyleSheet.create({
   container: {

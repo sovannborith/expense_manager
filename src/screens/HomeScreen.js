@@ -33,7 +33,6 @@ const HomeScreen = ({ navigation }) => {
   ]);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("list");
-  const [categories, setCategories] = useState(category);
   const [tranType, setTranType] = useState(null);
   const [expType, setExpType] = useState([]);
   const [revType, setRevType] = useState([]);
@@ -201,7 +200,7 @@ const HomeScreen = ({ navigation }) => {
             backgroundColor: COLORS.white,
             ...styles.shadow,
           }}
-          onPress={() => setSelectedCategory(item)}
+          onPress={() => setSelectedCategory(item.type_id)}
         >
           <Image
             source={getValueByKey(icons, item.icon)}
@@ -337,8 +336,7 @@ const HomeScreen = ({ navigation }) => {
             data={chartData}
             labels={(datum) => `${datum.label}`}
             radius={({ datum }) =>
-              selectedCategory &&
-              selectedCategory.type_nm_en == datum.type_nm_en
+              selectedCategory && selectedCategory == datum.type_id
                 ? SIZES.width * 0.4
                 : SIZES.width * 0.4 - 10
             }
@@ -355,18 +353,25 @@ const HomeScreen = ({ navigation }) => {
             width={SIZES.width * 0.8}
             height={SIZES.width * 0.8}
             colorScale={colorScales}
+            animate={{ duration: 2000 }}
             events={[
               {
                 target: "data",
                 eventHandlers: {
-                  onPress: () => {
+                  onPressIn: () => {
                     return [
                       {
                         target: "labels",
                         mutation: (props) => {
-                          let categoryName = chartData[props.index].type_nm_en;
-                          setSelectCategoryByName(categoryName);
-                          alert("Hello");
+                          let category = chartData[props.index].type_id;
+                          if (Number(category) !== Number(selectedCategory)) {
+                            return;
+                          } else {
+                            navigation.navigate("Transaction", {
+                              screen: "TransactionByCategory",
+                              type_id: chartData[props.index],
+                            });
+                          }
                         },
                       },
                     ];
@@ -419,7 +424,7 @@ const HomeScreen = ({ navigation }) => {
                 {
                   target: "data",
                   eventHandlers: {
-                    onPress: () => {
+                    onClick: () => {
                       return [
                         {
                           target: "labels",
@@ -427,6 +432,7 @@ const HomeScreen = ({ navigation }) => {
                             let categoryName =
                               chartData[props.index].type_nm_en;
                             setSelectCategoryByName(categoryName);
+                            alert("Hello");
                           },
                         },
                       ];
