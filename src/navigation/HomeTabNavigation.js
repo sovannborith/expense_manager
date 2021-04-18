@@ -13,6 +13,7 @@ const Tabs = () => {
   return (
     <Tab.Navigator
       initialRouteName="Home"
+      //resetOnBlur={true}
       tabBarOptions={{
         showLabel: false,
         style: {

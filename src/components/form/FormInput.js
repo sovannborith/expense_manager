@@ -34,7 +34,7 @@ const FormInput = ({
     >
       <View
         style={{
-          padding: 10,
+          //padding: 10,
           height: "100%",
           justifyContent: "center",
           alignItems: "center",
@@ -56,6 +56,7 @@ const FormInput = ({
           name={iconType}
           size={25}
           color={!touched ? "#878787" : !error ? "#246b6b" : "#d10000"}
+          //style={{ marginTop: -3 }}
         />
       </View>
       <TextInput

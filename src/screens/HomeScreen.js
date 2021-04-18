@@ -10,9 +10,8 @@ import {
   FlatList,
   Animated,
   LogBox,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 //import { useTheme } from "@react-navigation/native";
 //import { AuthContext } from "../server/context/AuthProvider";
 import { VictoryPie } from "victory-native";
@@ -35,15 +34,27 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState("list");
   const [categories, setCategories] = useState(category);
+  const [tranType, setTranType] = useState(null);
+  const [expType, setExpType] = useState([]);
+  const [revType, setRevType] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showMoreToggle, setShowMoreToggle] = useState(false);
-  const [tranData, setTranData] = useState(null);
+  const [tranData, setTranData] = useState([]);
 
+  const isFocused = useIsFocused();
   const db = firebase.firestore();
 
   let categoryListHeightAnimationValue = useRef(new Animated.Value(140))
     .current;
 
+  const getValueByKey = (obj, key) => {
+    for (const [k, val] of Object.entries(obj)) {
+      if (k === key) {
+        return val;
+      }
+    }
+  };
   const validate = async () => {
     try {
       if (!util.getCurrentLoginUser()) {
@@ -75,11 +86,15 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  const getHomeData = async () => {
+  const loadHomeData = async () => {
     var trxType = [];
-    var transactions = [];
+    var transaction = [];
+    var et = [];
+    var rt = [];
     var totalExp = 0;
     var totalRev = 0;
+    var expCount = 0;
+    var revCount = 0;
     var curDate = new Date();
     try {
       const unsubscribe_01 = await db
@@ -100,32 +115,59 @@ const HomeScreen = ({ navigation }) => {
         .get()
         .then((documentSnapshot) => {
           documentSnapshot.docs.map((trx) => {
-            transactions.push(trx.data());
+            transaction.push(trx.data());
           });
         })
         .catch((err) => alert(err));
+
       trxType.forEach((type) => {
-        transactions.forEach((trx) => {
+        if (type.val_id === "EXP") {
+          et.push(type);
+        } else {
+          rt.push(type);
+        }
+        transaction.forEach((trx) => {
           if (trx.exp_item === type.type_id) {
             if (type.val_id === "EXP") {
               totalExp = totalExp + parseInt(trx.tran_amt);
+              expCount += 1;
+              trx.trx_type = type.val_id;
+              trx.color = type.color;
+              trx.icon = type.icon;
+              trx.type_nm_en = type.type_nm_en;
             } else {
               totalRev = totalRev + parseInt(trx.tran_amt);
+              revCount += 1;
+              trx.trx_type = type.val_id;
+              trx.color = type.color;
+              trx.icon = type.icon;
+              trx.type_nm_en = type.type_nm_en;
             }
           }
         });
       });
-      setTranData({
+      const unsubscribe_04 = setTranType(trxType);
+      const unsubscribe_05 = setTransactions(transaction);
+      const unsubscribe_06 = setExpType(et);
+      const unsubscribe_07 = setRevType(rt);
+      const unsubscribe_03 = setTranData({
         totalRevenue: totalRev,
         totalExpense: totalExp,
         totalBalance: totalRev - totalExp,
+        totalExpCount: expCount,
+        totalRevCount: revCount,
       });
       return () => {
         unsubscribe_01;
         unsubscribe_02;
+        unsubscribe_03;
+        unsubscribe_04;
+        unsubscribe_05;
+        unsubscribe_06;
+        unsubscribe_07;
       };
     } catch (e) {
-      alert("Error @HomeScreen - getHomeData: " + e);
+      alert("Error @HomeScreen - loadHomeData: " + e);
     }
   };
 
@@ -133,15 +175,15 @@ const HomeScreen = ({ navigation }) => {
     setLoading(true);
     try {
       validate();
-      getHomeData();
+      loadHomeData();
     } catch (e) {
       alert(e);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isFocused]);
 
-  const renderCategoryList = () => {
+  const renderCategoryList = (rt) => {
     const renderItem = ({ item }) => {
       return (
         <TouchableOpacity
@@ -151,44 +193,48 @@ const HomeScreen = ({ navigation }) => {
             margin: 5,
             height: 60,
             paddingVertical: SIZES.radius,
-            paddingHorizontal: SIZES.padding,
+            paddingHorizontal: SIZES.padding - 10,
             justifyContent: "space-evenly",
             borderRadius: 5,
             alignItems: "center",
-            width: SIZES.width / 2 - SIZES.padding - 10,
+            width: SIZES.width / 2 - SIZES.padding,
             backgroundColor: COLORS.white,
             ...styles.shadow,
           }}
           onPress={() => setSelectedCategory(item)}
         >
           <Image
-            source={item.icon}
+            source={getValueByKey(icons, item.icon)}
             style={{
-              width: 20,
-              height: 20,
-              tintColor: item.color,
+              width: 30,
+              height: 30,
+              tintColor: getValueByKey(COLORS, item.color),
             }}
           />
           <Text
             style={{
               marginLeft: SIZES.base,
               color: COLORS.primary,
-              fontWeight: "800",
+              fontWeight: "700",
             }}
           >
-            {item.name}
+            {item.type_nm_en}
           </Text>
         </TouchableOpacity>
       );
     };
 
     return (
-      <View style={{ paddingHorizontal: SIZES.padding - 5 }}>
+      <View>
         <Animated.View style={{ height: categoryListHeightAnimationValue }}>
           <FlatList
-            data={categories}
+            data={
+              viewMode == "list"
+                ? formatDataForChart(revType)
+                : formatDataForChart(expType)
+            }
             renderItem={renderItem}
-            keyExtractor={(item) => `key-${item.id}`}
+            keyExtractor={(item) => `key-${item.type_id}`}
             numColumns={2}
           />
         </Animated.View>
@@ -232,64 +278,67 @@ const HomeScreen = ({ navigation }) => {
     );
   };
 
-  const processCategoryDataToDisplay = () => {
-    // Filter expenses with "Confirmed" status
-
-    let chartData = categories.map((item) => {
-      let confirmExpenses = item.expenses.filter((a) => a.status == "C");
-      var total = confirmExpenses.reduce((a, b) => a + (b.total || 0), 0);
-
-      return {
-        name: item.name,
-        y: total,
-        expenseCount: confirmExpenses.length,
-        color: item.color,
-        id: item.id,
-      };
-    });
-
-    // filter out categories with no data/expenses
-    let filterChartData = chartData.filter((a) => a.y > 0);
-
-    // Calculate the total expenses
-    let totalExpense = filterChartData.reduce((a, b) => a + (b.y || 0), 0);
-
-    // Calculate percentage and repopulate chart data
-    let finalChartData = filterChartData.map((item) => {
-      let percentage = ((item.y / totalExpense) * 100).toFixed(0);
-      return {
-        label: `${percentage}%`,
-        y: Number(item.y),
-        expenseCount: item.expenseCount,
-        color: item.color,
-        name: item.name,
-        id: item.id,
-      };
-    });
-
-    return finalChartData;
-  };
-
   const setSelectCategoryByName = ({ name }) => {
     let category = categories.filter((a) => a.name == name);
     setSelectedCategory(category[0]);
   };
+
+  const formatDataForChart = () => {
+    let tempData = [];
+    let chartData = viewMode == "list" ? revType : expType;
+    let finalChartData = [];
+
+    let total = 0;
+    chartData.forEach((item) => {
+      let subTotal = 0;
+      transactions.forEach((trx) => {
+        if (trx.exp_item == item.type_id) {
+          tempData.push(trx);
+          subTotal += Number(trx.tran_amt);
+        }
+      });
+      item.y = subTotal;
+      item.itemCount = tempData.length;
+    });
+    chartData.forEach((item) => {
+      if (Number(item.y) > 0) {
+        finalChartData.push(item);
+      }
+    });
+
+    finalChartData.forEach((trx) => {
+      total += Number(trx.y);
+    });
+
+    finalChartData.forEach((item) => {
+      let percentage = ((item.y / total) * 100).toFixed(0);
+      item.label = `${percentage}%`;
+    });
+    return finalChartData;
+  };
+
   const renderChart = () => {
-    let chartData = processCategoryDataToDisplay();
-    let colorScales = chartData.map((item) => item.color);
-    let totalExpenseCount = chartData.reduce(
-      (a, b) => a + (b.expenseCount || 0),
-      0
-    );
+    var cd = viewMode == "list" ? revType : expType;
+
+    var chartData = formatDataForChart(cd);
+
+    let colorScales = [];
+
+    chartData.forEach((item) => {
+      colorScales.push(getValueByKey(COLORS, item.color));
+    });
+    let totalCount =
+      viewMode == "list" ? tranData.totalRevCount : tranData.totalExpCount;
 
     if (Platform.OS == "ios") {
       return (
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <VictoryPie
             data={chartData}
-            labels={(datum) => `${datum.y}`}
+            labels={(datum) => `${datum.label}`}
             radius={({ datum }) =>
-              selectedCategory && selectedCategory.name == datum.name
+              selectedCategory &&
+              selectedCategory.type_nm_en == datum.type_nm_en
                 ? SIZES.width * 0.4
                 : SIZES.width * 0.4 - 10
             }
@@ -315,8 +364,9 @@ const HomeScreen = ({ navigation }) => {
                       {
                         target: "labels",
                         mutation: (props) => {
-                          let categoryName = chartData[props.index].name;
+                          let categoryName = chartData[props.index].type_nm_en;
                           setSelectCategoryByName(categoryName);
+                          alert("Hello");
                         },
                       },
                     ];
@@ -327,8 +377,10 @@ const HomeScreen = ({ navigation }) => {
           />
 
           <View style={{ position: "absolute", top: "42%", left: "42%" }}>
-            <Text style={{ textAlign: "center" }}>{totalExpenseCount}</Text>
-            <Text style={{ textAlign: "center" }}>Expenses</Text>
+            <Text style={{ textAlign: "center" }}>{totalCount}</Text>
+            <Text style={{ textAlign: "center" }}>
+              {viewMode == "list" ? "Revenue(s)" : "Expense(s)"}
+            </Text>
           </View>
         </View>
       );
@@ -342,11 +394,11 @@ const HomeScreen = ({ navigation }) => {
             style={{ width: "100%", height: "auto" }}
           >
             <VictoryPie
-              standalone={false} // Android workaround
               data={chartData}
-              labels={(datum) => `${datum.y}`}
+              labels={(datum) => `${datum.label}`}
               radius={({ datum }) =>
-                selectedCategory && selectedCategory.name == datum.name
+                selectedCategory &&
+                selectedCategory.type_nm_en == datum.type_nm_en
                   ? SIZES.width * 0.4
                   : SIZES.width * 0.4 - 10
               }
@@ -360,8 +412,8 @@ const HomeScreen = ({ navigation }) => {
                   ...styles.shadow,
                 },
               }}
-              width={SIZES.width}
-              height={SIZES.width}
+              width={SIZES.width * 0.8}
+              height={SIZES.width * 0.8}
               colorScale={colorScales}
               events={[
                 {
@@ -372,7 +424,8 @@ const HomeScreen = ({ navigation }) => {
                         {
                           target: "labels",
                           mutation: (props) => {
-                            let categoryName = chartData[props.index].name;
+                            let categoryName =
+                              chartData[props.index].type_nm_en;
                             setSelectCategoryByName(categoryName);
                           },
                         },
@@ -384,8 +437,10 @@ const HomeScreen = ({ navigation }) => {
             />
           </Svg>
           <View style={{ position: "absolute", top: "42%", left: "42%" }}>
-            <Text style={{ textAlign: "center" }}>{totalExpenseCount}</Text>
-            <Text style={{ textAlign: "center" }}>Expenses</Text>
+            <Text style={{ textAlign: "center" }}>{totalCount}</Text>
+            <Text style={{ textAlign: "center" }}>
+              {viewMode == "list" ? "Revenue(s)" : "Expense(s)"}
+            </Text>
           </View>
         </View>
       );
@@ -471,108 +526,131 @@ const HomeScreen = ({ navigation }) => {
   };
 
   if (loading) return <Loader loadingLabel="Loading..." />;
-  /* if (!util.getCurrentLoginUser()) {
-    navigation.navigate("Auth", { screen: "SignIn" });
-  } */
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss()}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
-        <View style={styles.container}>
-          {/* <Header title="Expense Manager" /> */}
-          <View style={styles.summary}>
-            <View style={styles.summarySection}>
-              <Text style={styles.sectionHeader}>Revenue</Text>
-              <Text style={styles.sectionNumber}>
-                {numberWithCommas(Number(tranData?.totalRevenue))}
-              </Text>
-            </View>
-            <View style={styles.summarySection}>
-              <Text style={styles.sectionHeader}>Expense</Text>
-              <Text style={styles.sectionNumber}>
-                {numberWithCommas(Number(tranData?.totalExpense))}
-              </Text>
-            </View>
-            <View style={styles.summarySection}>
-              <Text style={styles.sectionHeader}>Balance</Text>
-              <Text style={styles.sectionNumber}>
-                {numberWithCommas(Number(tranData?.totalBalance))}
-              </Text>
-            </View>
-          </View>
-
-          <View style={{ ...styles.category }}>
-            <View style={styles.categoryCaption}>
-              <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
-              <Text style={styles.categoryCaptionTotal}>
-                {categories.length} total
-              </Text>
-            </View>
-            <View style={styles.chart}>
-              <TouchableOpacity
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 50,
-                  width: 50,
-                  backgroundColor: viewMode == "list" ? COLORS.primary : null,
-                  borderRadius: 25,
-                  color: COLORS.primary,
-                }}
-                onPress={() => setViewMode("list")}
-              >
-                <Image
-                  source={icons.menu}
-                  resizeMode="contain"
-                  style={{
-                    width: 20,
-                    height: 20,
-                    tintColor:
-                      viewMode == "list" ? COLORS.white : COLORS.darkgray,
-                  }}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: 50,
-                  width: 50,
-                  backgroundColor: viewMode == "chart" ? COLORS.primary : null,
-                  borderRadius: 25,
-                  color: COLORS.primary,
-                }}
-                onPress={() => setViewMode("chart")}
-              >
-                <Image
-                  source={icons.chart}
-                  resizeMode="contain"
-                  style={{
-                    width: 20,
-                    height: 20,
-                    tintColor:
-                      viewMode == "chart" ? COLORS.white : COLORS.darkgray,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: 60 }}
-            showsVerticalScrollIndicator={false}
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar backgroundColor={COLORS.primary} barStyle="light-content" />
+      <View style={styles.container}>
+        <View
+          style={{
+            backgroundColor: COLORS.primary,
+            width: "100%",
+            paddingLeft: 10,
+            paddingTop: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "800",
+              color: COLORS.white,
+            }}
           >
-            {viewMode == "list" && <View>{renderCategoryList()}</View>}
-            {viewMode == "chart" && (
-              <View>
-                {renderChart()}
-                {renderExpenseSummary()}
-              </View>
-            )}
-          </ScrollView>
+            Current Month Balance
+          </Text>
         </View>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        <View style={styles.summary}>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Revenue</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(tranData?.totalRevenue))}
+            </Text>
+          </View>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Expense</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(tranData?.totalExpense))}
+            </Text>
+          </View>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Balance</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(tranData?.totalBalance))}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{ ...styles.category }}>
+          <View style={styles.categoryCaption}>
+            <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
+            <Text style={styles.categoryCaptionTotal}>
+              Revenue: {tranData?.totalRevCount}
+            </Text>
+            <Text style={styles.categoryCaptionTotal}>
+              Expenses: {tranData?.totalExpCount}
+            </Text>
+          </View>
+          <View style={styles.chart}>
+            <TouchableOpacity
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 50,
+                width: 50,
+                backgroundColor: viewMode == "list" ? COLORS.primary : null,
+                borderRadius: 25,
+                color: COLORS.primary,
+              }}
+              onPress={() => setViewMode("list")}
+            >
+              <Image
+                source={icons.menu}
+                resizeMode="contain"
+                style={{
+                  width: 20,
+                  height: 20,
+                  tintColor:
+                    viewMode == "list" ? COLORS.white : COLORS.darkgray,
+                }}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 50,
+                width: 50,
+                backgroundColor: viewMode == "chart" ? COLORS.primary : null,
+                borderRadius: 25,
+                color: COLORS.primary,
+              }}
+              onPress={() => setViewMode("chart")}
+            >
+              <Image
+                source={icons.chart}
+                resizeMode="contain"
+                style={{
+                  width: 20,
+                  height: 20,
+                  tintColor:
+                    viewMode == "chart" ? COLORS.white : COLORS.darkgray,
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <ScrollView
+          contentContainerStyle={{
+            //paddingBottom: 50,
+            alignItems: "center",
+            width: SIZES.width,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {viewMode == "list" && (
+            <View>
+              {renderCategoryList(revType)}
+              {renderChart()}
+            </View>
+          )}
+          {viewMode == "chart" && (
+            <View>
+              {renderCategoryList(expType)}
+              {renderChart()}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -634,6 +712,7 @@ const styles = StyleSheet.create({
   },
   categoryCaptionTotal: {
     color: COLORS.darkgray,
+    fontSize: 12,
   },
   chart: {
     flexDirection: "row",
