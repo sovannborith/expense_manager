@@ -27,6 +27,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
   const { loginUser } = useContext(AuthContext);
   const [trxType, setTrxType] = useState([]);
   const [transactionDetails, setTransactionDetails] = useState([]);
+  const [arrowIcon, setArrowIcon] = useState(0);
 
   useLayoutEffect(() => {
     try {
@@ -43,7 +44,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
   useEffect(() => {
     try {
       setLoading(true);
-      console.log(transactionDetails);
+      //console.log(transactionDetails);
     } catch (e) {
       console.log(e);
     } finally {
@@ -81,12 +82,15 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
     if (rowMap[rowKey]) {
       rowMap[rowKey].closeRow();
     }
+    setArrowIcon(0);
   };
 
   const deleteRow = (rowMap, rowKey) => {
     setLoading(true);
     try {
-      Alert.alert(
+      deleteDBData(rowKey);
+      closeRow(rowMap, rowKey);
+      /* Alert.alert(
         //title
         "Deleting Confirmation",
         //body
@@ -107,7 +111,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
         ],
         { cancelable: false }
         //clicking out side of alert will not cancel
-      );
+      ); */
     } catch (e) {
       console.log(e);
     } finally {
@@ -137,7 +141,8 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
         })
         .then(() => {
           removeArrayData(id);
-        });
+        })
+        .error((err) => console.log(err));
 
       return () => {
         unsubscribe_01;
@@ -148,7 +153,11 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
   };
 
   const onRowDidOpen = (rowKey) => {
-    console.log("This row opened", rowKey);
+    setArrowIcon(1);
+  };
+
+  const onRowDidClose = (rowKey) => {
+    setArrowIcon(0);
   };
 
   const onLeftActionStatusChange = (rowKey) => {
@@ -195,17 +204,57 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
           onPress={() => console.log("Element touched")}
           underlayColor={"#aaa"}
         >
-          <View>
-            <Text style={styles.title} numberOfLines={1}>
-              {`${data.item.tran_desc} with amount of ${
-                data.item.tran_amt
-              } on ${util.formartDate(new Date(data.item.timestamp))}`}
-            </Text>
-            {/* {data.item.tran_rmk && (
-              <Text style={styles.details} numberOfLines={1}>
-                {data.item.details}
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
+            <View
+              style={{
+                justifyContent: "center",
+                paddingRight: 10,
+              }}
+            >
+              <Image
+                source={getValueByKey(icons, trxType.icon)}
+                resizeMode="contain"
+                style={{
+                  width: 40,
+                  height: 40,
+                  tintColor: COLORS.primary,
+                }}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title} numberOfLines={1}>
+                {trxType?.val_id === "EXP" ? "Expense - " : "Revenue - "}
+                {data.item.tran_desc}
               </Text>
-            )} */}
+              <Text style={{ color: COLORS.gray }}>
+                Amount: {data.item.tran_amt}
+              </Text>
+              <Text style={{ color: COLORS.gray }}>
+                Date: {util.formartDate(new Date(data.item.timestamp))}
+              </Text>
+            </View>
+            <View
+              style={{
+                justifyContent: "center",
+                paddingRight: 10,
+              }}
+            >
+              <Image
+                source={arrowIcon == 1 ? icons.right_icon : icons.back_icon}
+                resizeMode="contain"
+                style={{
+                  width: 20,
+                  height: 20,
+                  tintColor: COLORS.primary,
+                  right: -20,
+                  alignSelf: "flex-end",
+                }}
+              />
+            </View>
           </View>
         </TouchableHighlight>
       </Animated.View>
@@ -214,12 +263,12 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
 
   const renderItem = (data, rowMap) => {
     const rowHeightAnimatedValue = new Animated.Value(60);
-    if (data == null) rethrn(<Text>No data!</Text>);
+    if (data == null) return <Text>No data!</Text>;
     return (
       <VisibleItem
         data={data}
         rowHeightAnimatedValue={rowHeightAnimatedValue}
-        removeRow={() => deleteRow(rowMap, data.item.key)}
+        removeRow={() => deleteRow(rowMap, data.item.tran_id)}
       />
     );
   };
@@ -249,7 +298,12 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
 
     return (
       <Animated.View
-        style={[styles.rowBack, { height: rowHeightAnimatedValue }]}
+        style={[
+          styles.rowBack,
+          {
+            height: rowHeightAnimatedValue,
+          },
+        ]}
       >
         {!leftActionActivated && (
           <TouchableOpacity
@@ -361,16 +415,18 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
           <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
             <View style={styles.signInWrapper}>
               <SwipeListView
+                style={{ width: SIZES.width - 20, height: SIZES.height }}
                 data={transactionDetails}
                 renderItem={renderItem}
                 renderHiddenItem={renderHiddenItem}
                 keyExtractor={(item) => `${item.tran_id}`}
-                leftOpenValue={75}
+                /* leftOpenValue={75} */
                 rightOpenValue={-150}
                 disableRightSwipe
                 onRowDidOpen={onRowDidOpen}
+                onRowDidClose={onRowDidClose}
                 leftActivationValue={100}
-                rightActivationValue={-200}
+                rightActivationValue={-300}
                 leftActionValue={0}
                 rightActionValue={-500}
                 onLeftAction={onLeftAction}
@@ -457,13 +513,15 @@ const styles = StyleSheet.create({
     height: 60,
     padding: 10,
     marginBottom: 15,
+
+    justifyContent: "center",
   },
   rowBack: {
     alignItems: "center",
     backgroundColor: "#DDD",
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     paddingLeft: 15,
     margin: 5,
     marginBottom: 15,
@@ -484,11 +542,11 @@ const styles = StyleSheet.create({
     width: 80,
   },
   backRightBtnRight: {
-    backgroundColor: COLORS.red,
+    backgroundColor: COLORS.danger,
     right: 0,
     borderTopRightRadius: 5,
     borderBottomRightRadius: 5,
-    width: 65,
+    width: 60,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -499,9 +557,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#666",
+    fontWeight: "600",
+    color: COLORS.primary,
+    alignSelf: "flex-start",
   },
   details: {
     fontSize: 12,

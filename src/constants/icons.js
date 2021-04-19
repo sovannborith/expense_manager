@@ -26,7 +26,8 @@ export const interest = require("../assets/icons/wallet.png");
 export const close = require("../assets/icons/close.png");
 export const trash = require("../assets/icons/delete.png");
 export const reload = require("../assets/icons/reload.png");
-
+export const back_icon = require("../assets/icons/back_icon.png");
+export const right_icon = require("../assets/icons/right_icon.png");
 export default {
   baby_car,
   back_arrow,
@@ -56,4 +57,6 @@ export default {
   close,
   trash,
   reload,
+  back_icon,
+  right_icon,
 };

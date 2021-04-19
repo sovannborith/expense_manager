@@ -74,13 +74,13 @@ const HomeScreen = ({ navigation }) => {
               console.log("No data found");
             }
           })
-          .catch((err) => alert(err));
+          .catch((err) => console.log(err));
         return () => {
           unsubscribe_01;
         };
       }
     } catch (e) {
-      alert("Error @HomeScreen - validate: " + e);
+      console.log("Error @HomeScreen - validate: " + e);
     } finally {
       setLoading(false);
     }
