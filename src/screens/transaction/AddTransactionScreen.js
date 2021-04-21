@@ -13,16 +13,16 @@ import * as Animatable from "react-native-animatable";
 import { Formik, useFormik } from "formik";
 import * as Yup from "yup";
 
-import { AuthContext } from "../server/context/AuthProvider";
+import { AuthContext } from "../../server/context/AuthProvider";
 
 import DropDownPicker from "react-native-dropdown-picker";
-import FormInput from "../components/form/FormInput";
-import FormButton from "../components/form/FormButton";
-import FormOutLineButton from "../components/form/FormOutLineButton";
-import { COLORS, SIZES } from "../constants";
-import { firebase } from "../server/firebase/firebase";
-import util from "../utils/util";
-import Loader from "../components/LoadingComponent";
+import FormInput from "../../components/form/FormInput";
+import FormButton from "../../components/form/FormButton";
+import FormOutLineButton from "../../components/form/FormOutLineButton";
+import { COLORS, SIZES } from "../../constants";
+import { firebase } from "../../server/firebase/firebase";
+import util from "../../utils/util";
+import Loader from "../../components/LoadingComponent";
 const db = firebase.firestore();
 
 const AddTransactionScreen = ({ navigation }) => {
@@ -73,7 +73,7 @@ const AddTransactionScreen = ({ navigation }) => {
               timestamp: new Date().getTime(),
               uid: loginUser.uid,
               tran_year: curDate.getFullYear(),
-              tran_month: curDate.getMonth()+1,
+              tran_month: curDate.getMonth() + 1,
               tran_day: curDate.getDate(),
             })
             .then(() => {
@@ -188,10 +188,11 @@ const AddTransactionScreen = ({ navigation }) => {
         <View style={styles.container}>
           <View style={styles.logoCover}>
             <Image
-              source={require("../assets/logo_01.png")}
+              source={require("../../assets/logo_01.png")}
               style={styles.logo}
             />
             <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
+              
               <View
                 style={{
                   flexDirection: "row",
@@ -256,7 +257,7 @@ const AddTransactionScreen = ({ navigation }) => {
                         paddingTop: 1,
                       }}
                     >
-                      Revenue
+                      Income
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -298,7 +299,7 @@ const AddTransactionScreen = ({ navigation }) => {
                   placeholderText={
                     expType == "EXP"
                       ? "Expense Description"
-                      : "Revenue Description"
+                      : "Income Description"
                   }
                   iconType="filetext1"
                   labelValue={values.description}
@@ -359,9 +360,13 @@ const AddTransactionScreen = ({ navigation }) => {
                   loading={isLoading}
                 />
                 <FormOutLineButton
-                  buttonTitle="Cancel"
-                  onPress={() => navigation.replace("App", { screen: "Home" })}
-                  danger={true}
+                  buttonTitle="View All Transaction"
+                  onPress={() =>
+                    navigation.navigate("Transaction", {
+                      screen: "TransactionList",
+                    })
+                  }
+                  /* danger={true} */
                 />
               </View>
             </Animatable.View>

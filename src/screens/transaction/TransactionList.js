@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useLayoutEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -13,76 +13,159 @@ import {
 import { SwipeListView } from "react-native-swipe-list-view";
 import * as Animatable from "react-native-animatable";
 
-import { AuthContext } from "../server/context/AuthProvider";
+import { AuthContext } from "../../server/context/AuthProvider";
 
-import FormOutLineButton from "../components/form/FormOutLineButton";
-import { COLORS, SIZES, icons } from "../constants";
-import { firebase } from "../server/firebase/firebase";
-import util from "../utils/util";
-import Loader from "../components/LoadingComponent";
+import { COLORS, SIZES, icons } from "../../constants";
+import { firebase } from "../../server/firebase/firebase";
+import util from "../../utils/util";
+import Loader from "../../components/LoadingComponent";
 const db = firebase.firestore();
 
-const TransactionByCategoryScreen = ({ route, navigation }) => {
+const TransactionList = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const { loginUser } = useContext(AuthContext);
-  const [trxType, setTrxType] = useState([]);
-  const [transactionDetails, setTransactionDetails] = useState([]);
+
+  const [category, setCategory] = useState([]);
+  const [transactionList, setTransactionList] = useState([]);
+  const [headerData, setHeaderData] = useState([]);
+  const [viewMode, setViewMode] = useState("inc");
+
   const [arrowIcon, setArrowIcon] = useState(0);
+  const [tranKey, setTranKey] = useState(null);
 
-  useLayoutEffect(() => {
-    try {
-      setLoading(true);
+  const numberWithCommas = (x) => {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+  const loadData = async () => {
+    var trxType = [];
+    var transaction = [];
 
-      loadTransactionDetails();
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [navigation, route]);
-
-  useEffect(() => {
+    var curDate = new Date();
     try {
-      setLoading(true);
-      //console.log(transactionDetails);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  const loadTransactionDetails = async () => {
-    try {
-      const { trxItem, title } = route.params;
-      navigation.setOptions({ headerTitle: title });
-      setTrxType(trxItem);
-      let curDate = new Date();
+      //Get all transaction types
       const unsubscribe_01 = await db
+        .collection("tbl_trx_type")
+        .get()
+        .then((documentSnapshot) => {
+          documentSnapshot.docs.map((trx) => {
+            trxType.push(trx.data());
+          });
+        })
+        .catch((err) => alert(err));
+      //Get all transactions
+      const unsubscribe_02 = await db
         .collection("tbl_transactions")
-        .where("uid", "==", loginUser.uid)
-        .where("exp_item", "==", trxItem.type_id)
+        .where("uid", "==", util.getCurrentLoginUser().uid)
         .where("tran_year", "==", curDate.getFullYear())
         .where("tran_month", "==", curDate.getMonth() + 1)
         .get()
         .then((documentSnapshot) => {
-          setTransactionDetails(
-            documentSnapshot.docs.map((item) => item.data())
-          );
+          documentSnapshot.docs.map((trx) => {
+            transaction.push(trx.data());
+          });
+        })
+        .catch((err) => alert(err));
+
+      trxType.forEach((type) => {
+        transaction.forEach((trx) => {
+          if (trx.exp_item === type.type_id) {
+            trx.trx_type = type.val_id;
+            trx.color = type.color;
+            trx.icon = type.icon;
+            trx.type_nm_en = type.type_nm_en;
+          }
         });
-      //.error((err) => console.log(err));
+      });
+
+      let tempData = [];
+      var totalExp = 0;
+      var totalInc = 0;
+      var expCount = 0;
+      var incCount = 0;
+      transaction.forEach((item) => {
+        if (item.val_id === "EXP") {
+          totalExp = totalExp + parseInt(item.tran_amt);
+          expCount += 1;
+        } else {
+          totalInc = totalInc + parseInt(item.tran_amt);
+          incCount += 1;
+        }
+      });
+      tempData.push({
+        totalExpense: totalExp,
+        totalIncome: totalInc,
+        totalExpenseCount: expCount,
+        totalIncomeCount: incCount,
+        balance: totalInc - totalExp,
+      });
+
+      const unsubscribe_03 = setHeaderData(tempData);
+      console.log(headerData);
+      //const unsubscribe_04 = setTransactionList(filterData(transaction));
+
       return () => {
         unsubscribe_01;
+        unsubscribe_02;
+        unsubscribe_03;
+        unsubscribe_04;
+        //unsubscribe_05;
       };
     } catch (e) {
-      console.log(e);
+      console.log("Error @TransactionList - loadHomeData: " + e);
     }
+  };
+
+  const listHomeData = async (trxDtls) => {
+    let tempData = [];
+    var totalExp = 0;
+    var totalInc = 0;
+    var expCount = 0;
+    var incCount = 0;
+    trxDtls.forEach((item) => {
+      if (item.val_id === "EXP") {
+        totalExp = totalExp + parseInt(item.tran_amt);
+        expCount += 1;
+      } else {
+        totalInc = totalInc + parseInt(item.tran_amt);
+        incCount += 1;
+      }
+    });
+    tempData.push({
+      totalExpense: totalExp,
+      totalIncome: totalInc,
+      totalExpenseCount: expCount,
+      totalIncomeCount: incCount,
+      balance: totalInc - totalExp,
+    });
+    console.log(tempData);
+    return tempData;
+  };
+
+  const filterData = async (trxDtls) => {
+    let tempData = [];
+    if (viewMode === "inc") {
+      trxDtls.forEach((item) => {
+        if (item.val_id === "REVN") {
+          tempData.push(item);
+        }
+      });
+    } else {
+      trxDtls.forEach((item) => {
+        if (item.val_id === "exp") {
+          tempData.push(item);
+        }
+      });
+    }
+    return tempData;
   };
 
   const closeRow = (rowMap, rowKey) => {
     if (rowMap[rowKey]) {
       rowMap[rowKey].closeRow();
     }
-    setArrowIcon(0);
+    if (rowKey === tranKey) {
+      setArrowIcon(0);
+    }
   };
 
   const deleteRow = (rowMap, rowKey) => {
@@ -154,10 +237,12 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
 
   const onRowDidOpen = (rowKey) => {
     setArrowIcon(1);
+    setTranKey(rowKey);
   };
 
   const onRowDidClose = (rowKey) => {
     setArrowIcon(0);
+    setTranKey(null);
   };
 
   const onLeftActionStatusChange = (rowKey) => {
@@ -221,7 +306,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
                 style={{
                   width: 40,
                   height: 40,
-                  tintColor: COLORS.primary,
+                  tintColor: getValueByKey(COLORS, trxType.color),
                 }}
               />
             </View>
@@ -311,7 +396,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
             onPress={onClose}
           >
             <Image
-              source={icons.reload}
+              source={icons.close}
               resizeMode="contain"
               style={{
                 width: 20,
@@ -392,35 +477,160 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
       }
     }
   };
+
+  const handleExpClick = () => {
+    setViewMode("exp");
+    filterData(viewMode);
+  };
+  const handleRevClick = () => {
+    setViewMode("inc");
+    filterData(viewMode);
+  };
+  useEffect(() => {
+    setLoading(true);
+    loadData();
+    try {
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  }, [viewMode]);
   if (loading) return <Loader loadingLabel="Loading..." />;
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <View style={[styles.logoCover, styles.shadow]}>
-          <View
-            style={{
-              backgroundColor: COLORS.white,
-              ...styles.logo,
-            }}
-          >
-            <Image
-              /* source={require("../assets/logo_01.png")} */
-              source={getValueByKey(icons, trxType.icon)}
-              style={{
-                tintColor: getValueByKey(COLORS, trxType.color),
-                ...styles.logoImg,
-              }}
-            />
+        <View style={styles.summary}>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Income</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(headerData?.totalIncome))}
+            </Text>
           </View>
-          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Expense</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(headerData?.totalExpense))}
+            </Text>
+          </View>
+          <View style={styles.summarySection}>
+            <Text style={styles.sectionHeader}>Balance</Text>
+            <Text style={styles.sectionNumber}>
+              {numberWithCommas(Number(headerData?.balance))}
+            </Text>
+          </View>
+        </View>
+
+        <View style={[styles.logoCover, styles.shadow]}>
+          <Animatable.View animation="fadeInUpBig">
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                backgroundColor: COLORS.lightGray,
+                width: SIZES.width,
+                padding: 10,
+                borderTopRightRadius: 20,
+                borderTopLeftRadius: 20,
+              }}
+            >
+              <Text
+                style={{
+                  color: COLORS.primary,
+                  fontWeight: "800",
+                  marginTop: 15,
+                }}
+              >
+                Transaction List
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  height: 50,
+                  borderColor: COLORS.primary,
+                  borderWidth: 3,
+                  borderRadius: 30,
+                  shadowColor: COLORS.gray,
+                  shadowRadius: 5,
+                  shadowOpacity: 2,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 5,
+                  padding: 1,
+                }}
+              >
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{
+                    backgroundColor:
+                      viewMode == "inc" ? COLORS.primary : COLORS.gray,
+                    padding: 10,
+                    borderTopLeftRadius: "50%",
+                    borderBottomLeftRadius: "50%",
+                    shadowColor: COLORS.gray,
+                    shadowRadius: 5,
+                    shadowOpacity: 2,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 5,
+                    borderColor: COLORS.white,
+                    borderWidth: viewMode == "inc" ? 1 : null,
+                    width: 80,
+                  }}
+                  onPress={() => {
+                    handleRevClick();
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "800",
+                      color: COLORS.white,
+                      paddingTop: 1,
+                    }}
+                  >
+                    Income
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{
+                    backgroundColor:
+                      viewMode == "exp" ? COLORS.red : COLORS.gray,
+                    padding: 10,
+                    borderTopRightRadius: "50%",
+                    borderBottomRightRadius: "50%",
+                    shadowColor: COLORS.gray,
+                    shadowRadius: 5,
+                    shadowOpacity: 2,
+                    shadowOffset: { width: 0, height: 2 },
+                    elevation: 5,
+                    borderColor: COLORS.white,
+                    borderWidth: viewMode == "exp" ? 1 : null,
+                    width: 80,
+                  }}
+                  onPress={() => {
+                    handleExpClick();
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "800",
+                      color: COLORS.white,
+                      paddingTop: 1,
+                    }}
+                  >
+                    Expense
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <View style={styles.signInWrapper}>
               <SwipeListView
                 style={{ width: SIZES.width - 20, height: SIZES.height }}
-                data={transactionDetails}
+                data={transactionList}
                 renderItem={renderItem}
                 renderHiddenItem={renderHiddenItem}
                 keyExtractor={(item) => `${item.tran_id}`}
-                /* leftOpenValue={75} */
                 rightOpenValue={-150}
                 disableRightSwipe
                 onRowDidOpen={onRowDidOpen}
@@ -435,60 +645,85 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
                 onRightActionStatusChange={onRightActionStatusChange}
               />
             </View>
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: COLORS.lightGray2,
-                paddingHorizontal: 20,
-              }}
-            >
-              <FormOutLineButton
-                buttonTitle="View all transaction?"
-                onPress={() =>
-                  navigation.navigate("Transaction", {
-                    screen: "TransactionList",
-                  })
-                }
-                danger={true}
-              />
-            </View>
           </Animatable.View>
         </View>
       </View>
     </SafeAreaView>
   );
 };
-export default TransactionByCategoryScreen;
+export default TransactionList;
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.primary,
   },
+  summary: {
+    width: "100%",
+    height: 75,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 5,
+    backgroundColor: COLORS.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  summarySection: {
+    flexDirection: "column",
+    backgroundColor: COLORS.white, //"#ee3431",
+    marginTop: 10,
+    height: (SIZES.body2 + 5) * 2,
+    justifyContent: "space-between",
+    width: Math.abs(SIZES.width / 3) - 10,
+    alignItems: "center",
+    borderRadius: SIZES.body2 + 5,
+    shadowColor: COLORS.gray,
+    shadowRadius: 5,
+    shadowOpacity: 2,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
+    paddingVertical: 5,
+  },
+  sectionHeader: {
+    color: COLORS.primary,
+    fontWeight: "600",
+    fontSize: 14,
+    paddingVertical: 3,
+  },
+  sectionNumber: {
+    color: COLORS.secondary,
+    fontWeight: "500",
+  },
+
   logoCover: {
     alignItems: "center",
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.lightGray,
     alignItems: "center",
     height: SIZES.height,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  logo: {
-    height: 120,
-    width: 120,
-    resizeMode: "cover",
-    borderRadius: 60,
-    alignItems: "center",
-    justifyContent: "center",
+  category: {
+    width: SIZES.width - SIZES.padding / 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: SIZES.padding / 4,
   },
-  logoImg: {
-    height: 60,
-    width: 60,
-    resizeMode: "contain",
+  categoryCaptionHeader: {
+    fontWeight: "800",
+    color: COLORS.primary,
+  },
+  categoryCaptionTotal: {
+    color: COLORS.darkgray,
+    fontSize: 12,
+  },
+  chart: {
+    flexDirection: "row",
   },
   signInWrapper: {
     flex: 1,
     alignItems: "center",
     width: SIZES.width,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+
     backgroundColor: COLORS.lightGray,
     padding: 10,
   },

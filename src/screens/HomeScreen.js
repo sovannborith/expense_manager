@@ -21,7 +21,7 @@ import { Svg } from "react-native-svg";
 //import api from "../services/api";
 import util from "../utils/util";
 import Loader from "../components/LoadingComponent";
-import { COLORS, SIZES, FONTS, icons } from "../constants";
+import { COLORS, SIZES, icons } from "../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 //import Header from "../components/Header";
@@ -33,7 +33,7 @@ const HomeScreen = ({ navigation }) => {
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState("income");
   const [tranType, setTranType] = useState(null);
   const [expType, setExpType] = useState([]);
   const [revType, setRevType] = useState([]);
@@ -229,7 +229,7 @@ const HomeScreen = ({ navigation }) => {
         <Animated.View style={{ height: categoryListHeightAnimationValue }}>
           <FlatList
             data={
-              viewMode == "list"
+              viewMode == "income"
                 ? formatDataForChart(revType)
                 : formatDataForChart(expType)
             }
@@ -280,7 +280,7 @@ const HomeScreen = ({ navigation }) => {
 
   const formatDataForChart = () => {
     let tempData = [];
-    let chartData = viewMode == "list" ? revType : expType;
+    let chartData = viewMode == "income" ? revType : expType;
     let finalChartData = [];
 
     let total = 0;
@@ -313,7 +313,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const renderChart = () => {
-    var cd = viewMode == "list" ? revType : expType;
+    var cd = viewMode == "income" ? revType : expType;
 
     var chartData = formatDataForChart(cd);
 
@@ -323,7 +323,7 @@ const HomeScreen = ({ navigation }) => {
       colorScales.push(getValueByKey(COLORS, item.color));
     });
     let totalCount =
-      viewMode == "list" ? tranData.totalRevCount : tranData.totalExpCount;
+      viewMode == "income" ? tranData.totalRevCount : tranData.totalExpCount;
 
     if (Platform.OS == "ios") {
       return (
@@ -368,9 +368,10 @@ const HomeScreen = ({ navigation }) => {
                             let titleDtl =
                               category.val_id == "EXP"
                                 ? `Expense on ${category.type_nm_en}`
-                                : `Revenue from ${category.type_nm_en}`;
+                                : `Income from ${category.type_nm_en}`;
                             navigation.navigate("Transaction", {
                               screen: "TransactionByCategory",
+                              initial: false,
                               params: {
                                 trxItem: chartData[props.index],
                                 title: titleDtl,
@@ -389,7 +390,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={{ position: "absolute", top: "42%", left: "42%" }}>
             <Text style={{ textAlign: "center" }}>{totalCount}</Text>
             <Text style={{ textAlign: "center" }}>
-              {viewMode == "list" ? "Revenue(s)" : "Expense(s)"}
+              {viewMode == "income" ? "Income(s)" : "Expense(s)"}
             </Text>
           </View>
         </View>
@@ -440,9 +441,10 @@ const HomeScreen = ({ navigation }) => {
                               let titleDtl =
                                 category.val_id == "EXP"
                                   ? `Expense on ${category.type_nm_en}`
-                                  : `Revenue from ${category.type_nm_en}`;
+                                  : `Income from ${category.type_nm_en}`;
                               navigation.navigate("Transaction", {
                                 screen: "TransactionByCategory",
+                                initial: false,
                                 params: {
                                   trxItem: chartData[props.index],
                                   title: titleDtl,
@@ -461,7 +463,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={{ position: "absolute", top: "42%", left: "42%" }}>
             <Text style={{ textAlign: "center" }}>{totalCount}</Text>
             <Text style={{ textAlign: "center" }}>
-              {viewMode == "list" ? "Revenue(s)" : "Expense(s)"}
+              {viewMode == "income" ? "Income(s)" : "Expense(s)"}
             </Text>
           </View>
         </View>
@@ -498,7 +500,7 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <View style={styles.summary}>
           <View style={styles.summarySection}>
-            <Text style={styles.sectionHeader}>Revenue</Text>
+            <Text style={styles.sectionHeader}>Income</Text>
             <Text style={styles.sectionNumber}>
               {numberWithCommas(Number(tranData?.totalRevenue))}
             </Text>
@@ -521,7 +523,7 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.categoryCaption}>
             <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
             <Text style={styles.categoryCaptionTotal}>
-              Revenue: {tranData?.totalRevCount}
+              Income: {tranData?.totalRevCount}
             </Text>
             <Text style={styles.categoryCaptionTotal}>
               Expenses: {tranData?.totalExpCount}
@@ -534,20 +536,19 @@ const HomeScreen = ({ navigation }) => {
                 justifyContent: "center",
                 height: 50,
                 width: 50,
-                backgroundColor: viewMode == "list" ? COLORS.primary : null,
+                backgroundColor: viewMode == "income" ? COLORS.primary : null,
                 borderRadius: 25,
                 color: COLORS.primary,
               }}
-              onPress={() => setViewMode("list")}
+              onPress={() => setViewMode("income")}
             >
               <Image
-                source={icons.menu}
+                source={icons.income}
                 resizeMode="contain"
                 style={{
                   width: 20,
                   height: 20,
-                  tintColor:
-                    viewMode == "list" ? COLORS.white : COLORS.darkgray,
+                  opacity: viewMode == "income" ? 1 : 0.4,
                 }}
               />
             </TouchableOpacity>
@@ -557,20 +558,19 @@ const HomeScreen = ({ navigation }) => {
                 justifyContent: "center",
                 height: 50,
                 width: 50,
-                backgroundColor: viewMode == "chart" ? COLORS.primary : null,
+                backgroundColor: viewMode == "expense" ? COLORS.danger : null,
                 borderRadius: 25,
                 color: COLORS.primary,
               }}
-              onPress={() => setViewMode("chart")}
+              onPress={() => setViewMode("expense")}
             >
               <Image
-                source={icons.chart}
+                source={icons.expense}
                 resizeMode="contain"
                 style={{
                   width: 20,
                   height: 20,
-                  tintColor:
-                    viewMode == "chart" ? COLORS.white : COLORS.darkgray,
+                  opacity: viewMode == "expense" ? 1 : 0.4,
                 }}
               />
             </TouchableOpacity>
@@ -578,24 +578,46 @@ const HomeScreen = ({ navigation }) => {
         </View>
         <ScrollView
           contentContainerStyle={{
-            //paddingBottom: 50,
+            paddingBottom: 100,
             alignItems: "center",
             width: SIZES.width,
           }}
           showsVerticalScrollIndicator={false}
         >
-          {viewMode == "list" && (
+          {viewMode == "income" && (
             <View>
               {renderCategoryList(revType)}
               {renderChart()}
             </View>
           )}
-          {viewMode == "chart" && (
+          {viewMode == "expense" && (
             <View>
               {renderCategoryList(expType)}
               {renderChart()}
             </View>
           )}
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "flex-end",
+              width: "100%",
+              paddingRight: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={{ alignSelf: "flex-end" }}
+              onPress={() =>
+                navigation.navigate("Transaction", {
+                  screen: "TransactionList",
+                  initial: false,
+                })
+              }
+            >
+              <Text style={{ color: COLORS.primary }}>
+                View current month transaction
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -609,6 +631,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     backgroundColor: COLORS.lightGray,
+    height: "auto",
     //padding: 5,
   },
   summary: {

@@ -3,8 +3,9 @@ import { StyleSheet, Alert } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthContext } from "../server/context/AuthProvider";
 import { COLORS } from "../constants";
-import AddTransactionScreen from "../screens/AddTransactionScreen";
-import TransactionByCategoryScreen from "../screens/TransactionByCategoryScreen";
+import AddTransactionScreen from "../screens/transaction/AddTransactionScreen";
+import TransactionByCategoryScreen from "../screens/transaction/TransactionByCategoryScreen";
+import TransactionList from "../screens/transaction/TransactionList";
 import LogOutButton from "../components/LogOutButton";
 import HeaderRight from "../components/HeaderRight";
 const Stack = createStackNavigator();
@@ -30,6 +31,39 @@ const TransactionStack = ({ navigation }) => {
         headerTitleStyle: {
           fontWeight: "bold",
         },
+        headerLeft: () => (
+          <LogOutButton
+            onPress={() => {
+              Alert.alert(
+                //title
+                "Sign Out Confirmation",
+                //body
+                "Are you sure want to sign out?",
+                [
+                  {
+                    text: "Yes",
+
+                    onPress: async () => {
+                      await signOut().then(() => {
+                        navigation.navigate("Auth", { screen: "SignIn" });
+                      });
+                    },
+                  },
+                  {
+                    text: "Cancel",
+                    onPress: () => true,
+                    style: "cancel",
+                  },
+                ],
+                { cancelable: false }
+                //clicking out side of alert will not cancel
+              );
+            }}
+          />
+        ),
+        headerRight: () => (
+          <HeaderRight onPress={() => navigation.navigate("Profile")} />
+        ),
       }}
     >
       <Stack.Screen
@@ -37,79 +71,18 @@ const TransactionStack = ({ navigation }) => {
         component={AddTransactionScreen}
         options={{
           title: "Add New Transaction",
-          headerLeft: () => (
-            <LogOutButton
-              onPress={() => {
-                Alert.alert(
-                  //title
-                  "Sign Out Confirmation",
-                  //body
-                  "Are you sure want to sign out?",
-                  [
-                    {
-                      text: "Yes",
-
-                      onPress: async () => {
-                        await signOut().then(() => {
-                          navigation.navigate("Auth", { screen: "SignIn" });
-                        });
-                      },
-                    },
-                    {
-                      text: "Cancel",
-                      onPress: () => true,
-                      style: "cancel",
-                    },
-                  ],
-                  { cancelable: false }
-                  //clicking out side of alert will not cancel
-                );
-              }}
-            />
-          ),
-          headerRight: () => (
-            <HeaderRight onPress={() => navigation.navigate("Profile")} />
-          ),
         }}
       />
       <Stack.Screen
         name="TransactionByCategory"
         component={TransactionByCategoryScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
+      <Stack.Screen
+        name="TransactionList"
+        component={TransactionList}
         options={{
-          title: "Transaction By Type",
-          headerLeft: () => (
-            <LogOutButton
-              onPress={() => {
-                Alert.alert(
-                  //title
-                  "Sign Out Confirmation",
-                  //body
-                  "Are you sure want to sign out?",
-                  [
-                    {
-                      text: "Yes",
-
-                      onPress: async () => {
-                        await signOut().then(() => {
-                          navigation.navigate("Auth", { screen: "SignIn" });
-                        });
-                      },
-                    },
-                    {
-                      text: "Cancel",
-                      onPress: () => true,
-                      style: "cancel",
-                    },
-                  ],
-                  { cancelable: false }
-                  //clicking out side of alert will not cancel
-                );
-              }}
-            />
-          ),
-          headerRight: () => (
-            <HeaderRight onPress={() => navigation.navigate("Profile")} />
-          ),
+          headerTitle: "Current Month Transaction",
         }}
       />
     </Stack.Navigator>
