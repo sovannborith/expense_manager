@@ -146,10 +146,6 @@ const HomeScreen = ({ navigation }) => {
           }
         });
       });
-      const unsubscribe_04 = setTranType(trxType);
-      const unsubscribe_05 = setTransactions(transaction);
-      const unsubscribe_06 = setExpType(et);
-      const unsubscribe_07 = setRevType(rt);
       const unsubscribe_03 = setTranData({
         totalRevenue: totalRev,
         totalExpense: totalExp,
@@ -157,6 +153,11 @@ const HomeScreen = ({ navigation }) => {
         totalExpCount: expCount,
         totalRevCount: revCount,
       });
+      const unsubscribe_04 = setTranType(trxType);
+      const unsubscribe_05 = setTransactions(transaction);
+      const unsubscribe_06 = setExpType(et);
+      const unsubscribe_07 = setRevType(rt);
+
       return () => {
         unsubscribe_01;
         unsubscribe_02;
@@ -502,19 +503,19 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.summarySection}>
             <Text style={styles.sectionHeader}>Income</Text>
             <Text style={styles.sectionNumber}>
-              {numberWithCommas(Number(tranData?.totalRevenue))}
+              {numberWithCommas(Number(tranData?.totalRevenue || 0))}
             </Text>
           </View>
           <View style={styles.summarySection}>
             <Text style={styles.sectionHeader}>Expense</Text>
             <Text style={styles.sectionNumber}>
-              {numberWithCommas(Number(tranData?.totalExpense))}
+              {numberWithCommas(Number(tranData?.totalExpense || 0))}
             </Text>
           </View>
           <View style={styles.summarySection}>
             <Text style={styles.sectionHeader}>Balance</Text>
             <Text style={styles.sectionNumber}>
-              {numberWithCommas(Number(tranData?.totalBalance))}
+              {numberWithCommas(Number(tranData?.totalBalance || 0))}
             </Text>
           </View>
         </View>
@@ -523,10 +524,10 @@ const HomeScreen = ({ navigation }) => {
           <View style={styles.categoryCaption}>
             <Text style={styles.categoryCaptionHeader}>CATEGORIES</Text>
             <Text style={styles.categoryCaptionTotal}>
-              Income: {tranData?.totalRevCount}
+              Income: {tranData?.totalRevCount || 0}
             </Text>
             <Text style={styles.categoryCaptionTotal}>
-              Expenses: {tranData?.totalExpCount}
+              Expenses: {tranData?.totalExpCount || 0}
             </Text>
           </View>
           <View style={styles.chart}>
