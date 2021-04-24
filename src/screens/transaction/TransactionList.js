@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useLayoutEffect, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Animated,
   TouchableHighlight,
-  Alert,
+  ScrollView,
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import * as Animatable from "react-native-animatable";
@@ -25,27 +25,18 @@ const TransactionList = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const { loginUser } = useContext(AuthContext);
 
-  const [category, setCategory] = useState([]);
   const [transactionList, setTransactionList] = useState([]);
   const [masterTransactionList, setMasterTransactionList] = useState([]);
   const [headerData, setHeaderData] = useState([]);
   const [viewMode, setViewMode] = useState("inc");
 
-  const [arrowIcon, setArrowIcon] = useState(0);
   const [tranKey, setTranKey] = useState(null);
 
   const numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const closeRow = (rowMap, rowKey) => {
-    if (rowMap[rowKey]) {
-      rowMap[rowKey].closeRow();
-    }
-    if (rowKey === tranKey) {
-      setArrowIcon(0);
-    }
-  };
+  const closeRow = (rowMap, rowKey) => {};
 
   const deleteRow = (rowMap, rowKey) => {
     setLoading(true);
@@ -53,26 +44,10 @@ const TransactionList = ({ navigation }) => {
       deleteDBData(rowKey);
       closeRow(rowMap, rowKey);
     } catch (e) {
-      console.log(e);
+      //console.log(e);
     } finally {
       setLoading(false);
     }
-  };
-
-  const removeArrayData = (id) => {
-    const newTranList = [...transactionList];
-    const newMasterTranList = [...masterTransactionList];
-
-    const preTIdx = transactionList.findIndex((item) => item?.key === id);
-    const preMIdx = masterTransactionList.findIndex((item) => item?.key === id);
-    newTranList.splice(preTIdx, 1);
-    newMasterTranList.splice(preMIdx, 1);
-
-    setHeaderData(newMasterTranList);
-    setTransactionList(newTranList);
-    return () => {
-      unsubscribe;
-    };
   };
 
   const deleteDBData = async (id) => {
@@ -88,27 +63,22 @@ const TransactionList = ({ navigation }) => {
           });
         })
         .then(() => {
-          removeArrayData(id);
+          //removeArrayData(id);
+          loadData();
         })
-        .error((err) => console.log(err));
+        .error((err) => console.log("error: " + err));
 
       return () => {
         unsubscribe_01;
       };
     } catch (e) {
-      console.log(e);
+      //console.log(e);
     }
   };
 
-  const onRowDidOpen = (rowKey) => {
-    setArrowIcon(1);
-    setTranKey(rowKey);
-  };
+  const onRowDidOpen = (rowKey) => {};
 
-  const onRowDidClose = (rowKey) => {
-    setArrowIcon(0);
-    setTranKey(null);
-  };
+  const onRowDidClose = (rowKey) => {};
 
   const onLeftActionStatusChange = (rowKey) => {
     console.log("onLeftActionStatusChange", rowKey);
@@ -194,7 +164,7 @@ const TransactionList = ({ navigation }) => {
                   width: 20,
                   height: 20,
                   tintColor: COLORS.primary,
-                  right: -20,
+                  right: -10,
                   alignSelf: "flex-end",
                 }}
               />
@@ -345,7 +315,7 @@ const TransactionList = ({ navigation }) => {
     setViewMode("inc");
     setTransactionList(filterData(masterTransactionList));
   };
-  useEffect(() => {
+  useLayoutEffect(() => {
     setLoading(true);
 
     try {
@@ -354,16 +324,31 @@ const TransactionList = ({ navigation }) => {
         unsubscribe_01;
       };
     } catch (e) {
-      console.log(e);
+      console.log("Error useLayoutEffect " + e);
     } finally {
       setLoading(false);
     }
   }, [viewMode]);
+
+  useEffect(() => {
+    setLoading(true);
+
+    try {
+    } catch (e) {
+      console.log("Error on useEffect " + e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   const loadData = async () => {
     var trxType = [];
     var transaction = [];
-
     var curDate = new Date();
+    let totalExp = 0;
+    let totalInc = 0;
+    let expCount = 0;
+    let incCount = 0;
+    let tempDara = [];
     try {
       //Get all transaction types
       const unsubscribe_01 = await db
@@ -374,48 +359,45 @@ const TransactionList = ({ navigation }) => {
             trxType.push(trx.data());
           });
         })
-        .catch((err) => alert(err));
+        .catch((err) => console.log(err));
       //Get all transactions
       const unsubscribe_02 = await db
         .collection("tbl_transactions")
         .where("uid", "==", util.getCurrentLoginUser().uid)
         .where("tran_year", "==", curDate.getFullYear())
         .where("tran_month", "==", curDate.getMonth() + 1)
+        .orderBy("timestamp", "desc")
         .get()
         .then((documentSnapshot) => {
           documentSnapshot.docs.map((trx) => {
             transaction.push(trx.data());
           });
         })
-        .catch((err) => alert(err));
+        .catch((err) => console.log(err));
 
       trxType.forEach((type) => {
         transaction.forEach((trx) => {
           if (trx.exp_item === type.type_id) {
-            trx.trx_type = type.val_id;
-            trx.color = type.color;
-            trx.icon = type.icon;
-            trx.type_nm_en = type.type_nm_en;
+            if (type.val_id === "EXP") {
+              totalExp = totalExp + parseInt(trx.tran_amt);
+              expCount += 1;
+              trx.trx_type = type.val_id;
+              trx.color = type.color;
+              trx.icon = type.icon;
+              trx.type_nm_en = type.type_nm_en;
+            } else {
+              totalInc = totalInc + parseInt(trx.tran_amt);
+              incCount += 1;
+              trx.trx_type = type.val_id;
+              trx.color = type.color;
+              trx.icon = type.icon;
+              trx.type_nm_en = type.type_nm_en;
+            }
           }
         });
       });
-
-      const unsubscribe_03 = setMasterTransactionList(transaction);
-      //Calculate home header data
-      let totalExp = 0;
-      let totalInc = 0;
-      let expCount = 0;
-      let incCount = 0;
-      let tempDara = [];
-
+      const unsubscribe_05 = setMasterTransactionList(transaction);
       transaction.forEach((item) => {
-        if (item.trx_type === "EXP") {
-          totalExp = totalExp + parseInt(item.tran_amt);
-          expCount += 1;
-        } else {
-          totalInc = totalInc + parseInt(item.tran_amt);
-          incCount += 1;
-        }
         if (viewMode === "inc") {
           if (item.trx_type === "REVN") {
             tempDara.push(item);
@@ -426,15 +408,15 @@ const TransactionList = ({ navigation }) => {
           }
         }
       });
-      const unsubscribe_04 = setHeaderData({
+      const unsubscribe_03 = setHeaderData({
         totalExpense: totalExp,
         totalIncome: totalInc,
         totalExpenseCount: expCount,
         totalIncomeCount: incCount,
         balance: totalInc - totalExp,
       });
-      //Filter the data based on the view mode
-      const unsubscribe_05 = setTransactionList(tempDara);
+
+      const unsubscribe_04 = setTransactionList(tempDara);
       return () => {
         unsubscribe_01;
         unsubscribe_02;
@@ -445,31 +427,6 @@ const TransactionList = ({ navigation }) => {
     } catch (e) {
       console.log("Error @TransactionList - loadData: " + e);
     }
-  };
-
-  const loadHeaderData = (trxDtls) => {
-    var tempData = [];
-    var totalExp = 0;
-    var totalInc = 0;
-    var expCount = 0;
-    var incCount = 0;
-    trxDtls.forEach((item) => {
-      if (item.trx_type === "EXP") {
-        totalExp = totalExp + parseInt(item.tran_amt);
-        expCount += 1;
-      } else {
-        totalInc = totalInc + parseInt(item.tran_amt);
-        incCount += 1;
-      }
-    });
-    tempData.push({
-      totalExpense: totalExp,
-      totalIncome: totalInc,
-      totalExpenseCount: expCount,
-      totalIncomeCount: incCount,
-      balance: totalInc - totalExp,
-    });
-    setHeaderData(tempData);
   };
 
   const filterData = (trxDtls) => {
@@ -487,7 +444,7 @@ const TransactionList = ({ navigation }) => {
         }
       });
     }
-    setTransactionList(tempData);
+    return tempData;
   };
 
   if (loading) return <Loader loadingLabel="Loading..." />;
@@ -515,12 +472,12 @@ const TransactionList = ({ navigation }) => {
               </Text>
             </View>
           </View>
-          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 0 }}>
+          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
-                backgroundColor: COLORS.lightGray,
+                backgroundColor: COLORS.white,
                 width: SIZES.width,
                 padding: 10,
                 borderTopRightRadius: 20,
@@ -620,11 +577,12 @@ const TransactionList = ({ navigation }) => {
             </View>
             <View style={styles.signInWrapper}>
               <SwipeListView
-                style={{ width: SIZES.width - 20, height: SIZES.height }}
+                style={{ width: SIZES.width - 20 }}
                 data={transactionList}
                 renderItem={renderItem}
                 renderHiddenItem={renderHiddenItem}
-                keyExtractor={(item) => `${item?.tran_id}`}
+                keyExtractor={(item) => `${item.tran_id}`}
+                /* leftOpenValue={75} */
                 rightOpenValue={-150}
                 disableRightSwipe
                 onRowDidOpen={onRowDidOpen}

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Animated,
   TouchableHighlight,
+  Keyboard,
   Alert,
 } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -35,6 +36,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
       setLoading(true);
 
       loadTransactionDetails();
+      Keyboard.dismiss();
     } catch (e) {
       console.log(e);
     } finally {
@@ -42,19 +44,9 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
     }
   }, [navigation, route]);
 
-  useEffect(() => {
-    try {
-      setLoading(true);
-      //console.log(transactionDetails);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
   const loadTransactionDetails = async () => {
     try {
-      const { trxItem, title } = route.params;
+      const { trxItem } = route.params;
       //navigation.setOptions({ title: title });
       setTrxType(trxItem);
       let curDate = new Date();
@@ -93,20 +85,11 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
     try {
       deleteDBData(rowKey);
       closeRow(rowMap, rowKey);
-      
     } catch (e) {
       console.log(e);
     } finally {
       setLoading(false);
     }
-  };
-
-  const removeArrayData = (id) => {
-    const newTransaction = [...transactionDetails];
-    const preIdx = transactionDetails.findIndex((item) => item.key === id);
-
-    newTransaction.splice(preIdx, 1);
-    setTransactionDetails(newTransaction);
   };
 
   const deleteDBData = async (id) => {
@@ -122,9 +105,10 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
           });
         })
         .then(() => {
-          removeArrayData(id);
+          loadTransactionDetails();
+          //removeArrayData(id);
         })
-        .error((err) => console.log(err));
+        .catch((err) => console.log(err));
 
       return () => {
         unsubscribe_01;
@@ -228,7 +212,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
               }}
             >
               <Image
-                source={arrowIcon == 1 ? icons.right_icon : icons.back_icon}
+                source={icons.back_icon}
                 resizeMode="contain"
                 style={{
                   width: 20,
@@ -395,7 +379,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
               }}
             />
           </View>
-          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
+          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 0 }}>
             <View style={styles.signInWrapper}>
               <SwipeListView
                 style={{ width: SIZES.width - 20 }}
@@ -421,7 +405,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
             <View
               style={{
                 flex: 1,
-                backgroundColor: COLORS.lightGray2,
+                backgroundColor: COLORS.lightGray,
                 paddingHorizontal: 20,
               }}
             >
@@ -432,7 +416,6 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
                     screen: "TransactionList",
                   })
                 }
-                /* danger={true} */
               />
             </View>
           </Animatable.View>

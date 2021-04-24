@@ -59,7 +59,7 @@ const AddTransactionScreen = ({ navigation }) => {
     onSubmit: async () => {
       if (isValid) {
         setLoading(true);
-        formik.setFieldValue("expItem", selectedItem?.value);
+        formik.setFieldValue("expItem", selectedItem.value);
         var curDate = new Date();
         try {
           await db
@@ -77,7 +77,8 @@ const AddTransactionScreen = ({ navigation }) => {
               tran_day: curDate.getDate(),
             })
             .then(() => {
-              formik.resetForm();
+              //formik.resetForm();
+              formik.setFieldValue("description", "");
               alert("Transaction created!");
             });
         } catch (err) {
@@ -110,36 +111,6 @@ const AddTransactionScreen = ({ navigation }) => {
     filterData(expType);
   };
 
-  const fetchTransaction = async () => {
-    try {
-      await db
-        .collection("tbl_transactions")
-        .get()
-        .then((querySnapshot) => {
-          setTransaction(
-            querySnapshot.docs.map((doc) => ({
-              doc,
-            }))
-          );
-          let exp = 0;
-          let rev = 0;
-          querySnapshot.docs.map((doc) => {
-            if (doc.data().val_id === expType) {
-              let filter = {
-                label: doc.data().type_nm_en,
-                value: doc.data().type_id,
-                val_id: doc.data().val_id,
-              };
-              data.push(filter);
-            }
-          });
-        })
-        .catch((err) => alert(err));
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   useEffect(() => {
     setLoading(true);
     try {
@@ -170,6 +141,7 @@ const AddTransactionScreen = ({ navigation }) => {
           setFilterTranItems(data);
           setSelectedItem(data[0]);
           formik.setFieldValue("expItem", "1");
+          formik.setFieldValue("description", "");
         })
         .catch((err) => alert(err));
 
@@ -192,7 +164,6 @@ const AddTransactionScreen = ({ navigation }) => {
               style={styles.logo}
             />
             <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
-              
               <View
                 style={{
                   flexDirection: "row",
