@@ -69,6 +69,7 @@ const TransactionStack = ({ navigation }) => {
       <Stack.Screen
         name="AddTransaction"
         component={AddTransactionScreen}
+        mode="modal"
         options={{
           title: "Add New Transaction",
         }}

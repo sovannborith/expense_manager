@@ -96,9 +96,9 @@ const AddTransactionScreen = ({ navigation }) => {
       if (item.val_id === type) {
         filter.push(item);
       }
-      setFilterTranItems(filter);
-      setSelectedItem(filter[0]);
     });
+    setFilterTranItems(filter);
+    setSelectedItem(filter[0]);
     formik.setFieldValue("expItem", selectedItem?.value);
   };
 
