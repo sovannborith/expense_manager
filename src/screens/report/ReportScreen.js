@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,15 @@ import {
   ScrollView,
 } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { VictoryPie } from "victory-native";
+import {
+  VictoryPie,
+  VictoryChart,
+  VictoryBar,
+  VictoryAxis,
+  VictoryLegend,
+  VictoryGroup,
+  VictoryTheme,
+} from "victory-native";
 import { firebase } from "../../server/firebase/firebase";
 import { Svg } from "react-native-svg";
 
@@ -21,14 +29,11 @@ import Loader from "../../components/LoadingComponent";
 import { COLORS, SIZES, icons } from "../../constants";
 
 const ReportScreen = ({ navigation }) => {
-  /* LogBox.ignoreLogs([
-    "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation - use another VirtualizedList-backed container instead.",
-  ]); */
-
   const [loading, setLoading] = useState(false);
-  const [selectedItem, setSelectedItem] = useState();
+  const [selectedItem, setSelectedItem] = useState(1);
   const [tranData, setTranData] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [barChart, setBarChart] = useState([]);
 
   const isFocused = useIsFocused();
   const db = firebase.firestore();
@@ -47,18 +52,118 @@ const ReportScreen = ({ navigation }) => {
     { value: 6, label: "Last 6 Months" },
     { value: 9, label: "Last 9 Months" },
     { value: 12, label: "Last 12 Months" },
+    { value: 0, label: "Current Year" },
+    { value: -1, label: "Last Year" },
   ];
 
-  const loadData = async () => {
+  const groupByType = (array, key) => {
+    return array.reduce((result, currentValue) => {
+      (result[currentValue[key]] = result[currentValue[key]] || []).push(
+        currentValue
+      );
+
+      return result;
+    }, {});
+  };
+
+  const calculateYearMonth = (param) => {
+    let curDate = new Date();
+    switch (param) {
+      case 1:
+        return {
+          year: curDate.getFullYear(),
+          min_month: curDate.getMonth() + 1,
+          max_month: curDate.getMonth() + 1,
+        };
+        break;
+      case 3:
+        if (curDate.getMonth() + 1 - (param - 1) >= 0) {
+          return {
+            year: curDate.getFullYear(),
+            min_month: curDate.getMonth() + 1 - (param - 1),
+            max_month: curDate.getMonth() + 1,
+          };
+        } else {
+          return {
+            year: curDate.getFullYear(),
+            min_month: 1,
+            max_month: curDate.getMonth() + 1,
+          };
+        }
+        break;
+
+      case 6:
+        if (curDate.getMonth() + 1 - (param - 1) >= 0) {
+          return {
+            year: curDate.getFullYear(),
+            min_month: curDate.getMonth() + 1 - param - 1,
+            max_month: curDate.getMonth() + 1,
+          };
+        } else {
+          return {
+            year: curDate.getFullYear(),
+            min_month: 1,
+            max_month: curDate.getMonth() + 1,
+          };
+        }
+        break;
+
+      case 9:
+        if (curDate.getMonth() + 1 - (param - 1) >= 0) {
+          return {
+            year: curDate.getFullYear(),
+            min_month: curDate.getMonth() + 1 - param - 1,
+            max_month: curDate.getMonth() + 1,
+          };
+        } else {
+          return {
+            year: curDate.getFullYear(),
+            min_month: 1,
+            max_month: curDate.getMonth() + 1,
+          };
+        }
+        break;
+
+      case 12: //Current year
+        return {
+          year: curDate.getFullYear(),
+          min_month: 1,
+          max_month: curDate.getMonth() + 1,
+        };
+        break;
+
+      case 0: //Current year
+        return {
+          year: curDate.getFullYear(),
+          min_month: 1,
+          max_month: curDate.getMonth() + 1,
+        };
+        break;
+
+      case -1: //Last year
+        return {
+          year: curDate.getFullYear() - 1,
+          min_month: 1,
+          max_month: 12,
+        };
+        break;
+      default:
+        return {
+          year: curDate.getFullYear(),
+          min_month: curDate.getMonth() + 1,
+          max_month: curDate.getMonth() + 1,
+        };
+    }
+  };
+
+  const loadData = async (month) => {
     var trxType = [];
     var transaction = [];
-    var et = [];
-    var rt = [];
     var totalExp = 0;
     var totalRev = 0;
     var expCount = 0;
     var revCount = 0;
-    var curDate = new Date();
+    let param = calculateYearMonth(month);
     try {
       const unsubscribe_01 = await db
         .collection("tbl_trx_type")
@@ -68,20 +173,21 @@ const ReportScreen = ({ navigation }) => {
             trxType.push(trx.data());
           });
         })
-        .catch((err) => alert(err));
+        .catch((err) => console.log(err));
 
       const unsubscribe_02 = await db
         .collection("tbl_transactions")
         .where("uid", "==", util.getCurrentLoginUser().uid)
-        .where("tran_year", "==", curDate.getFullYear())
-        .where("tran_month", "==", curDate.getMonth() + 1)
+        .where("tran_year", "==", param.year)
+        .where("tran_month", ">=", param.min_month)
+        .where("tran_month", "<=", param.max_month)
         .get()
         .then((documentSnapshot) => {
           documentSnapshot.docs.map((trx) => {
             transaction.push(trx.data());
           });
         })
-        .catch((err) => alert(err));
+        .catch((err) => console.log(err));
 
       trxType.forEach((type) => {
         transaction.forEach((trx) => {
@@ -111,7 +217,10 @@ const ReportScreen = ({ navigation }) => {
         totalExpCount: expCount,
         totalRevCount: revCount,
       });
-      setSelectedItem(reportScope[0]);
+      let trxGroupByMonth = groupByType(transaction, "tran_month");
+      let barChartData = formatBarData(trxGroupByMonth);
+
+      setBarChart(barChartData);
       const unsubscribe_05 = setTransactions(transaction);
 
       return () => {
@@ -121,26 +230,180 @@ const ReportScreen = ({ navigation }) => {
         unsubscribe_05;
       };
     } catch (e) {
-      alert("Error @HomeScreen - loadHomeData: " + e);
+      console.log("Error @ReportScreen - loadData: " + e);
     }
+  };
+
+  const formatBarData = (trxDtls) => {
+    let inc = [];
+    let exp = [];
+    for (const [k, val] of Object.entries(trxDtls)) {
+      let totExp = 0;
+      let totInc = 0;
+      val.map((item) => {
+        if (item.trx_type === "EXP") {
+          totExp += Number(item.tran_amt || 0);
+        } else {
+          totInc += Number(item.tran_amt || 0);
+        }
+      });
+      inc.push({
+        x: util.getMonthName(Number(k) - 1),
+        y: totInc,
+        //label: "Income",
+      });
+      exp.push({
+        x: util.getMonthName(Number(k) - 1),
+        y: totExp,
+        //label: "Expense",
+      });
+    }
+
+    return {
+      Income: inc,
+      Expense: exp,
+    };
   };
 
   useEffect(() => {
     setLoading(true);
     try {
-      loadData();
+      loadData(1);
     } catch (e) {
-      alert(e);
+      console.log(e);
     } finally {
       setLoading(false);
     }
   }, [isFocused]);
 
-  const formatDataForChart = () => {
-    let tempData = [];
-    let chartData = viewMode == "income" ? revType : expType;
-    let finalChartData = [];
+  const renderBarChart = () => {
+    if (Platform.OS == "ios") {
+      return (
+        <View>
+          <VictoryChart domainPadding={20} theme={VictoryTheme.material}>
+            <VictoryGroup offset={20}>
+              <VictoryBar
+                data={barChart.Income}
+                barWidth={20}
+                cornerRadius={{ top: 10 }}
+                style={{
+                  data: {
+                    fill: COLORS.primary,
+                  },
+                }}
+              />
+              <VictoryBar
+                data={barChart.Expense}
+                barWidth={20}
+                cornerRadius={{ top: 10 }}
+                style={{
+                  data: {
+                    fill: COLORS.danger,
+                  },
+                }}
+                events={[
+                  {
+                    target: "data",
+                    eventHandlers: {
+                      onPressIn: () => {
+                        return [
+                          {
+                            target: "data",
+                            mutation: (props) => {
+                              let exp = barChart.Expense[props.index];
+                              alert(exp);
+                            },
+                          },
+                        ];
+                      },
+                    },
+                  },
+                ]}
+              />
+            </VictoryGroup>
+            <VictoryLegend
+              data={[
+                {
+                  name: "Income",
+                  symbol: {
+                    fill: COLORS.primary,
+                  },
+                },
+                {
+                  name: "Expense",
+                  symbol: {
+                    fill: COLORS.danger,
+                  },
+                },
+              ]}
+              orientation="horizontal"
+              x={SIZES.width / 2 - 70}
+              y={30}
+            />
+          </VictoryChart>
+        </View>
+      );
+    } else {
+      return (
+        <View>
+          <Svg
+            width={SIZES.width}
+            height={SIZES.width}
+            style={{ width: "100%", height: "auto" }}
+          >
+            <VictoryChart domainPadding={20} theme={VictoryTheme.material}>
+              <VictoryGroup offset={20}>
+                <VictoryBar
+                  data={barChart.Income}
+                  barWidth={20}
+                  cornerRadius={{ top: 10 }}
+                  style={{
+                    data: {
+                      fill: COLORS.primary,
+                    },
+                  }}
+                />
+                <VictoryBar
+                  data={barChart.Expense}
+                  barWidth={20}
+                  cornerRadius={{ top: 10 }}
+                  style={{
+                    data: {
+                      fill: COLORS.danger,
+                    },
+                  }}
+                />
+              </VictoryGroup>
+              <VictoryLegend
+                data={[
+                  {
+                    name: "Income",
+                    symbol: {
+                      fill: COLORS.primary,
+                    },
+                  },
+                  {
+                    name: "Expense",
+                    symbol: {
+                      fill: COLORS.danger,
+                    },
+                  },
+                ]}
+                orientation="horizontal"
+                x={SIZES.width / 2 - 70}
+                y={30}
+              />
+            </VictoryChart>
+          </Svg>
+        </View>
+      );
+    }
+  };
 
+  const formatDataForChart = (trxDtls) => {
+    let chartData = trxDtls;
+    let finalChartData = [];
+    let tempData = [];
     let total = 0;
     chartData.forEach((item) => {
       let subTotal = 0;
@@ -351,14 +614,15 @@ const ReportScreen = ({ navigation }) => {
           <DropDownPicker
             items={reportScope}
             onChangeItem={(item) => {
-              setSelectedItem(item);
+              setSelectedItem(Number(item.value));
+              loadData(Number(item.value));
             }}
             containerStyle={{
               height: 40,
               width: SIZES.width - 20,
             }}
             autoScrollToDefaultValue={true}
-            defaultValue={selectedItem?.value}
+            defaultValue={reportScope[0]?.value}
             globalTextStyle={{
               fontSize: 14,
               textAlign: "left",
@@ -396,7 +660,7 @@ const ReportScreen = ({ navigation }) => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* {renderChart()} */}
+          {barChart && renderBarChart()}
         </ScrollView>
       </View>
     </SafeAreaView>

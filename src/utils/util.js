@@ -110,6 +110,29 @@ const util = {
       return null;
     }
   },
+  getMonthName: (month) => {
+    let result ="";
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    months.map((item, idx) => {
+      if (idx === month) {
+        result = item;
+      }
+    });
+    return result;
+  },
 };
 
 export default util;
