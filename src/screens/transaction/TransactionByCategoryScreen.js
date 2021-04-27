@@ -75,9 +75,6 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
     if (rowMap[rowKey]) {
       rowMap[rowKey].closeRow();
     }
-    if (rowKey === tranKey) {
-      setArrowIcon(0);
-    }
   };
 
   const deleteRow = (rowMap, rowKey) => {
@@ -379,7 +376,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
               }}
             />
           </View>
-          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 0 }}>
+          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 10 }}>
             <View style={styles.signInWrapper}>
               <SwipeListView
                 style={{ width: SIZES.width - 20 }}
@@ -410,7 +407,7 @@ const TransactionByCategoryScreen = ({ route, navigation }) => {
               }}
             >
               <FormOutLineButton
-                buttonTitle="View all transaction?"
+                buttonTitle="View current month transaction?"
                 onPress={() =>
                   navigation.navigate("Transaction", {
                     screen: "TransactionList",
@@ -466,7 +463,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 60,
     margin: 5,
-    marginBottom: 15,
+    marginBottom: 5,
     shadowColor: "#999",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
@@ -478,7 +475,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 60,
     padding: 10,
-    marginBottom: 15,
+    marginBottom: 5,
 
     justifyContent: "center",
   },
@@ -490,7 +487,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     paddingLeft: 15,
     margin: 5,
-    marginBottom: 15,
+    marginBottom: 5,
     borderRadius: 5,
   },
   backRightBtn: {

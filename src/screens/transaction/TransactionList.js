@@ -30,13 +30,15 @@ const TransactionList = ({ navigation }) => {
   const [headerData, setHeaderData] = useState([]);
   const [viewMode, setViewMode] = useState("inc");
 
-  const [tranKey, setTranKey] = useState(null);
-
   const numberWithCommas = (x) => {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const closeRow = (rowMap, rowKey) => {};
+  const closeRow = (rowMap, rowKey) => {
+    if (rowMap[rowKey]) {
+      rowMap[rowKey].closeRow();
+    }
+  };
 
   const deleteRow = (rowMap, rowKey) => {
     setLoading(true);
@@ -44,7 +46,7 @@ const TransactionList = ({ navigation }) => {
       deleteDBData(rowKey);
       closeRow(rowMap, rowKey);
     } catch (e) {
-      //console.log(e);
+      console.log(e);
     } finally {
       setLoading(false);
     }
@@ -472,7 +474,7 @@ const TransactionList = ({ navigation }) => {
               </Text>
             </View>
           </View>
-          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 20 }}>
+          <Animatable.View animation="fadeInUpBig" style={{ marginTop: 0 }}>
             <View
               style={{
                 flexDirection: "row",
@@ -673,9 +675,12 @@ const styles = StyleSheet.create({
   },
 
   signInWrapper: {
+    flex: 1,
     alignItems: "center",
     width: SIZES.width,
     backgroundColor: COLORS.lightGray,
+    padding: 10,
+    paddingBottom: 200,
   },
   backTextWhite: {
     color: "#FFF",
@@ -685,7 +690,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 60,
     margin: 5,
-    marginBottom: 15,
+    marginBottom: 5,
     shadowColor: "#999",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.8,
@@ -697,7 +702,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 60,
     padding: 10,
-    marginBottom: 15,
+    marginBottom: 5,
 
     justifyContent: "center",
   },
@@ -709,7 +714,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     paddingLeft: 15,
     margin: 5,
-    marginBottom: 15,
+    marginBottom: 5,
     borderRadius: 5,
   },
   backRightBtn: {

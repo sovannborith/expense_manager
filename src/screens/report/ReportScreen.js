@@ -51,8 +51,7 @@ const ReportScreen = ({ navigation }) => {
     { value: 3, label: "Last 3 Months" },
     { value: 6, label: "Last 6 Months" },
     { value: 9, label: "Last 9 Months" },
-    { value: 12, label: "Last 12 Months" },
-    { value: 0, label: "Current Year" },
+    { value: 0, label: "This Year" },
     { value: -1, label: "Last Year" },
   ];
 
@@ -268,7 +267,7 @@ const ReportScreen = ({ navigation }) => {
   useEffect(() => {
     setLoading(true);
     try {
-      loadData(1);
+      loadData(Number(selectedItem?.value));
     } catch (e) {
       console.log(e);
     } finally {
@@ -281,7 +280,8 @@ const ReportScreen = ({ navigation }) => {
       return (
         <View>
           <VictoryChart domainPadding={20} theme={VictoryTheme.material}>
-            <VictoryGroup offset={20}>
+            {/* <VictoryAxis label="Year" style={{ top: 20 }} /> */}
+            <VictoryGroup offset={10}>
               <VictoryBar
                 data={barChart.Income}
                 barWidth={20}
@@ -622,7 +622,7 @@ const ReportScreen = ({ navigation }) => {
               width: SIZES.width - 20,
             }}
             autoScrollToDefaultValue={true}
-            defaultValue={reportScope[0]?.value}
+            defaultValue={reportScope[0].value}
             globalTextStyle={{
               fontSize: 14,
               textAlign: "left",

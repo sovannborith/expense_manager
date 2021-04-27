@@ -24,9 +24,6 @@ import Loader from "../components/LoadingComponent";
 import { COLORS, SIZES, icons } from "../constants";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-//import Header from "../components/Header";
-import category from "../services/category";
-
 const HomeScreen = ({ navigation }) => {
   LogBox.ignoreLogs([
     "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation - use another VirtualizedList-backed container instead.",
